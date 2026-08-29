@@ -1,0 +1,316 @@
+# Order Bump Pro Translation Template
+# Copyright (C) 2026 Your Name
+# This file is distributed under the GPLv2 or later.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Order Bump Pro 2.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-26 00:00+0530\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Antigravity IDE\n"
+"X-Domain: order-bump-pro\n"
+
+#. Plugin Name
+msgid "Order Bump Pro"
+msgstr ""
+
+#. Description
+msgid "Add order bumps to WooCommerce checkout page like FunnelKit"
+msgstr ""
+
+msgid "Order Bumps"
+msgstr ""
+
+msgid "All Bumps"
+msgstr ""
+
+msgid "Add New"
+msgstr ""
+
+msgid "Boost revenue with smart checkout upsells"
+msgstr ""
+
+msgid "Add New Order Bump"
+msgstr ""
+
+msgid "Saved successfully."
+msgstr ""
+
+msgid "Deleted."
+msgstr ""
+
+msgid "Total Bumps"
+msgstr ""
+
+msgid "Active"
+msgstr ""
+
+msgid "Inactive"
+msgstr ""
+
+msgid "No Order Bumps Yet"
+msgstr ""
+
+msgid "Create your first bump."
+msgstr ""
+
+msgid "Create First Bump"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "Products"
+msgstr ""
+
+msgid "Trigger"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Actions"
+msgstr ""
+
+msgid "All"
+msgstr ""
+
+msgid "Specific Product"
+msgstr ""
+
+msgid "Category"
+msgstr ""
+
+msgid "Min. Order"
+msgstr ""
+
+#, php-format
+msgid "%d product(s)"
+msgstr ""
+
+msgid "Edit"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Save"
+msgstr ""
+
+msgid "Back"
+msgstr ""
+
+msgid "New Order Bump"
+msgstr ""
+
+#, php-format
+msgid "Edit: %s"
+msgstr ""
+
+msgid "Configure your checkout order bump"
+msgstr ""
+
+msgid "Order Bump saved successfully."
+msgstr ""
+
+msgid "Bump Name (Internal):"
+msgstr ""
+
+msgid "Design"
+msgstr ""
+
+msgid "Rules"
+msgstr ""
+
+msgid "Call To Action Text"
+msgstr ""
+
+msgid "Product Descriptions"
+msgstr ""
+
+msgid "Display Options"
+msgstr ""
+
+msgid "Position on Checkout"
+msgstr ""
+
+msgid "Before Payment Button (Default)"
+msgstr ""
+
+msgid "After Payment Button"
+msgstr ""
+
+msgid "Skin / Layout"
+msgstr ""
+
+msgid "Skin 1"
+msgstr ""
+
+msgid "Skin 2"
+msgstr ""
+
+msgid "Header Color"
+msgstr ""
+
+msgid "Background"
+msgstr ""
+
+msgid "Text"
+msgstr ""
+
+msgid "Options"
+msgstr ""
+
+msgid "Show Original (Strikethrough) Price"
+msgstr ""
+
+msgid "Badge / Ribbon"
+msgstr ""
+
+msgid "Show Badge"
+msgstr ""
+
+msgid "Badge Text"
+msgstr ""
+
+msgid "Special Offer"
+msgstr ""
+
+msgid "Product Image"
+msgstr ""
+
+msgid "Show Product Image"
+msgstr ""
+
+msgid "Image Type"
+msgstr ""
+
+msgid "Product"
+msgstr ""
+
+msgid "Custom"
+msgstr ""
+
+msgid "Width (px)"
+msgstr ""
+
+msgid "Image Position"
+msgstr ""
+
+msgid "Left"
+msgstr ""
+
+msgid "Right"
+msgstr ""
+
+msgid "Custom Image URL"
+msgstr ""
+
+msgid "Select"
+msgstr ""
+
+msgid "Preview"
+msgstr ""
+
+msgid "No description set."
+msgstr ""
+
+msgid "Add products to see preview."
+msgstr ""
+
+msgid "All Products"
+msgstr ""
+
+msgid "Each product can have its own description"
+msgstr ""
+
+msgid "No products added yet. Search above to add."
+msgstr ""
+
+msgid "Behaviour"
+msgstr ""
+
+msgid "Add Order Bumps to Cart Items"
+msgstr ""
+
+msgid "Replace Cart Items with Order Bump"
+msgstr ""
+
+msgid "Display Rules — When to show?"
+msgstr ""
+
+msgid "For"
+msgstr ""
+
+msgid "No Rules (Always Show)"
+msgstr ""
+
+msgid "Cart Item(s)"
+msgstr ""
+
+msgid "Cart Category(s)"
+msgstr ""
+
+msgid "Cart Total"
+msgstr ""
+
+msgid "matches any of"
+msgstr ""
+
+msgid "is greater than ₹"
+msgstr ""
+
+#, php-format
+msgid "Regular: %s"
+msgstr ""
+
+#, php-format
+msgid "Sale: %s"
+msgstr ""
+
+msgid "% Sale"
+msgstr ""
+
+msgid "Flat ₹"
+msgstr ""
+
+msgid "in-stock"
+msgstr ""
+
+msgid "out-of-stock"
+msgstr ""
+
+msgid "Remove"
+msgstr ""
+
+msgid "Delete this Order Bump?"
+msgstr ""
+
+msgid "Product added! Go to Design tab to set its description."
+msgstr ""
+
+msgid "is already added."
+msgstr ""
+
+msgid "No products found."
+msgstr ""
+
+msgid "Error deleting."
+msgstr ""
+
+msgid "Error."
+msgstr ""
+
+msgid "Security check failed"
+msgstr ""
+
+msgid "Unauthorized"
+msgstr ""

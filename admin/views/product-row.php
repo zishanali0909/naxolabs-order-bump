@@ -1,0 +1,60 @@
+<?php
+/**
+ * Product Row Template — Order Bump Pro
+ *
+ * Variables available: $i, $p, $field_prefix, $is_new
+ *
+ * @package OrderBumpPro
+ */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
+
+$stock_product = wc_get_product( $p['id'] );
+$is_in_stock   = $stock_product && $stock_product->is_in_stock();
+?>
+<div class="obp-product-row" data-product-id="<?php echo intval( $p['id'] ); ?>">
+    <div class="obp-product-row-header">
+        <span class="obp-drag-handle">⠿</span>
+        <?php if ( $p['thumb'] ) : ?>
+            <img src="<?php echo esc_url( $p['thumb'] ); ?>" class="obp-product-thumb">
+        <?php else : ?>
+            <div class="obp-product-thumb obp-no-thumb">📦</div>
+        <?php endif; ?>
+        <div class="obp-product-row-info">
+            <strong><?php echo esc_html( $p['name'] ); ?></strong>
+            <span class="obp-muted">
+                <?php
+                /* translators: %s: regular price */
+                printf( esc_html__( 'Regular: %s', 'order-bump-pro' ), wc_price( $p['regular_price'] ) );
+                ?> |
+                <?php
+                /* translators: %s: sale price */
+                printf( esc_html__( 'Sale: %s', 'order-bump-pro' ), wc_price( $p['price'] ) );
+                ?>
+            </span>
+        </div>
+        <div class="obp-product-row-controls">
+            <input type="number" name="<?php echo esc_attr( $field_prefix ); ?>[discount]"
+                   value="<?php echo esc_attr( $p['discount'] ); ?>"
+                   class="obp-input obp-input-sm" min="0" style="width:60px" placeholder="0">
+            <select name="<?php echo esc_attr( $field_prefix ); ?>[discount_type]" class="obp-select obp-select-sm">
+                <option value="percentage" <?php selected( $p['discount_type'] ?? 'percentage', 'percentage' ); ?>>
+                    <?php esc_html_e( '% Sale', 'order-bump-pro' ); ?>
+                </option>
+                <option value="flat" <?php selected( $p['discount_type'] ?? '', 'flat' ); ?>>
+                    <?php esc_html_e( 'Flat ₹', 'order-bump-pro' ); ?>
+                </option>
+            </select>
+            <input type="number" name="<?php echo esc_attr( $field_prefix ); ?>[qty]"
+                   value="<?php echo esc_attr( $p['qty'] ?? 1 ); ?>"
+                   class="obp-input obp-input-sm" min="1" style="width:52px">
+            <span class="obp-badge <?php echo $is_in_stock ? 'obp-badge-green' : 'obp-badge-red'; ?>" style="white-space:nowrap">
+                <?php echo $is_in_stock ? esc_html__( 'in-stock', 'order-bump-pro' ) : esc_html__( 'out-of-stock', 'order-bump-pro' ); ?>
+            </span>
+            <button type="button" class="obp-remove-product obp-btn-icon"
+                    data-id="<?php echo intval( $p['id'] ); ?>"
+                    title="<?php esc_attr_e( 'Remove', 'order-bump-pro' ); ?>">🗑️</button>
+        </div>
+        <input type="hidden" name="<?php echo esc_attr( $field_prefix ); ?>[id]" value="<?php echo intval( $p['id'] ); ?>">
+    </div>
+</div>
