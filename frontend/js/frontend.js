@@ -16,18 +16,14 @@ jQuery(function($) {
             function injectBumps() {
                 if (injected) return;
 
-                // Try multiple selectors for different WC Blocks versions
                 var $target =
                     $('.wc-block-checkout__actions').first() ||
                     $('.wp-block-woocommerce-checkout-actions-block').first() ||
                     $('.wc-block-components-checkout-place-order-button').first().parent();
 
-                // Fallback: try the main checkout form
                 if (!$target || !$target.length) {
                     $target = $('.wc-block-checkout__main .wc-block-components-checkout-step').last();
                 }
-
-                // Another fallback: any element inside checkout main
                 if (!$target || !$target.length) {
                     $target = $('.wc-block-checkout__main').first();
                 }
@@ -35,7 +31,6 @@ jQuery(function($) {
                 if ($target && $target.length) {
                     injected = true;
 
-                    // Clone bumps, make visible, and insert before payment actions
                     var $bumps = $hiddenBumps.children().clone(true);
                     $bumps.each(function() { $(this).css('display', ''); });
 
@@ -45,7 +40,6 @@ jQuery(function($) {
                     });
                     $wrapper.append($bumps);
 
-                    // Insert before the actions/payment section
                     var $actions = $('.wc-block-checkout__actions, .wp-block-woocommerce-checkout-actions-block').first();
                     if ($actions.length) {
                         $actions.before($wrapper);
@@ -55,7 +49,6 @@ jQuery(function($) {
 
                     $hiddenBumps.remove();
 
-                    // Initialize cart state for injected bumps
                     $wrapper.find('.obp-bump-wrap').each(function() {
                         var pid = parseInt($(this).data('product-id'), 10);
                         var checked = $(this).find('.obp-bump-checkbox').is(':checked');
@@ -68,17 +61,13 @@ jQuery(function($) {
                 return false;
             }
 
-            // Try immediately
             if (!injectBumps()) {
-                // Use MutationObserver to wait for block checkout to render
-                var observer = new MutationObserver(function(mutations) {
+                var observer = new MutationObserver(function() {
                     if (injectBumps()) {
                         observer.disconnect();
                     }
                 });
                 observer.observe(document.body, { childList: true, subtree: true });
-
-                // Safety timeout — stop observing after 15 seconds
                 setTimeout(function() { observer.disconnect(); }, 15000);
             }
         }
@@ -98,6 +87,8 @@ jQuery(function($) {
 
     /* ═══════════════════════════════════════════════
        CHECKBOX CHANGE — works for BOTH checkout types
+       - Disables checkbox during AJAX (prevents double-click)
+       - Shows error state on failure
     ═══════════════════════════════════════════════ */
     $(document).on('change', '.obp-bump-checkbox', function() {
         var $cb    = $(this);
@@ -112,9 +103,16 @@ jQuery(function($) {
             delete pending[pid];
         }
 
+        // Disable checkbox during AJAX — prevent rapid double-clicks
+        $cb.prop('disabled', true);
+        $wrap.addClass('obp-bump-loading-state');
+
         // Instant visual feedback
         cartState[pid] = adding;
         $wrap.toggleClass('obp-bump-is-added', adding);
+
+        // Clear any previous error
+        $wrap.find('.obp-bump-error').remove();
 
         // AJAX
         pending[pid] = $.ajax({
@@ -128,38 +126,55 @@ jQuery(function($) {
             },
             success: function(res) {
                 delete pending[pid];
+                $cb.prop('disabled', false);
+                $wrap.removeClass('obp-bump-loading-state');
+
                 if (res.success) {
                     if (isBlockCheckout) {
-                        // Refresh WooCommerce Blocks cart store
                         refreshBlockCart();
                     } else {
-                        // Classic checkout: trigger WC refresh
                         $('body').trigger('update_checkout');
                     }
                 } else {
-                    // Revert on failure
                     revertState($cb, $wrap, pid, adding);
+                    showBumpError($wrap, res.data && res.data.message ? res.data.message : 'Something went wrong.');
                 }
             },
             error: function(xhr) {
                 if (xhr.statusText === 'abort') return;
                 delete pending[pid];
+                $cb.prop('disabled', false);
+                $wrap.removeClass('obp-bump-loading-state');
                 revertState($cb, $wrap, pid, adding);
+                showBumpError($wrap, 'Connection error. Please try again.');
             }
         });
     });
 
+    /**
+     * Revert checkbox and visual state on failure.
+     */
     function revertState($cb, $wrap, pid, adding) {
         cartState[pid] = !adding;
         $wrap.toggleClass('obp-bump-is-added', !adding);
         $cb.prop('checked', !adding);
     }
 
+    /**
+     * Show a brief error message inside the bump wrap.
+     */
+    function showBumpError($wrap, message) {
+        var $err = $('<div class="obp-bump-error">' + message + '</div>');
+        $wrap.append($err);
+        setTimeout(function() {
+            $err.fadeOut(300, function() { $(this).remove(); });
+        }, 3000);
+    }
+
     /* ═══════════════════════════════════════════════
        BLOCK CHECKOUT: Refresh cart totals
     ═══════════════════════════════════════════════ */
     function refreshBlockCart() {
-        // Method 1: WordPress data store (most reliable)
         try {
             if (wp && wp.data && wp.data.dispatch) {
                 var cartStore = wp.data.dispatch('wc/store/cart');
@@ -170,12 +185,10 @@ jQuery(function($) {
             }
         } catch(e) {}
 
-        // Method 2: Dispatch a custom event that WC Blocks listens to
         try {
             document.body.dispatchEvent(new Event('wc-blocks_added_to_cart'));
         } catch(e) {}
 
-        // Method 3: jQuery fragment refresh (older WC)
         $(document.body).trigger('wc_fragment_refresh');
     }
 

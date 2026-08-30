@@ -43,8 +43,12 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         </div>
     </div>
 
-    <?php if ( isset( $_GET['saved'] ) ) : ?>
+    <?php
+    $obp_status = isset( $_GET['obp_status'] ) ? sanitize_key( $_GET['obp_status'] ) : '';
+    if ( $obp_status === 'saved' ) : ?>
         <div class="obp-notice obp-notice-success" style="margin-top:10px;">✅ <?php esc_html_e( 'Order Bump saved successfully.', 'order-bump-pro' ); ?></div>
+    <?php elseif ( $obp_status === 'saved_no_products' ) : ?>
+        <div class="obp-notice obp-notice-info" style="margin-top:10px;">⚠️ <?php esc_html_e( 'Saved, but no products added yet. Go to Products tab to add products.', 'order-bump-pro' ); ?></div>
     <?php endif; ?>
 
     <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" id="obp-edit-form">
@@ -81,6 +85,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                         <div class="obp-card-body">
                             <input type="text" name="obp_settings[headline]"
                                    value="<?php echo esc_attr( $meta['headline'] ); ?>"
+                                   maxlength="200"
                                    class="obp-input"
                                    placeholder="<?php esc_attr_e( 'Yes! Add {{product_name}} to my order', 'order-bump-pro' ); ?>">
                             <p class="obp-help">
@@ -243,6 +248,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                 <label class="obp-label"><?php esc_html_e( 'Badge Text', 'order-bump-pro' ); ?></label>
                                 <input type="text" name="obp_settings[badge_text]"
                                        value="<?php echo esc_attr( $meta['badge_text'] ?? 'Special Offer' ); ?>"
+                                       maxlength="50"
                                        class="obp-input"
                                        placeholder="<?php esc_attr_e( 'Special Offer', 'order-bump-pro' ); ?>">
                             </div>

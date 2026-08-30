@@ -196,52 +196,81 @@ class OBP_Admin {
      */
     public function handle_save() {
         if ( ! wp_verify_nonce( $_POST['obp_nonce'] ?? '', 'obp_save_bump' ) ) {
-            wp_die( esc_html__( 'Security check failed', 'order-bump-pro' ) );
+            wp_die( esc_html__( 'Security check failed.', 'order-bump-pro' ) );
         }
         if ( ! current_user_can( 'manage_woocommerce' ) ) {
-            wp_die( esc_html__( 'Unauthorized', 'order-bump-pro' ) );
+            wp_die( esc_html__( 'Unauthorized.', 'order-bump-pro' ) );
         }
 
         $bump_id  = intval( $_POST['bump_id'] ?? 0 );
         $title    = sanitize_text_field( $_POST['bump_title'] ?? 'Order Bump' );
         $settings = $_POST['obp_settings'] ?? [];
 
+        // Validate title
+        if ( empty( trim( $title ) ) ) {
+            $title = __( 'Order Bump', 'order-bump-pro' );
+        }
+
         $clean = [];
-        $clean['headline']             = sanitize_text_field( $settings['headline'] ?? '' );
-        $clean['badge_text']           = sanitize_text_field( $settings['badge_text'] ?? '' );
-        $clean['show_badge']           = isset( $settings['show_badge'] ) ? 1 : 0;
-        $clean['show_original_price']  = isset( $settings['show_original_price'] ) ? 1 : 0;
-        $clean['skin1_bg_color']       = sanitize_hex_color( $settings['skin1_bg_color'] ?? '#FFFDE7' ) ?: '#FFFDE7';
-        $clean['skin1_text_color']     = sanitize_hex_color( $settings['skin1_text_color'] ?? '#155724' ) ?: '#155724';
-        $clean['skin2_bg_color']       = sanitize_hex_color( $settings['skin2_bg_color'] ?? '#e8f7f9' ) ?: '#e8f7f9';
-        $clean['skin2_text_color']     = sanitize_hex_color( $settings['skin2_text_color'] ?? '#155724' ) ?: '#155724';
-        $clean['show_product_image']   = isset( $settings['show_product_image'] ) ? 1 : 0;
-        $clean['image_type']           = in_array( $settings['image_type'] ?? '', [ 'product', 'custom' ] ) ? $settings['image_type'] : 'product';
-        $clean['image_width']          = intval( $settings['image_width'] ?? 96 );
-        $clean['image_position']       = in_array( $settings['image_position'] ?? '', [ 'left', 'right' ] ) ? $settings['image_position'] : 'left';
-        $clean['image_custom_url']     = esc_url_raw( $settings['image_custom_url'] ?? '' );
-        $clean['position']             = sanitize_key( $settings['position'] ?? 'before_payment' );
-        $clean['skin']                 = sanitize_key( $settings['skin'] ?? 'skin1' );
-        $clean['bump_status']          = in_array( $settings['bump_status'] ?? '', [ 'publish', 'draft' ] ) ? $settings['bump_status'] : 'publish';
-        $clean['trigger_type']         = sanitize_key( $settings['trigger_type'] ?? 'all' );
+
+        // Text fields with length limits
+        $clean['headline']   = mb_substr( sanitize_text_field( $settings['headline'] ?? '' ), 0, 200 );
+        $clean['badge_text'] = mb_substr( sanitize_text_field( $settings['badge_text'] ?? '' ), 0, 50 );
+
+        // Boolean toggles
+        $clean['show_badge']          = isset( $settings['show_badge'] ) ? 1 : 0;
+        $clean['show_original_price'] = isset( $settings['show_original_price'] ) ? 1 : 0;
+        $clean['show_product_image']  = isset( $settings['show_product_image'] ) ? 1 : 0;
+
+        // Colors — with fallback defaults
+        $clean['skin1_bg_color']   = sanitize_hex_color( $settings['skin1_bg_color'] ?? '#FFFDE7' ) ?: '#FFFDE7';
+        $clean['skin1_text_color'] = sanitize_hex_color( $settings['skin1_text_color'] ?? '#155724' ) ?: '#155724';
+        $clean['skin2_bg_color']   = sanitize_hex_color( $settings['skin2_bg_color'] ?? '#e8f7f9' ) ?: '#e8f7f9';
+        $clean['skin2_text_color'] = sanitize_hex_color( $settings['skin2_text_color'] ?? '#155724' ) ?: '#155724';
+
+        // Image settings — clamped values
+        $clean['image_type']       = in_array( $settings['image_type'] ?? '', [ 'product', 'custom' ], true ) ? $settings['image_type'] : 'product';
+        $clean['image_width']      = max( 40, min( 300, intval( $settings['image_width'] ?? 96 ) ) );
+        $clean['image_position']   = in_array( $settings['image_position'] ?? '', [ 'left', 'right' ], true ) ? $settings['image_position'] : 'left';
+        $clean['image_custom_url'] = esc_url_raw( $settings['image_custom_url'] ?? '' );
+
+        // Layout & skin — whitelist values
+        $clean['position']    = in_array( $settings['position'] ?? '', [ 'before_payment', 'after_payment' ], true ) ? $settings['position'] : 'before_payment';
+        $clean['skin']        = in_array( $settings['skin'] ?? '', [ 'skin1', 'skin2' ], true ) ? $settings['skin'] : 'skin1';
+        $clean['bump_status'] = in_array( $settings['bump_status'] ?? '', [ 'publish', 'draft' ], true ) ? $settings['bump_status'] : 'publish';
+
+        // Trigger rules
+        $clean['trigger_type']         = in_array( $settings['trigger_type'] ?? '', [ 'all', 'specific_product', 'category', 'minimum_order' ], true ) ? $settings['trigger_type'] : 'all';
         $clean['trigger_products']     = array_map( 'intval', (array) ( $settings['trigger_products'] ?? [] ) );
         $clean['trigger_categories']   = array_map( 'intval', (array) ( $settings['trigger_categories'] ?? [] ) );
-        $clean['minimum_order_amount'] = floatval( $settings['minimum_order_amount'] ?? 0 );
-        $clean['behaviour']            = in_array( $settings['behaviour'] ?? '', [ 'add', 'replace' ] ) ? $settings['behaviour'] : 'add';
+        $clean['minimum_order_amount'] = max( 0, min( 999999, floatval( $settings['minimum_order_amount'] ?? 0 ) ) );
+        $clean['behaviour']            = in_array( $settings['behaviour'] ?? '', [ 'add', 'replace' ], true ) ? $settings['behaviour'] : 'add';
 
-        // Products — each with its own description
+        // Products — max 10, each with validated fields
         $clean['products'] = [];
-        foreach ( (array) ( $settings['products'] ?? [] ) as $p ) {
+        $raw_products = array_slice( (array) ( $settings['products'] ?? [] ), 0, 10 );
+        foreach ( $raw_products as $p ) {
             if ( empty( $p['id'] ) ) continue;
+            $dtype    = in_array( $p['discount_type'] ?? '', [ 'percentage', 'flat' ], true ) ? $p['discount_type'] : 'percentage';
+            $discount = max( 0, floatval( $p['discount'] ?? 0 ) );
+
+            // Cap discount: percentage max 100%, flat max 999999
+            if ( $dtype === 'percentage' ) {
+                $discount = min( 100, $discount );
+            } else {
+                $discount = min( 999999, $discount );
+            }
+
             $clean['products'][] = [
                 'id'            => intval( $p['id'] ),
-                'discount'      => floatval( $p['discount'] ?? 0 ),
-                'discount_type' => in_array( $p['discount_type'] ?? '', [ 'percentage', 'flat' ] ) ? $p['discount_type'] : 'percentage',
-                'qty'           => max( 1, intval( $p['qty'] ?? 1 ) ),
+                'discount'      => $discount,
+                'discount_type' => $dtype,
+                'qty'           => max( 1, min( 99, intval( $p['qty'] ?? 1 ) ) ),
                 'description'   => wp_kses_post( stripslashes( $p['description'] ?? '' ) ),
             ];
         }
 
+        // Save post
         $post_data = [
             'post_title'  => $title,
             'post_type'   => 'order_bump',
@@ -256,9 +285,10 @@ class OBP_Admin {
 
         update_post_meta( $bump_id, '_obp_settings', $clean );
 
-        // Stay on same edit page after save
+        // Redirect with status
         $active_tab = sanitize_key( $_POST['active_tab'] ?? 'design' );
-        wp_redirect( admin_url( 'admin.php?page=obp-edit&edit=' . $bump_id . '&saved=1&tab=' . $active_tab ) );
+        $status     = empty( $clean['products'] ) ? 'saved_no_products' : 'saved';
+        wp_redirect( admin_url( 'admin.php?page=obp-edit&edit=' . $bump_id . '&obp_status=' . $status . '&tab=' . $active_tab ) );
         exit;
     }
 }

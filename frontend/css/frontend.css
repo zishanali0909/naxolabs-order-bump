@@ -477,3 +477,29 @@
 .obp-skin-skin2 .obp-bump-cta-row .obp-bump-check-label { flex: 1; }
 .obp-skin-skin2 .obp-bump-cta-row .obp-bump-headline-text { font-size: 14px; font-weight: 800; color: #155724; }
 .obp-skin-skin2 .obp-bump-cta-row .obp-bump-prices { margin-left: auto; flex-shrink: 0; }
+
+/* ═══════════════════════════════════════
+   LOADING & ERROR STATES
+═══════════════════════════════════════ */
+/* Dim bump during AJAX request */
+.obp-bump-loading-state {
+    opacity: 0.6;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+/* Error message inside bump */
+.obp-bump-error {
+    background: #FEE2E2;
+    color: #991B1B;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    text-align: center;
+    border-top: 1px solid #FECACA;
+    animation: obp-error-in 0.3s ease;
+}
+@keyframes obp-error-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}

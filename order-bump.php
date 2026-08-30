@@ -1,31 +1,51 @@
 <?php
 /**
  * Plugin Name: Order Bump Pro
- * Description: Add order bumps to WooCommerce checkout page like FunnelKit
- * Version: 2.1.0
- * Author: Your Name
+ * Plugin URI:  https://github.com/zishanali0909/order-bump-pro
+ * Description: Add order bumps to WooCommerce checkout page — boost average order value with one-click upsells.
+ * Version:     2.2.0
+ * Author:      Zishan Ali
+ * Author URI:  https://github.com/zishanali0909
  * Text Domain: order-bump-pro
+ * Domain Path: /languages
  * Requires Plugins: woocommerce
  * Requires at least: 5.8
  * Requires PHP: 7.4
+ * License:     GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ *
+ * @package OrderBumpPro
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
  * Check if WooCommerce is active before doing anything.
+ *
+ * @since 1.0.0
+ * @return bool
  */
 function obp_check_woocommerce() {
     if ( ! class_exists( 'WooCommerce' ) ) {
         add_action( 'admin_notices', function() {
-            echo '<div class="notice notice-error"><p><strong>Order Bump Pro</strong> requires <strong>WooCommerce</strong> to be installed and active.</p></div>';
+            printf(
+                '<div class="notice notice-error"><p>%s</p></div>',
+                wp_kses_post(
+                    sprintf(
+                        /* translators: %1$s: plugin name, %2$s: dependency name */
+                        __( '<strong>%1$s</strong> requires <strong>%2$s</strong> to be installed and active.', 'order-bump-pro' ),
+                        'Order Bump Pro',
+                        'WooCommerce'
+                    )
+                )
+            );
         });
         return false;
     }
     return true;
 }
 
-define( 'OBP_VERSION', '2.1.0' );
+define( 'OBP_VERSION', '2.2.0' );
 define( 'OBP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'OBP_URL', plugin_dir_url( __FILE__ ) );
 
@@ -35,10 +55,14 @@ require_once OBP_PATH . 'includes/class-obp-frontend.php';
 require_once OBP_PATH . 'includes/class-obp-ajax.php';
 require_once OBP_PATH . 'includes/class-obp-discount.php';
 
+/**
+ * Initialize plugin after all plugins are loaded.
+ *
+ * @since 1.0.0
+ */
 function obp_init() {
     if ( ! obp_check_woocommerce() ) return;
 
-    // Load translations
     load_plugin_textdomain( 'order-bump-pro', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 
     new OBP_Post_Type();
@@ -56,11 +80,21 @@ add_action( 'before_woocommerce_init', function() {
     }
 } );
 
+/**
+ * Activation hook — flush rewrite rules.
+ *
+ * @since 1.0.0
+ */
 register_activation_hook( __FILE__, 'obp_activate' );
 function obp_activate() {
     flush_rewrite_rules();
 }
 
+/**
+ * Deactivation hook — flush rewrite rules.
+ *
+ * @since 1.0.0
+ */
 register_deactivation_hook( __FILE__, 'obp_deactivate' );
 function obp_deactivate() {
     flush_rewrite_rules();
@@ -68,7 +102,8 @@ function obp_deactivate() {
 
 /**
  * Register WooCommerce Blocks checkout integration.
- * This enables order bumps in the block-based (Gutenberg) checkout.
+ *
+ * @since 2.0.0
  */
 add_action( 'woocommerce_blocks_loaded', function() {
     if ( ! class_exists( 'Automattic\WooCommerce\Blocks\Integrations\IntegrationInterface' ) ) {

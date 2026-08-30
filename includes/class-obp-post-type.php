@@ -1,12 +1,26 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
 
+/**
+ * OBP_Post_Type — Registers the 'order_bump' custom post type.
+ *
+ * @since 1.0.0
+ * @package OrderBumpPro
+ */
 class OBP_Post_Type {
 
+    /**
+     * Hook into WordPress init to register the post type.
+     */
     public function __construct() {
         add_action( 'init', [ $this, 'register_post_type' ] );
     }
 
+    /**
+     * Register the 'order_bump' custom post type.
+     *
+     * @since 1.0.0
+     */
     public function register_post_type() {
         $labels = [
             'name'               => __( 'Order Bumps', 'order-bump-pro' ),
@@ -28,6 +42,7 @@ class OBP_Post_Type {
             'show_ui'            => true,
             'show_in_menu'       => false,
             'capability_type'    => 'post',
+            'map_meta_cap'       => true,
             'supports'           => [ 'title' ],
         ] );
     }
