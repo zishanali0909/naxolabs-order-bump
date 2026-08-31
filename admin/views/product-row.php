@@ -36,7 +36,7 @@ $is_in_stock   = $stock_product && $stock_product->is_in_stock();
         <div class="obp-product-row-controls">
             <input type="number" name="<?php echo esc_attr( $field_prefix ); ?>[discount]"
                    value="<?php echo esc_attr( $p['discount'] ); ?>"
-                   class="obp-input obp-input-sm" min="0" style="width:60px" placeholder="0">
+                   class="obp-input obp-input-sm" min="0" max="100" step="0.01" style="width:70px" placeholder="0">
             <select name="<?php echo esc_attr( $field_prefix ); ?>[discount_type]" class="obp-select obp-select-sm">
                 <option value="percentage" <?php selected( $p['discount_type'] ?? 'percentage', 'percentage' ); ?>>
                     <?php esc_html_e( '% Sale', 'order-bump-pro' ); ?>
@@ -47,7 +47,7 @@ $is_in_stock   = $stock_product && $stock_product->is_in_stock();
             </select>
             <input type="number" name="<?php echo esc_attr( $field_prefix ); ?>[qty]"
                    value="<?php echo esc_attr( $p['qty'] ?? 1 ); ?>"
-                   class="obp-input obp-input-sm" min="1" style="width:52px">
+                   class="obp-input obp-input-sm" min="1" max="99" style="width:52px">
             <span class="obp-badge <?php echo $is_in_stock ? 'obp-badge-green' : 'obp-badge-red'; ?>" style="white-space:nowrap">
                 <?php echo $is_in_stock ? esc_html__( 'in-stock', 'order-bump-pro' ) : esc_html__( 'out-of-stock', 'order-bump-pro' ); ?>
             </span>

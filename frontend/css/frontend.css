@@ -31,37 +31,8 @@
 }
 .obp-bump-wrap + .obp-bump-wrap { margin-top: 16px; }
 
-/* Loading overlay */
-.obp-bump-loading {
-    display: none;
-    position: absolute;
-    inset: 0;
-    background: rgba(255,255,255,.85);
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    font-size: 13px;
-    font-weight: 700;
-    color: #6C63FF;
-    z-index: 20;
-}
+/* Loading overlay (hidden — we use obp-bump-loading-state class instead) */
 .obp-bump-loading { display: none !important; }
-.obp-bump-loading.active { display: none !important; }
-.obp-bump-spinner {
-    width: 24px; height: 24px;
-    border: 3px solid #EDE9FE;
-    border-top-color: #6C63FF;
-    border-radius: 50%;
-    animation: obp-spin .55s linear infinite;
-    flex-shrink: 0;
-}
-@keyframes obp-spin { to { transform: rotate(360deg); } }
-
-/* Added bar */
-.obp-bump-added-bar {
-    display: none !important;
-}
-.obp-bump-is-added .obp-bump-added-bar { display: none !important; }
 
 /* Hidden native checkbox — display:none is the only reliable way */
 .obp-bump-checkbox {

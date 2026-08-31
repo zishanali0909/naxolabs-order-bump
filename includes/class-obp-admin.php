@@ -266,7 +266,7 @@ class OBP_Admin {
                 'discount'      => $discount,
                 'discount_type' => $dtype,
                 'qty'           => max( 1, min( 99, intval( $p['qty'] ?? 1 ) ) ),
-                'description'   => wp_kses_post( stripslashes( $p['description'] ?? '' ) ),
+                'description'   => mb_substr( wp_kses_post( stripslashes( $p['description'] ?? '' ) ), 0, 2000 ),
             ];
         }
 

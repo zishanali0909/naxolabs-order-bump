@@ -1,6 +1,14 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
 
+/**
+ * OBP_Frontend — Renders order bumps on the WooCommerce checkout page.
+ *
+ * Handles both classic shortcode-based checkout and Block checkout.
+ *
+ * @since   1.0.0
+ * @package OrderBumpPro
+ */
 class OBP_Frontend {
 
     public function __construct() {
@@ -25,8 +33,13 @@ class OBP_Frontend {
         delete_transient( 'obp_published_bumps' );
     }
 
+    /**
+     * Enqueue frontend CSS/JS on checkout page.
+     *
+     * @since 1.0.0
+     */
     public function enqueue_assets() {
-        if ( !is_checkout() ) return;
+        if ( ! is_checkout() ) return;
         wp_enqueue_style(  'obp-frontend', OBP_URL . 'frontend/css/frontend.css', [], OBP_VERSION );
         wp_enqueue_script( 'obp-frontend', OBP_URL . 'frontend/js/frontend.js', ['jquery'], OBP_VERSION, true );
         wp_localize_script( 'obp-frontend', 'obpFrontend', [
@@ -119,8 +132,9 @@ class OBP_Frontend {
     }
 
     private function is_in_cart( $product_id ) {
-        foreach ( WC()->cart->get_cart() as $item )
-            if ( $item['product_id'] == $product_id ) return true;
+        foreach ( WC()->cart->get_cart() as $item ) {
+            if ( (int) $item['product_id'] === (int) $product_id ) return true;
+        }
         return false;
     }
 
@@ -163,7 +177,7 @@ class OBP_Frontend {
             $offer_price = max( 0, $offer_price );
 
             $prod_name    = $product->get_name();
-            $description  = $pm['description'] ?? '';
+            $description  = mb_substr( $pm['description'] ?? '', 0, 2000 );
             $in_cart      = $this->is_in_cart( $product->get_id() );
             $headline_html = str_replace(
                 '{{product_name}}',
@@ -273,11 +287,6 @@ class OBP_Frontend {
                     <?php endif; ?>
 
                 <?php endif; ?>
-
-                <div class="obp-bump-loading">
-                    <div class="obp-bump-spinner"></div>
-                    <span>Updating order...</span>
-                </div>
             </div>
             <?php
         }
