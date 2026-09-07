@@ -1,6 +1,6 @@
 <?php
 /**
- * Order Bump Pro — Uninstall Script
+ * WP Order Bump — Uninstall Script
  *
  * Runs when the plugin is deleted via WordPress admin.
  * Cleans up all plugin data: custom post type posts and associated meta.

@@ -1,12 +1,12 @@
 <?php
 /**
- * Plugin Name: Order Bump Pro
- * Plugin URI:  https://github.com/zishanali0909/order-bump-pro
+ * Plugin Name: WP Order Bump
+ * Plugin URI:  https://github.com/zishanali0909/wp-order-bump
  * Description: Add order bumps to WooCommerce checkout page — boost average order value with one-click upsells.
- * Version:     2.2.0
+ * Version:     1.0.0
  * Author:      Zishan Ali
  * Author URI:  https://github.com/zishanali0909
- * Text Domain: order-bump-pro
+ * Text Domain: wp-order-bump
  * Domain Path: /languages
  * Requires Plugins: woocommerce
  * Requires at least: 5.8
@@ -14,7 +14,7 @@
  * License:     GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package OrderBumpPro
+ * @package WPOrderBump
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -33,8 +33,8 @@ function obp_check_woocommerce() {
                 wp_kses_post(
                     sprintf(
                         /* translators: %1$s: plugin name, %2$s: dependency name */
-                        __( '<strong>%1$s</strong> requires <strong>%2$s</strong> to be installed and active.', 'order-bump-pro' ),
-                        'Order Bump Pro',
+                        __( '<strong>%1$s</strong> requires <strong>%2$s</strong> to be installed and active.', 'wp-order-bump' ),
+                        'WP Order Bump',
                         'WooCommerce'
                     )
                 )
@@ -45,7 +45,7 @@ function obp_check_woocommerce() {
     return true;
 }
 
-define( 'OBP_VERSION', '2.2.0' );
+define( 'OBP_VERSION', '1.0.0' );
 define( 'OBP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'OBP_URL', plugin_dir_url( __FILE__ ) );
 
@@ -63,7 +63,7 @@ require_once OBP_PATH . 'includes/class-obp-discount.php';
 function obp_init() {
     if ( ! obp_check_woocommerce() ) return;
 
-    load_plugin_textdomain( 'order-bump-pro', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+    load_plugin_textdomain( 'wp-order-bump', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 
     new OBP_Post_Type();
     new OBP_Admin();

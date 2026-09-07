@@ -1,18 +1,18 @@
-=== Order Bump Pro ===
+=== WP Order Bump ===
 Contributors: zishanali0909
 Tags: woocommerce, order bump, checkout upsell, cart bump, upsell
 Requires at least: 5.8
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 2.2.0
+Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Add smart order bumps to your WooCommerce checkout page — boost revenue with one-click upsells like FunnelKit.
+Add smart order bumps to your WooCommerce checkout page — boost revenue with one-click upsells.
 
 == Description ==
 
-**Order Bump Pro** lets you create beautiful, conversion-optimized order bumps that display on your WooCommerce checkout page. When customers check a box, the bump product is instantly added to their cart at a special discounted price.
+**WP Order Bump** lets you create beautiful, conversion-optimized order bumps that display on your WooCommerce checkout page. When customers check a box, the bump product is instantly added to their cart at a special discounted price.
 
 = Key Features =
 
@@ -26,6 +26,8 @@ Add smart order bumps to your WooCommerce checkout page — boost revenue with o
 * **Per-Product Descriptions** — Rich text descriptions with full WP Editor support
 * **Drag & Drop Reorder** — Easily reorder products within a bump
 * **Fully Responsive** — Works perfectly on mobile and desktop
+* **Block & Classic Checkout** — Compatible with both WooCommerce checkout types
+* **HPOS Compatible** — Works with WooCommerce High-Performance Order Storage
 
 = How It Works =
 
@@ -36,7 +38,7 @@ Add smart order bumps to your WooCommerce checkout page — boost revenue with o
 
 == Installation ==
 
-1. Upload the `order-bump-pro` folder to `/wp-content/plugins/`
+1. Upload the `wp-order-bump` folder to `/wp-content/plugins/`
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. Make sure WooCommerce is installed and active
 4. Navigate to **Order Bumps** in the admin sidebar to create your first bump
@@ -63,6 +65,10 @@ Yes, you can set display rules based on:
 * Product categories in cart
 * Minimum cart total
 
+= Is it compatible with other plugins and themes? =
+
+Yes! WP Order Bump is designed with full isolation — all CSS classes, JS variables, and PHP functions are prefixed to prevent conflicts with any theme or plugin.
+
 == Screenshots ==
 
 1. Admin Dashboard — Manage all your order bumps
@@ -73,32 +79,23 @@ Yes, you can set display rules based on:
 
 == Changelog ==
 
-= 2.1.0 =
-* Improved: Admin class split into separate template files
-* Improved: All strings now translatable (i18n ready)
-* Improved: Inline JavaScript moved to external file
-* Added: Frontend query caching with transients
-* Added: readme.txt for WordPress.org standards
-* Added: Drag & drop product reorder support
-
-= 2.0.1 =
-* Fixed: Discount prices now correctly apply in WooCommerce cart
-* Fixed: Custom image URL field name mismatch
-* Fixed: Duplicate AJAX handler conflict
-* Added: Badge/Ribbon UI controls in Design tab
-* Added: WooCommerce dependency runtime check
-* Added: Dynamic stock status checking
-* Added: Behaviour radio with Replace option
-* Added: uninstall.php for data cleanup
-* Added: Deactivation hook
-
-= 2.0.0 =
-* Initial release
+= 1.0.0 =
+* Initial public release
+* Multiple skins (Classic & Modern)
+* Per-product discounts (percentage & flat)
+* Smart display rules (product, category, minimum order)
+* Custom badges and ribbons
+* Product images with configurable width and position
+* Live admin preview
+* AJAX add/remove on checkout (no page reload)
+* Per-product rich text descriptions
+* Drag & drop product reorder
+* Block & Classic checkout support
+* HPOS compatibility
+* Full input validation and security hardening
+* WordPress.org coding standards compliance
 
 == Upgrade Notice ==
 
-= 2.1.0 =
-Major quality update: i18n support, cleaner code structure, performance improvements.
-
-= 2.0.1 =
-Critical fix: Discount prices now correctly apply in cart. Please update immediately.
+= 1.0.0 =
+Initial release — install and start boosting your checkout revenue!

@@ -1,10 +1,10 @@
 <?php
 /**
- * Admin Dashboard Template — Order Bump Pro
+ * Admin Dashboard Template — WP Order Bump
  *
  * Variables available: $bumps, $active
  *
- * @package OrderBumpPro
+ * @package WPOrderBump
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -14,44 +14,44 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         <div class="obp-header-left">
             <div class="obp-logo">⚡</div>
             <div>
-                <h1><?php esc_html_e( 'Order Bump Pro', 'order-bump-pro' ); ?></h1>
-                <p><?php esc_html_e( 'Boost revenue with smart checkout upsells', 'order-bump-pro' ); ?></p>
+                <h1><?php esc_html_e( 'WP Order Bump', 'wp-order-bump' ); ?></h1>
+                <p><?php esc_html_e( 'Boost revenue with smart checkout upsells', 'wp-order-bump' ); ?></p>
             </div>
         </div>
         <a href="<?php echo esc_url( admin_url( 'admin.php?page=obp-edit' ) ); ?>" class="obp-btn obp-btn-primary">
-            + <?php esc_html_e( 'Add New Order Bump', 'order-bump-pro' ); ?>
+            + <?php esc_html_e( 'Add New Order Bump', 'wp-order-bump' ); ?>
         </a>
     </div>
 
     <?php if ( isset( $_GET['saved'] ) ) : ?>
-        <div class="obp-notice obp-notice-success">✅ <?php esc_html_e( 'Saved successfully.', 'order-bump-pro' ); ?></div>
+        <div class="obp-notice obp-notice-success">✅ <?php esc_html_e( 'Saved successfully.', 'wp-order-bump' ); ?></div>
     <?php endif; ?>
     <?php if ( isset( $_GET['deleted'] ) ) : ?>
-        <div class="obp-notice obp-notice-success">🗑️ <?php esc_html_e( 'Deleted.', 'order-bump-pro' ); ?></div>
+        <div class="obp-notice obp-notice-success">🗑️ <?php esc_html_e( 'Deleted.', 'wp-order-bump' ); ?></div>
     <?php endif; ?>
 
     <div class="obp-stats-row">
         <div class="obp-stat-card">
             <span class="obp-stat-number"><?php echo count( $bumps ); ?></span>
-            <span class="obp-stat-label"><?php esc_html_e( 'Total Bumps', 'order-bump-pro' ); ?></span>
+            <span class="obp-stat-label"><?php esc_html_e( 'Total Bumps', 'wp-order-bump' ); ?></span>
         </div>
         <div class="obp-stat-card">
             <span class="obp-stat-number"><?php echo intval( $active ); ?></span>
-            <span class="obp-stat-label"><?php esc_html_e( 'Active', 'order-bump-pro' ); ?></span>
+            <span class="obp-stat-label"><?php esc_html_e( 'Active', 'wp-order-bump' ); ?></span>
         </div>
         <div class="obp-stat-card">
             <span class="obp-stat-number"><?php echo count( $bumps ) - $active; ?></span>
-            <span class="obp-stat-label"><?php esc_html_e( 'Inactive', 'order-bump-pro' ); ?></span>
+            <span class="obp-stat-label"><?php esc_html_e( 'Inactive', 'wp-order-bump' ); ?></span>
         </div>
     </div>
 
     <?php if ( empty( $bumps ) ) : ?>
         <div class="obp-empty-state">
             <div class="obp-empty-icon">🛒</div>
-            <h3><?php esc_html_e( 'No Order Bumps Yet', 'order-bump-pro' ); ?></h3>
-            <p><?php esc_html_e( 'Create your first bump.', 'order-bump-pro' ); ?></p>
+            <h3><?php esc_html_e( 'No Order Bumps Yet', 'wp-order-bump' ); ?></h3>
+            <p><?php esc_html_e( 'Create your first bump.', 'wp-order-bump' ); ?></p>
             <a href="<?php echo esc_url( admin_url( 'admin.php?page=obp-edit' ) ); ?>" class="obp-btn obp-btn-primary">
-                <?php esc_html_e( 'Create First Bump', 'order-bump-pro' ); ?>
+                <?php esc_html_e( 'Create First Bump', 'wp-order-bump' ); ?>
             </a>
         </div>
     <?php else : ?>
@@ -59,11 +59,11 @@ if ( ! defined( 'ABSPATH' ) ) exit;
             <table class="obp-table">
                 <thead>
                     <tr>
-                        <th><?php esc_html_e( 'Name', 'order-bump-pro' ); ?></th>
-                        <th><?php esc_html_e( 'Products', 'order-bump-pro' ); ?></th>
-                        <th><?php esc_html_e( 'Trigger', 'order-bump-pro' ); ?></th>
-                        <th><?php esc_html_e( 'Status', 'order-bump-pro' ); ?></th>
-                        <th><?php esc_html_e( 'Actions', 'order-bump-pro' ); ?></th>
+                        <th><?php esc_html_e( 'Name', 'wp-order-bump' ); ?></th>
+                        <th><?php esc_html_e( 'Products', 'wp-order-bump' ); ?></th>
+                        <th><?php esc_html_e( 'Trigger', 'wp-order-bump' ); ?></th>
+                        <th><?php esc_html_e( 'Status', 'wp-order-bump' ); ?></th>
+                        <th><?php esc_html_e( 'Actions', 'wp-order-bump' ); ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -72,10 +72,10 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                     $prods   = $meta['products'] ?? [];
                     $trigger = $meta['trigger_type'] ?? 'all';
                     $labels  = [
-                        'all'              => __( 'All', 'order-bump-pro' ),
-                        'specific_product' => __( 'Specific Product', 'order-bump-pro' ),
-                        'category'         => __( 'Category', 'order-bump-pro' ),
-                        'minimum_order'    => __( 'Min. Order', 'order-bump-pro' ),
+                        'all'              => __( 'All', 'wp-order-bump' ),
+                        'specific_product' => __( 'Specific Product', 'wp-order-bump' ),
+                        'category'         => __( 'Category', 'wp-order-bump' ),
+                        'minimum_order'    => __( 'Min. Order', 'wp-order-bump' ),
                     ];
                 ?>
                     <tr>
@@ -83,7 +83,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                         <td>
                             <?php
                             /* translators: %d: number of products */
-                            printf( esc_html__( '%d product(s)', 'order-bump-pro' ), count( $prods ) );
+                            printf( esc_html__( '%d product(s)', 'wp-order-bump' ), count( $prods ) );
                             ?>
                         </td>
                         <td><span class="obp-badge obp-badge-blue"><?php echo esc_html( $labels[ $trigger ] ?? $trigger ); ?></span></td>
@@ -95,12 +95,12 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                         </td>
                         <td class="obp-actions">
                             <a href="<?php echo esc_url( admin_url( 'admin.php?page=obp-edit&edit=' . $bump->ID ) ); ?>" class="obp-action-btn obp-action-edit">
-                                ✏️ <?php esc_html_e( 'Edit', 'order-bump-pro' ); ?>
+                                ✏️ <?php esc_html_e( 'Edit', 'wp-order-bump' ); ?>
                             </a>
                             <a href="#" class="obp-action-btn obp-action-delete"
                                data-id="<?php echo intval( $bump->ID ); ?>"
                                data-nonce="<?php echo esc_attr( wp_create_nonce( 'obp_delete_' . $bump->ID ) ); ?>">
-                                🗑️ <?php esc_html_e( 'Delete', 'order-bump-pro' ); ?>
+                                🗑️ <?php esc_html_e( 'Delete', 'wp-order-bump' ); ?>
                             </a>
                         </td>
                     </tr>

@@ -2,7 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
- * OBP_Ajax — Handles all AJAX requests for Order Bump Pro.
+ * OBP_Ajax — Handles all AJAX requests for WP Order Bump.
  *
  * Admin endpoints: toggle bump status, delete bump, search products.
  * Frontend endpoints: add/remove products from cart.
@@ -33,14 +33,14 @@ class OBP_Ajax {
         check_ajax_referer( 'obp_admin_nonce', 'nonce' );
 
         if ( ! current_user_can( 'manage_woocommerce' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permission denied.', 'order-bump-pro' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Permission denied.', 'wp-order-bump' ) ] );
         }
 
         $id = intval( $_POST['id'] ?? 0 );
         $p  = get_post( $id );
 
         if ( ! $p || $p->post_type !== 'order_bump' ) {
-            wp_send_json_error( [ 'message' => __( 'Invalid order bump.', 'order-bump-pro' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Invalid order bump.', 'wp-order-bump' ) ] );
         }
 
         $new = $p->post_status === 'publish' ? 'draft' : 'publish';
@@ -57,15 +57,15 @@ class OBP_Ajax {
         $id = intval( $_POST['id'] ?? 0 );
 
         if ( ! wp_verify_nonce( $_POST['nonce'] ?? '', 'obp_delete_' . $id ) ) {
-            wp_send_json_error( [ 'message' => __( 'Security check failed.', 'order-bump-pro' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Security check failed.', 'wp-order-bump' ) ] );
         }
         if ( ! current_user_can( 'manage_woocommerce' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permission denied.', 'order-bump-pro' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Permission denied.', 'wp-order-bump' ) ] );
         }
 
         $p = get_post( $id );
         if ( ! $p || $p->post_type !== 'order_bump' ) {
-            wp_send_json_error( [ 'message' => __( 'Invalid order bump.', 'order-bump-pro' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Invalid order bump.', 'wp-order-bump' ) ] );
         }
 
         wp_delete_post( $id, true );
@@ -81,7 +81,7 @@ class OBP_Ajax {
         check_ajax_referer( 'obp_admin_nonce', 'nonce' );
 
         if ( ! current_user_can( 'manage_woocommerce' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permission denied.', 'order-bump-pro' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Permission denied.', 'wp-order-bump' ) ] );
         }
 
         $q = sanitize_text_field( $_POST['q'] ?? '' );
@@ -125,12 +125,12 @@ class OBP_Ajax {
         $qty = max( 1, min( 99, intval( $_POST['qty'] ?? 1 ) ) );
 
         if ( ! $pid ) {
-            wp_send_json_error( [ 'message' => __( 'Invalid product.', 'order-bump-pro' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Invalid product.', 'wp-order-bump' ) ] );
         }
 
         $product = wc_get_product( $pid );
         if ( ! $product || ! $product->is_purchasable() || ! $product->is_in_stock() ) {
-            wp_send_json_error( [ 'message' => __( 'This product is not available.', 'order-bump-pro' ) ] );
+            wp_send_json_error( [ 'message' => __( 'This product is not available.', 'wp-order-bump' ) ] );
         }
 
         // Already in cart?
@@ -146,7 +146,7 @@ class OBP_Ajax {
             wp_send_json_success( [ 'added' => true, 'total' => WC()->cart->get_total() ] );
         }
 
-        wp_send_json_error( [ 'message' => __( 'Could not add product to cart.', 'order-bump-pro' ) ] );
+        wp_send_json_error( [ 'message' => __( 'Could not add product to cart.', 'wp-order-bump' ) ] );
     }
 
     /**
@@ -159,7 +159,7 @@ class OBP_Ajax {
 
         $pid = intval( $_POST['product_id'] ?? 0 );
         if ( ! $pid ) {
-            wp_send_json_error( [ 'message' => __( 'Invalid product.', 'order-bump-pro' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Invalid product.', 'wp-order-bump' ) ] );
         }
 
         $removed = false;

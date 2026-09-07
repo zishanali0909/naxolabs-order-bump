@@ -2,12 +2,12 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
- * OBP_Admin — Admin controller for Order Bump Pro.
+ * OBP_Admin — Admin controller for WP Order Bump.
  *
  * Handles menu registration, asset enqueueing, rendering (via templates),
  * and form save processing. HTML templates are in admin/views/.
  *
- * @package OrderBumpPro
+ * @package WPOrderBump
  */
 class OBP_Admin {
 
@@ -22,26 +22,26 @@ class OBP_Admin {
      */
     public function add_menu() {
         add_menu_page(
-            __( 'Order Bump Pro', 'order-bump-pro' ),
-            __( 'Order Bumps', 'order-bump-pro' ),
+            __( 'WP Order Bump', 'wp-order-bump' ),
+            __( 'Order Bumps', 'wp-order-bump' ),
             'manage_woocommerce',
-            'order-bump-pro',
+            'wp-order-bump',
             [ $this, 'render_dashboard' ],
             'dashicons-cart',
             56
         );
         add_submenu_page(
-            'order-bump-pro',
-            __( 'All Bumps', 'order-bump-pro' ),
-            __( 'All Bumps', 'order-bump-pro' ),
+            'wp-order-bump',
+            __( 'All Bumps', 'wp-order-bump' ),
+            __( 'All Bumps', 'wp-order-bump' ),
             'manage_woocommerce',
-            'order-bump-pro',
+            'wp-order-bump',
             [ $this, 'render_dashboard' ]
         );
         add_submenu_page(
-            'order-bump-pro',
-            __( 'Add New', 'order-bump-pro' ),
-            __( 'Add New', 'order-bump-pro' ),
+            'wp-order-bump',
+            __( 'Add New', 'wp-order-bump' ),
+            __( 'Add New', 'wp-order-bump' ),
             'manage_woocommerce',
             'obp-edit',
             [ $this, 'render_edit_page' ]
@@ -105,16 +105,16 @@ class OBP_Admin {
             'customImageUrl' => $custom_img_url,
             'imageType'      => $image_type,
             'i18n'           => [
-                'deleteConfirm'  => __( 'Delete this Order Bump?', 'order-bump-pro' ),
-                'productAdded'   => __( 'Product added! Go to Design tab to set its description.', 'order-bump-pro' ),
-                'alreadyAdded'   => __( 'is already added.', 'order-bump-pro' ),
-                'noProducts'     => __( 'No products found.', 'order-bump-pro' ),
-                'active'         => __( 'Active', 'order-bump-pro' ),
-                'inactive'       => __( 'Inactive', 'order-bump-pro' ),
-                'noDescription'  => __( 'No description set.', 'order-bump-pro' ),
-                'errorDeleting'  => __( 'Error deleting.', 'order-bump-pro' ),
-                'error'          => __( 'Error.', 'order-bump-pro' ),
-                'inStock'        => __( 'in-stock', 'order-bump-pro' ),
+                'deleteConfirm'  => __( 'Delete this Order Bump?', 'wp-order-bump' ),
+                'productAdded'   => __( 'Product added! Go to Design tab to set its description.', 'wp-order-bump' ),
+                'alreadyAdded'   => __( 'is already added.', 'wp-order-bump' ),
+                'noProducts'     => __( 'No products found.', 'wp-order-bump' ),
+                'active'         => __( 'Active', 'wp-order-bump' ),
+                'inactive'       => __( 'Inactive', 'wp-order-bump' ),
+                'noDescription'  => __( 'No description set.', 'wp-order-bump' ),
+                'errorDeleting'  => __( 'Error deleting.', 'wp-order-bump' ),
+                'error'          => __( 'Error.', 'wp-order-bump' ),
+                'inStock'        => __( 'in-stock', 'wp-order-bump' ),
             ],
         ] );
     }
@@ -196,10 +196,10 @@ class OBP_Admin {
      */
     public function handle_save() {
         if ( ! wp_verify_nonce( $_POST['obp_nonce'] ?? '', 'obp_save_bump' ) ) {
-            wp_die( esc_html__( 'Security check failed.', 'order-bump-pro' ) );
+            wp_die( esc_html__( 'Security check failed.', 'wp-order-bump' ) );
         }
         if ( ! current_user_can( 'manage_woocommerce' ) ) {
-            wp_die( esc_html__( 'Unauthorized.', 'order-bump-pro' ) );
+            wp_die( esc_html__( 'Unauthorized.', 'wp-order-bump' ) );
         }
 
         $bump_id  = intval( $_POST['bump_id'] ?? 0 );
@@ -208,7 +208,7 @@ class OBP_Admin {
 
         // Validate title
         if ( empty( trim( $title ) ) ) {
-            $title = __( 'Order Bump', 'order-bump-pro' );
+            $title = __( 'Order Bump', 'wp-order-bump' );
         }
 
         $clean = [];

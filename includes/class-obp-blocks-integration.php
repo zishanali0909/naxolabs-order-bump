@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Blocks\Integrations\IntegrationInterface;
  * Registers scripts/styles and passes bump data to the block checkout
  * so order bumps render in the new Gutenberg-based checkout.
  *
- * @package OrderBumpPro
+ * @package WPOrderBump
  */
 class OBP_Blocks_Integration implements IntegrationInterface {
 
@@ -17,7 +17,7 @@ class OBP_Blocks_Integration implements IntegrationInterface {
      * Integration name identifier.
      */
     public function get_name() {
-        return 'order-bump-pro';
+        return 'wp-order-bump';
     }
 
     /**
@@ -58,7 +58,7 @@ class OBP_Blocks_Integration implements IntegrationInterface {
     }
 
     /**
-     * Data passed to JS via wc.wcSettings.getSetting('order-bump-pro_data').
+     * Data passed to JS via wc.wcSettings.getSetting('wp-order-bump_data').
      * Contains all published bumps with their product details.
      */
     public function get_script_data() {

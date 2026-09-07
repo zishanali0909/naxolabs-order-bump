@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * OBP_Post_Type — Registers the 'order_bump' custom post type.
  *
  * @since 1.0.0
- * @package OrderBumpPro
+ * @package WPOrderBump
  */
 class OBP_Post_Type {
 
@@ -23,17 +23,17 @@ class OBP_Post_Type {
      */
     public function register_post_type() {
         $labels = [
-            'name'               => __( 'Order Bumps', 'order-bump-pro' ),
-            'singular_name'      => __( 'Order Bump', 'order-bump-pro' ),
-            'add_new'            => __( 'Add New Bump', 'order-bump-pro' ),
-            'add_new_item'       => __( 'Add New Order Bump', 'order-bump-pro' ),
-            'edit_item'          => __( 'Edit Order Bump', 'order-bump-pro' ),
-            'new_item'           => __( 'New Order Bump', 'order-bump-pro' ),
-            'view_item'          => __( 'View Order Bump', 'order-bump-pro' ),
-            'search_items'       => __( 'Search Order Bumps', 'order-bump-pro' ),
-            'not_found'          => __( 'No order bumps found', 'order-bump-pro' ),
-            'not_found_in_trash' => __( 'No order bumps found in Trash', 'order-bump-pro' ),
-            'menu_name'          => __( 'Order Bumps', 'order-bump-pro' ),
+            'name'               => __( 'Order Bumps', 'wp-order-bump' ),
+            'singular_name'      => __( 'Order Bump', 'wp-order-bump' ),
+            'add_new'            => __( 'Add New Bump', 'wp-order-bump' ),
+            'add_new_item'       => __( 'Add New Order Bump', 'wp-order-bump' ),
+            'edit_item'          => __( 'Edit Order Bump', 'wp-order-bump' ),
+            'new_item'           => __( 'New Order Bump', 'wp-order-bump' ),
+            'view_item'          => __( 'View Order Bump', 'wp-order-bump' ),
+            'search_items'       => __( 'Search Order Bumps', 'wp-order-bump' ),
+            'not_found'          => __( 'No order bumps found', 'wp-order-bump' ),
+            'not_found_in_trash' => __( 'No order bumps found in Trash', 'wp-order-bump' ),
+            'menu_name'          => __( 'Order Bumps', 'wp-order-bump' ),
         ];
 
         register_post_type( 'order_bump', [
