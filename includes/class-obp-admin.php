@@ -29,10 +29,11 @@ class OBP_Admin {
             'wp-order-bump',
             [ $this, 'render_dashboard' ]
         );
+        // Hidden page (no menu item) for editing/creating bumps
         add_submenu_page(
-            'woocommerce',
-            __( 'Add New Bump', 'wp-order-bump' ),
-            __( 'Add New Bump', 'wp-order-bump' ),
+            null,
+            __( 'Edit Order Bump', 'wp-order-bump' ),
+            '',
             'manage_woocommerce',
             'obp-edit',
             [ $this, 'render_edit_page' ]
