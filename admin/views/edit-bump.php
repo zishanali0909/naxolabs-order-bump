@@ -11,6 +11,8 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 ?>
 <div class="wrap obp-wrap">
+    <h1 class="wp-heading-inline" style="display:none;"><?php esc_html_e( 'Edit Bump', 'wp-order-bump' ); ?></h1>
+    <hr class="wp-header-end">
     <div class="obp-header">
         <div class="obp-header-left">
             <a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-order-bump' ) ); ?>" class="obp-back-btn">
