@@ -16,6 +16,9 @@ class OBP_Discount {
 
         // Store bump meta when product is added to cart via order bump
         add_filter( 'woocommerce_add_cart_item_data', [ $this, 'add_bump_meta_to_cart' ], 10, 3 );
+
+        // Save bump meta to order line items for revenue tracking
+        add_action( 'woocommerce_checkout_create_order_line_item', [ $this, 'save_bump_meta_to_order_item' ], 10, 4 );
     }
 
     /**
@@ -91,6 +94,26 @@ class OBP_Discount {
 
             $new_price = max( 0, $new_price );
             $product->set_price( $new_price );
+        }
+    
+    }
+
+    /**
+     * Save bump metadata to order line items for revenue tracking.
+     *
+     * @since 1.0.0
+     * @param \WC_Order_Item_Product $item  Order line item.
+     * @param string                 $cart_item_key Cart item key.
+     * @param array                  $values Cart item data.
+     * @param \WC_Order              $order  The order object.
+     */
+    public function save_bump_meta_to_order_item( $item, $cart_item_key, $values, $order ) {
+        if ( ! empty( $values['obp_bump_id'] ) ) {
+            $item->add_meta_data( '_obp_bump_id', intval( $values['obp_bump_id'] ), true );
+        }
+        if ( ! empty( $values['obp_discount'] ) ) {
+            $item->add_meta_data( '_obp_discount', floatval( $values['obp_discount'] ), true );
+            $item->add_meta_data( '_obp_discount_type', sanitize_text_field( $values['obp_discount_type'] ?? 'percentage' ), true );
         }
     }
 }

@@ -24,6 +24,7 @@
 .obp-stats-row{display:flex;gap:12px;margin-bottom:18px}
 .obp-stat-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:16px 22px;flex:1;display:flex;flex-direction:column;gap:4px;box-shadow:var(--sh)}
 .obp-stat-number{font-size:26px;font-weight:800;color:var(--p)}
+.obp-stat-revenue .obp-stat-number{color:var(--ok)}
 .obp-stat-label{font-size:11px;color:var(--muted);font-weight:600}
 
 /* NOTICE */

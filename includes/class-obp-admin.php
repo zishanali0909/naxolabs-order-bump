@@ -21,27 +21,18 @@ class OBP_Admin {
      * Register admin menu pages.
      */
     public function add_menu() {
-        add_menu_page(
-            __( 'WP Order Bump', 'wp-order-bump' ),
-            __( 'Order Bumps', 'wp-order-bump' ),
-            'manage_woocommerce',
-            'wp-order-bump',
-            [ $this, 'render_dashboard' ],
-            'dashicons-cart',
-            56
-        );
         add_submenu_page(
-            'wp-order-bump',
-            __( 'All Bumps', 'wp-order-bump' ),
-            __( 'All Bumps', 'wp-order-bump' ),
+            'woocommerce',
+            __( 'Order Bumps', 'wp-order-bump' ),
+            __( 'Order Bumps', 'wp-order-bump' ),
             'manage_woocommerce',
             'wp-order-bump',
             [ $this, 'render_dashboard' ]
         );
         add_submenu_page(
-            'wp-order-bump',
-            __( 'Add New', 'wp-order-bump' ),
-            __( 'Add New', 'wp-order-bump' ),
+            'woocommerce',
+            __( 'Add New Bump', 'wp-order-bump' ),
+            __( 'Add New Bump', 'wp-order-bump' ),
             'manage_woocommerce',
             'obp-edit',
             [ $this, 'render_edit_page' ]
@@ -129,8 +120,38 @@ class OBP_Admin {
             'post_status'    => [ 'publish', 'draft' ],
         ] );
         $active = count( array_filter( $bumps, fn( $b ) => $b->post_status === 'publish' ) );
+        $bump_revenue = $this->get_bump_revenue();
 
         include OBP_PATH . 'admin/views/dashboard.php';
+    }
+
+    /**
+     * Calculate total revenue generated from order bump items.
+     *
+     * Queries completed/processing orders that contain bump line items
+     * and sums up their totals.
+     *
+     * @since 1.0.0
+     * @return float Total revenue from bump items.
+     */
+    private function get_bump_revenue() {
+        global $wpdb;
+
+        $result = $wpdb->get_var(
+            "SELECT COALESCE( SUM( oim_total.meta_value ), 0 )
+             FROM {$wpdb->prefix}woocommerce_order_itemmeta AS oim_bump
+             INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS oim_total
+                 ON oim_bump.order_item_id = oim_total.order_item_id
+                 AND oim_total.meta_key = '_line_total'
+             INNER JOIN {$wpdb->prefix}woocommerce_order_items AS oi
+                 ON oi.order_item_id = oim_bump.order_item_id
+             INNER JOIN {$wpdb->posts} AS p
+                 ON p.ID = oi.order_id
+                 AND p.post_status IN ( 'wc-completed', 'wc-processing' )
+             WHERE oim_bump.meta_key = '_obp_bump_id'"
+        );
+
+        return floatval( $result );
     }
 
     /**

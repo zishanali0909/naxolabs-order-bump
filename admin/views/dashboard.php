@@ -43,6 +43,10 @@ if ( ! defined( 'ABSPATH' ) ) exit;
             <span class="obp-stat-number"><?php echo intval( count( $bumps ) - $active ); ?></span>
             <span class="obp-stat-label"><?php esc_html_e( 'Inactive', 'wp-order-bump' ); ?></span>
         </div>
+        <div class="obp-stat-card obp-stat-revenue">
+            <span class="obp-stat-number"><?php echo wp_kses_post( wc_price( $bump_revenue ) ); ?></span>
+            <span class="obp-stat-label"><?php esc_html_e( 'Bump Revenue', 'wp-order-bump' ); ?></span>
+        </div>
     </div>
 
     <?php if ( empty( $bumps ) ) : ?>
