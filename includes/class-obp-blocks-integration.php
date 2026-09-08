@@ -148,6 +148,7 @@ class OBP_Blocks_Integration implements IntegrationInterface {
                 'show_original_price' => ! empty( $meta['show_original_price'] ),
                 'show_product_image'  => ! empty( $meta['show_product_image'] ),
                 'image_position'      => $meta['image_position'] ?? 'left',
+                'position'            => $meta['position'] ?? 'before_payment',
                 'image_width'         => intval( $meta['image_width'] ?? 96 ),
                 'trigger_type'        => $meta['trigger_type'] ?? 'all',
                 'trigger_products'    => array_map( 'intval', (array) ( $meta['trigger_products'] ?? [] ) ),

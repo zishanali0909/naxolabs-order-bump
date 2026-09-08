@@ -1,11 +1,11 @@
 /**
- * Order Bump Pro — Block Checkout Integration
+ * WP Order Bump — Block Checkout Integration
  *
  * Renders order bumps inside WooCommerce Block-based Checkout
  * using wp.element (React) and wc.blocksCheckout slot fills.
  * No build step required — uses createElement directly.
  *
- * @package OrderBumpPro
+ * @package WPOrderBump
  */
 (function () {
     'use strict';
@@ -23,7 +23,7 @@
     // Get bump data passed from PHP via IntegrationInterface::get_script_data()
     var settingsData = {};
     try {
-        settingsData = wc.wcSettings.getSetting('order-bump-pro_data', {});
+        settingsData = wc.wcSettings.getSetting('wp-order-bump_data', {});
     } catch (e) {
         console.warn('OBP: Could not get settings data', e);
     }
@@ -293,6 +293,8 @@
 
         bumps.forEach(function (bump) {
             if (!shouldShowBump(bump, cart)) return;
+            // Position filtering: default to before_payment
+            var bumpPosition = bump.position || 'before_payment';
 
             bump.products.forEach(function (product, idx) {
                 elements.push(
@@ -314,7 +316,7 @@
     /* ═══════════════════════════════════════════════
        Register as WooCommerce Checkout Plugin
     ═══════════════════════════════════════════════ */
-    registerPlugin('order-bump-pro-blocks', {
+    registerPlugin('wp-order-bump-blocks', {
         render: function () {
             return el(OrderMetaSlot, null,
                 el(OrderBumpBlockComponent)
