@@ -1,10 +1,12 @@
 /* WP Order Bump — Admin CSS */
 :root{--p:#6C63FF;--pd:#5A52E0;--ok:#22C55E;--err:#EF4444;--border:#E5E2FF;--text:#1E1B4B;--muted:#9CA3AF;--card:#fff;--sh:0 1px 3px rgba(108,99,255,.08),0 4px 16px rgba(108,99,255,.06);--r:12px}
-.obp-wrap{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,sans-serif;color:var(--text);max-width:1280px}
+.obp-wrap{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,sans-serif;color:var(--text);max-width:1280px;padding-top:0}
+.obp-wrap .wp-heading-inline{display:none !important}
+.obp-wrap hr.wp-header-end{margin:0;border:none}
 .obp-wrap *{box-sizing:border-box}
 
 /* HEADER */
-.obp-header{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#6C63FF,#8B5CF6);border-radius:var(--r);padding:16px 22px;margin:10px 0 18px;color:#fff}
+.obp-header{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#6C63FF 0%,#8B5CF6 50%,#A78BFA 100%);border-radius:10px;padding:20px 28px;margin:0 0 20px;color:#fff;box-shadow:0 4px 20px rgba(108,99,255,.2)}
 .obp-header-left{display:flex;align-items:center;gap:12px}
 .obp-logo{font-size:26px;background:rgba(255,255,255,.2);border-radius:9px;width:46px;height:46px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .obp-header h1{margin:0;font-size:17px;font-weight:800;color:#fff}
@@ -22,22 +24,23 @@
 
 /* STATS */
 .obp-stats-row{display:flex;gap:12px;margin-bottom:18px}
-.obp-stat-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:16px 22px;flex:1;display:flex;flex-direction:column;gap:4px;box-shadow:var(--sh)}
+.obp-stat-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:18px 22px;flex:1;display:flex;flex-direction:column;gap:4px;box-shadow:var(--sh);transition:transform .2s,box-shadow .2s}
+.obp-stat-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(108,99,255,.12)}
 .obp-stat-number{font-size:26px;font-weight:800;color:var(--p)}
 .obp-stat-revenue .obp-stat-number{color:var(--ok)}
 .obp-stat-label{font-size:11px;color:var(--muted);font-weight:600}
 
 /* NOTICE */
-.obp-notice{padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:13px;font-weight:600}
+.obp-notice{padding:12px 18px;border-radius:8px;margin-bottom:18px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px}
 .obp-notice-success{background:#DCFCE7;color:#166534;border:1px solid #86EFAC}
 
 /* TABLE */
 .obp-table-wrap{background:#fff;border-radius:var(--r);border:1px solid var(--border);overflow:hidden;box-shadow:var(--sh)}
 .obp-table{width:100%;border-collapse:collapse;font-size:13px}
-.obp-table thead tr{background:linear-gradient(to right,#F5F3FF,#EDE9FE)}
-.obp-table th{padding:11px 14px;text-align:left;font-weight:700;color:var(--p);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
-.obp-table td{padding:13px 14px;border-top:1px solid #F5F3FF;vertical-align:middle}
-.obp-table tbody tr:hover{background:#FAFAFF}
+.obp-table thead tr{background:#FAFAFE;border-bottom:2px solid var(--border)}
+.obp-table th{padding:13px 16px;text-align:left;font-weight:700;color:#6B7280;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.obp-table td{padding:14px 16px;border-top:1px solid #F3F4F6;vertical-align:middle}
+.obp-table tbody tr:hover{background:#F9FAFB;transition:background .15s}
 
 /* BADGES */
 .obp-badge{padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
@@ -58,14 +61,14 @@
 
 /* ACTIONS */
 .obp-actions{display:flex;gap:6px}
-.obp-action-btn{padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;text-decoration:none;transition:all .2s}
-.obp-action-edit{background:#EDE9FE;color:var(--p)}
-.obp-action-edit:hover{background:var(--p);color:#fff}
-.obp-action-delete{background:#FEE2E2;color:var(--err)}
-.obp-action-delete:hover{background:var(--err);color:#fff}
+.obp-action-btn{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;transition:all .2s;display:inline-flex;align-items:center;gap:4px;border:none;cursor:pointer}
+.obp-action-edit{background:#F3F4F6;color:#374151;border:1px solid #E5E7EB}
+.obp-action-edit:hover{background:var(--p);color:#fff;border-color:var(--p);box-shadow:0 2px 8px rgba(108,99,255,.25)}
+.obp-action-delete{background:#FEF2F2;color:var(--err);border:1px solid #FECACA}
+.obp-action-delete:hover{background:var(--err);color:#fff;border-color:var(--err);box-shadow:0 2px 8px rgba(239,68,68,.25)}
 
 /* EMPTY */
-.obp-empty-state{text-align:center;padding:60px 20px;background:#fff;border:2px dashed var(--border);border-radius:var(--r)}
+.obp-empty-state{text-align:center;padding:50px 20px;background:#FAFAFE;border:1.5px dashed #D1D5DB;border-radius:var(--r)}
 .obp-empty-icon{font-size:48px;margin-bottom:12px}
 
 /* BUTTONS */
