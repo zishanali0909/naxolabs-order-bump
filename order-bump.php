@@ -87,6 +87,13 @@ add_action( 'before_woocommerce_init', function() {
  */
 register_activation_hook( __FILE__, 'obp_activate' );
 function obp_activate() {
+    // Migrate old post type 'order_bump' to 'obp_order_bump' if needed
+    global $wpdb;
+    $wpdb->update(
+        $wpdb->posts,
+        [ 'post_type' => 'obp_order_bump' ],
+        [ 'post_type' => 'order_bump' ]
+    );
     flush_rewrite_rules();
 }
 

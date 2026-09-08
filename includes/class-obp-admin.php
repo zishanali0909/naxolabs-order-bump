@@ -115,7 +115,7 @@ class OBP_Admin {
      */
     public function render_dashboard() {
         $bumps  = get_posts( [
-            'post_type'      => 'order_bump',
+            'post_type'      => 'obp_order_bump',
             'posts_per_page' => -1,
             'post_status'    => [ 'publish', 'draft' ],
         ] );
@@ -294,7 +294,7 @@ class OBP_Admin {
         // Save post
         $post_data = [
             'post_title'  => $title,
-            'post_type'   => 'order_bump',
+            'post_type'   => 'obp_order_bump',
             'post_status' => $clean['bump_status'],
         ];
         if ( $bump_id ) {

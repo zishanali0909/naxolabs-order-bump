@@ -2,7 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
- * OBP_Post_Type — Registers the 'order_bump' custom post type.
+ * OBP_Post_Type — Registers the 'obp_order_bump' custom post type.
  *
  * @since 1.0.0
  * @package WPOrderBump
@@ -17,7 +17,7 @@ class OBP_Post_Type {
     }
 
     /**
-     * Register the 'order_bump' custom post type.
+     * Register the 'obp_order_bump' custom post type.
      *
      * @since 1.0.0
      */
@@ -36,7 +36,7 @@ class OBP_Post_Type {
             'menu_name'          => __( 'Order Bumps', 'wp-order-bump' ),
         ];
 
-        register_post_type( 'order_bump', [
+        register_post_type( 'obp_order_bump', [
             'labels'             => $labels,
             'public'             => false,
             'show_ui'            => true,

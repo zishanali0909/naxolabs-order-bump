@@ -35,7 +35,7 @@ class OBP_Discount {
         $cached = get_transient( 'obp_published_bumps' );
         if ( $cached === false ) {
             $bumps_posts = get_posts([
-                'post_type'      => 'order_bump',
+                'post_type'      => 'obp_order_bump',
                 'post_status'    => 'publish',
                 'posts_per_page' => -1,
             ]);

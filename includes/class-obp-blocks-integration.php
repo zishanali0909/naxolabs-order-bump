@@ -70,7 +70,7 @@ class OBP_Blocks_Integration implements IntegrationInterface {
      */
     private function get_bumps_data() {
         $bumps_posts = get_posts( [
-            'post_type'      => 'order_bump',
+            'post_type'      => 'obp_order_bump',
             'post_status'    => 'publish',
             'posts_per_page' => -1,
         ] );

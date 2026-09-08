@@ -39,7 +39,7 @@ class OBP_Ajax {
         $id = intval( $_POST['id'] ?? 0 );
         $p  = get_post( $id );
 
-        if ( ! $p || $p->post_type !== 'order_bump' ) {
+        if ( ! $p || $p->post_type !== 'obp_order_bump' ) {
             wp_send_json_error( [ 'message' => __( 'Invalid order bump.', 'wp-order-bump' ) ] );
         }
 
@@ -64,7 +64,7 @@ class OBP_Ajax {
         }
 
         $p = get_post( $id );
-        if ( ! $p || $p->post_type !== 'order_bump' ) {
+        if ( ! $p || $p->post_type !== 'obp_order_bump' ) {
             wp_send_json_error( [ 'message' => __( 'Invalid order bump.', 'wp-order-bump' ) ] );
         }
 

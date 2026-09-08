@@ -86,7 +86,7 @@ class OBP_Frontend {
         $cached = get_transient( 'obp_published_bumps' );
         if ( $cached !== false ) return $cached;
 
-        $all  = get_posts(['post_type'=>'order_bump','post_status'=>'publish','posts_per_page'=>-1]);
+        $all  = get_posts(['post_type'=>'obp_order_bump','post_status'=>'publish','posts_per_page'=>-1]);
         $data = [];
         foreach ( $all as $bump ) {
             $meta = get_post_meta( $bump->ID, '_obp_settings', true );
