@@ -514,7 +514,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                         </div>
 
                         <div class="obp-rule-val" id="rule-minimum_order" style="<?php echo $meta['trigger_type'] !== 'minimum_order' ? 'display:none' : ''; ?>">
-                            <span class="obp-rule-hint"><?php esc_html_e( 'is greater than ₹', 'wp-order-bump' ); ?></span>
+                            <span class="obp-rule-hint"><?php esc_html_e( 'is greater than ', 'wp-order-bump' ); ?></span>
                             <input type="number" name="obp_settings[minimum_order_amount]"
                                    value="<?php echo esc_attr( $meta['minimum_order_amount'] ); ?>"
                                    class="obp-input" placeholder="500" style="width:140px">
