@@ -370,13 +370,15 @@ jQuery(function($) {
         $('#obp-products-list').append(html);
         $('#obp-no-products-msg').hide();
         reindexProducts();
-        showNotice(obpAdmin.i18n.productAdded || 'Product added! Go to Design tab to set its description.', 'info');
+        syncDesignTabProducts();
+        showNotice(obpAdmin.i18n.productAdded || 'Product added!', 'info');
     }
 
     /* ── REMOVE PRODUCT ── */
     $(document).on('click', '.obp-remove-product', function() {
         $(this).closest('.obp-product-row').remove();
         reindexProducts();
+        syncDesignTabProducts();
         if ($('#obp-products-list .obp-product-row').length === 0)
             $('#obp-no-products-msg').show();
     });
