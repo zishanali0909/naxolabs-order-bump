@@ -541,6 +541,19 @@ jQuery(function($) {
 
     obpBindTinyMCELive();
 
+    // Reset TinyMCE dirty flags after init to prevent false "unsaved changes" popup
+    setTimeout(function() {
+        if (typeof tinyMCE !== 'undefined' && tinyMCE.editors) {
+            tinyMCE.editors.forEach(function(editor) {
+                if (editor.id.indexOf('obp_prod_editor_') === 0) {
+                    editor.isNotDirty = true;
+                }
+            });
+        }
+        // Remove WordPress default beforeunload warning on our admin pages
+        $(window).off('beforeunload.edit-post');
+    }, 1000);
+
     /* ═══════════════════════════════════════
        NOTICE HELPER
     ═══════════════════════════════════════ */
