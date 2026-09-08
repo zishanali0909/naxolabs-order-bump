@@ -157,6 +157,18 @@
 .obp-preview-desc img{max-width:100%;height:auto;border-radius:4px;}
 .obp-preview-desc img.emoji,.obp-preview-desc img.wp-smiley{display:inline !important;width:1em !important;height:1em !important;vertical-align:-0.1em;margin:0 2px;border-radius:0}
 .obp-preview-desc p{margin:0 0 4px;}
+.obp-preview-desc ul,.obp-preview-desc ol{padding-left:16px;margin:4px 0;font-size:11px;}
+.obp-preview-desc li{margin-bottom:2px;}
+.obp-preview-desc h1,.obp-preview-desc h2,.obp-preview-desc h3,.obp-preview-desc h4{font-size:12px;font-weight:700;margin:6px 0 3px;}
+.obp-preview-desc a{color:var(--p);text-decoration:underline;}
+.obp-preview-desc blockquote{margin:4px 0;padding:4px 8px;border-left:3px solid var(--border);font-style:italic;color:#6B7280;}
+.obp-preview-desc table{width:100%;border-collapse:collapse;font-size:10px;margin:4px 0;}
+.obp-preview-desc th,.obp-preview-desc td{border:1px solid #E5E7EB;padding:3px 6px;text-align:left;}
+.obp-preview-desc iframe,.obp-preview-desc video,.obp-preview-desc audio{max-width:100%;height:auto;}
+.obp-preview-desc hr{border:none;border-top:1px solid #E5E7EB;margin:6px 0;}
+.obp-preview-desc pre,.obp-preview-desc code{font-size:10px;background:#F3F4F6;padding:2px 4px;border-radius:3px;overflow-x:auto;word-wrap:break-word;}
+.obp-preview-desc pre{padding:6px 8px;margin:4px 0;}
+.obp-preview-desc strong{font-weight:700;}
 
 
 /* ── PRODUCT SWITCHER ── */

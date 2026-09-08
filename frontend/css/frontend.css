@@ -112,6 +112,15 @@
 .obp-bump-description img { max-width: 100%; border-radius: 5px; margin: 6px 0; display: block; }
 .obp-bump-description img.emoji,.obp-bump-description img.wp-smiley { display: inline !important; width: 1em !important; height: 1em !important; vertical-align: -0.1em; margin: 0 2px; border-radius: 0; }
 .obp-bump-description strong { font-weight: 700; }
+.obp-bump-description a { color: #6C63FF; text-decoration: underline; }
+.obp-bump-description blockquote { margin: 6px 0; padding: 8px 12px; border-left: 3px solid #E5E2FF; font-style: italic; color: #6B7280; }
+.obp-bump-description table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 8px 0; }
+.obp-bump-description th, .obp-bump-description td { border: 1px solid #E5E7EB; padding: 6px 10px; text-align: left; }
+.obp-bump-description th { background: #F9FAFB; font-weight: 700; }
+.obp-bump-description iframe, .obp-bump-description video, .obp-bump-description audio { max-width: 100%; height: auto; display: block; margin: 8px 0; }
+.obp-bump-description hr { border: none; border-top: 1px solid #E5E7EB; margin: 10px 0; }
+.obp-bump-description pre, .obp-bump-description code { font-size: 12px; background: #F3F4F6; padding: 2px 5px; border-radius: 4px; }
+.obp-bump-description pre { padding: 10px 12px; margin: 8px 0; overflow-x: auto; word-wrap: break-word; }
 
 
 /* ═══════════════════════════════════════
