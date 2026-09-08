@@ -321,7 +321,7 @@ jQuery(function($) {
                         +'<div class="obp-product-item-price">'+p.regular_html+' → '+p.price_html+'</div></div></div>';
                 });
                 $('#obp-product-results').html(html).addClass('open');
-            });
+            }).fail(function() { $('#obp-product-results').html('<div style="padding:10px;color:#EF4444;font-size:13px;">Search failed. Try again.</div>').addClass('open'); });
         }, 200);
     });
 
@@ -457,8 +457,14 @@ jQuery(function($) {
     ═══════════════════════════════════════ */
     $(document).on('change', '.obp-status-toggle', function() {
         var $t = $(this), id = $t.data('id');
+        $t.prop('disabled', true);
         $.post(obpAdmin.ajaxUrl, { action: 'obp_toggle_bump', id: id, nonce: obpAdmin.nonce }, function(res) {
             if (!res.success) { $t.prop('checked', !$t.prop('checked')); alert(obpAdmin.i18n.error || 'Error.'); }
+        }).fail(function() {
+            $t.prop('checked', !$t.prop('checked'));
+            alert(obpAdmin.i18n.error || 'Error. Please try again.');
+        }).always(function() {
+            $t.prop('disabled', false);
         });
     });
 
@@ -469,9 +475,14 @@ jQuery(function($) {
         e.preventDefault();
         if (!confirm(obpAdmin.i18n.deleteConfirm || 'Delete this Order Bump?')) return;
         var id = $(this).data('id'), nonce = $(this).data('nonce');
+        var $btn = $(this);
+        $btn.text('Deleting...').css('pointer-events', 'none');
         $.post(obpAdmin.ajaxUrl, { action: 'obp_delete_bump', id: id, nonce: nonce }, function(res) {
             if (res.success) window.location = obpAdmin.ajaxUrl.replace('admin-ajax.php', '') + 'admin.php?page=wp-order-bump&deleted=1';
-            else alert(obpAdmin.i18n.errorDeleting || 'Error deleting.');
+            else { alert(obpAdmin.i18n.errorDeleting || 'Error deleting.'); $btn.text('Delete').css('pointer-events', ''); }
+        }).fail(function() {
+            alert(obpAdmin.i18n.error || 'Error. Please try again.');
+            $btn.text('Delete').css('pointer-events', '');
         });
     });
 
