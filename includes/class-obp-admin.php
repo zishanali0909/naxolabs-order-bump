@@ -49,8 +49,11 @@ class OBP_Admin {
         $js_path  = plugin_dir_path( dirname( __FILE__ ) ) . 'admin/js/admin.js';
         wp_enqueue_style( 'obp-admin', OBP_URL . 'admin/css/admin.css', [], filemtime( $css_path ) );
         wp_enqueue_script( 'obp-admin', OBP_URL . 'admin/js/admin.js', [ 'jquery', 'jquery-ui-sortable' ], filemtime( $js_path ), true );
-        wp_enqueue_editor();
-        wp_enqueue_media();
+        // Only load TinyMCE and media on edit page (not dashboard)
+        if ( strpos( $hook, 'obp-' ) !== false ) {
+            wp_enqueue_editor();
+            wp_enqueue_media();
+        }
 
         $edit_id   = isset( $_GET['edit'] ) ? intval( $_GET['edit'] ) : 0;
         $edit_meta = $edit_id ? ( get_post_meta( $edit_id, '_obp_settings', true ) ?: [] ) : [];
