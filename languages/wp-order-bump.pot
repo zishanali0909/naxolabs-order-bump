@@ -19,7 +19,7 @@ msgstr ""
 "X-Domain: wp-order-bump\n"
 
 #. Plugin Name
-msgid "Order Bump Pro"
+msgid "WP Order Bump"
 msgstr ""
 
 #. Description
