@@ -468,7 +468,7 @@ jQuery(function($) {
         if (!confirm(obpAdmin.i18n.deleteConfirm || 'Delete this Order Bump?')) return;
         var id = $(this).data('id'), nonce = $(this).data('nonce');
         $.post(obpAdmin.ajaxUrl, { action: 'obp_delete_bump', id: id, nonce: nonce }, function(res) {
-            if (res.success) window.location = obpAdmin.ajaxUrl.replace('admin-ajax.php', '') + 'admin.php?page=order-bump-pro&deleted=1';
+            if (res.success) window.location = obpAdmin.ajaxUrl.replace('admin-ajax.php', '') + 'admin.php?page=wp-order-bump&deleted=1';
             else alert(obpAdmin.i18n.errorDeleting || 'Error deleting.');
         });
     });
