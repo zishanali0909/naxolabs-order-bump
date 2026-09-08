@@ -488,6 +488,71 @@ jQuery(function($) {
         frame.open();
     });
 
+    /* ==========================================
+       LIVE SYNC: Products tab -> Design tab
+    ========================================== */
+    function syncDesignTabProducts() {
+        var products = [];
+        $('#obp-products-list .obp-product-row').each(function(i) {
+            var name = $(this).find('.obp-product-row-info strong').text();
+            var thumb = $(this).find('.obp-product-thumb').attr('src') || '';
+            var id = $(this).data('product-id');
+            products.push({ idx: i, name: name, thumb: thumb, id: id });
+        });
+
+        var $descCard = $('#obp-design-desc-card .obp-card-body');
+        var $switcherWrap = $descCard.find('.obp-desc-switcher-wrap');
+
+        if (products.length === 0) {
+            $switcherWrap.hide();
+            $descCard.find('.obp-desc-panel').hide();
+            $descCard.find('.obp-help').hide();
+            if (!$descCard.find('.obp-no-prod-hint').length) {
+                $descCard.append('<p class="obp-help obp-no-prod-hint" style="padding:12px 0;text-align:center;">First add products in the <strong>Products tab</strong>.</p>');
+            }
+            $descCard.find('.obp-no-prod-hint').show();
+            return;
+        }
+
+        $descCard.find('.obp-no-prod-hint').remove();
+
+        if (!$switcherWrap.length) {
+            $descCard.html('');
+            $descCard.append('<div class="obp-desc-switcher-wrap" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;padding:10px;background:#F5F3FF;border-radius:8px;border:1px solid #E5E2FF;"></div>');
+            $descCard.append('<div class="obp-desc-editors-wrap" style="position:relative;"></div>');
+            $descCard.append('<p class="obp-help" style="margin-top:6px;">Save to enable rich text editor for descriptions.</p>');
+            $switcherWrap = $descCard.find('.obp-desc-switcher-wrap');
+        }
+
+        $switcherWrap.empty();
+        products.forEach(function(p, idx) {
+            var shortName = p.name.length > 40 ? p.name.substring(0, 40) + '...' : p.name;
+            var activeClass = idx === 0 ? ' obp-switch-active' : '';
+            $switcherWrap.append('<button type="button" class="obp-desc-switch-btn' + activeClass + '" data-index="' + idx + '" id="obp-swbtn-' + idx + '">' + shortName + '</button>');
+        });
+        $switcherWrap.show();
+
+        var $editorsWrap = $descCard.find('.obp-desc-editors-wrap');
+        if (!$editorsWrap.length) {
+            $switcherWrap.after('<div class="obp-desc-editors-wrap" style="position:relative;"></div>');
+            $editorsWrap = $descCard.find('.obp-desc-editors-wrap');
+        }
+
+        products.forEach(function(p, idx) {
+            var panelId = 'obp-desc-panel-' + idx;
+            if (!$('#' + panelId).length) {
+                var display = idx === 0 ? 'display:block;' : 'display:none;';
+                $editorsWrap.append('<div id="' + panelId + '" class="obp-desc-panel" style="' + display + '"><textarea name="obp_settings[products][' + idx + '][description]" rows="8" class="obp-input" style="width:100%;min-height:180px;" placeholder="Write product description..."></textarea></div>');
+            }
+        });
+
+        $descCard.find('.obp-desc-panel').each(function() {
+            var panelIdx = parseInt($(this).attr('id').replace('obp-desc-panel-', ''));
+            if (panelIdx >= products.length) $(this).remove();
+        });
+
+        $descCard.find('.obp-help').not('.obp-no-prod-hint').show();
+    }
     /* ═══════════════════════════════════════
        TINYMCE LIVE PREVIEW
     ═══════════════════════════════════════ */
