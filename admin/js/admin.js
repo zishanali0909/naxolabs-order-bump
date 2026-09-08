@@ -520,7 +520,7 @@ jQuery(function($) {
             $descCard.html('');
             $descCard.append('<div class="obp-desc-switcher-wrap" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;padding:10px;background:#F5F3FF;border-radius:8px;border:1px solid #E5E2FF;"></div>');
             $descCard.append('<div class="obp-desc-editors-wrap" style="position:relative;"></div>');
-            $descCard.append('<p class="obp-help" style="margin-top:6px;">Save to enable rich text editor for descriptions.</p>');
+            $descCard.append('<p class="obp-help" style="margin-top:6px;">Use short promotional text. HTML supported.</p>');
             $switcherWrap = $descCard.find('.obp-desc-switcher-wrap');
         }
 
@@ -540,15 +540,52 @@ jQuery(function($) {
 
         products.forEach(function(p, idx) {
             var panelId = 'obp-desc-panel-' + idx;
+            var editorId = 'obp_prod_editor_' + idx;
             if (!$('#' + panelId).length) {
                 var display = idx === 0 ? 'display:block;' : 'display:none;';
-                $editorsWrap.append('<div id="' + panelId + '" class="obp-desc-panel" style="' + display + '"><textarea name="obp_settings[products][' + idx + '][description]" rows="8" class="obp-input" style="width:100%;min-height:180px;" placeholder="Write product description..."></textarea></div>');
+                $editorsWrap.append('<div id="' + panelId + '" class="obp-desc-panel" style="' + display + '"><textarea id="' + editorId + '" name="obp_settings[products][' + idx + '][description]" rows="8" style="width:100%;min-height:180px;"></textarea></div>');
+
+                // Initialize TinyMCE on the new textarea
+                if (typeof wp !== 'undefined' && wp.editor) {
+                    wp.editor.initialize(editorId, {
+                        tinymce: {
+                            wpautop: true,
+                            toolbar1: 'bold,italic,underline,strikethrough,|,alignleft,aligncenter,alignright,|,bullist,numlist,|,link,unlink',
+                            toolbar2: '',
+                            height: 220
+                        },
+                        quicktags: true,
+                        mediaButtons: false
+                    });
+
+                    // Bind live preview sync
+                    setTimeout(function() {
+                        if (typeof tinyMCE !== 'undefined' && tinyMCE.get(editorId)) {
+                            var editor = tinyMCE.get(editorId);
+                            editor.on('keyup change input NodeChange', function() {
+                                var panelIdx = editorId.replace('obp_prod_editor_', '');
+                                var panel = document.getElementById('obp-desc-panel-' + panelIdx);
+                                if (panel && panel.style.display !== 'none') {
+                                    obpSyncDescToPreview(editorId);
+                                }
+                            });
+                            editor.isNotDirty = true;
+                        }
+                    }, 500);
+                }
             }
         });
 
+        // Remove extra panels for deleted products
         $descCard.find('.obp-desc-panel').each(function() {
             var panelIdx = parseInt($(this).attr('id').replace('obp-desc-panel-', ''));
-            if (panelIdx >= products.length) $(this).remove();
+            if (panelIdx >= products.length) {
+                var editorId = 'obp_prod_editor_' + panelIdx;
+                if (typeof wp !== 'undefined' && wp.editor) {
+                    wp.editor.remove(editorId);
+                }
+                $(this).remove();
+            }
         });
 
         $descCard.find('.obp-help').not('.obp-no-prod-hint').show();
