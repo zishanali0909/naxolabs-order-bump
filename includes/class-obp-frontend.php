@@ -22,7 +22,7 @@ class OBP_Frontend {
         add_action( 'wp_footer', [ $this, 'render_block_checkout_fallback' ], 5 );
 
         // Invalidate bump cache when a bump is saved/updated/deleted
-        add_action( 'save_post_order_bump',   [ $this, 'clear_bump_cache' ] );
+        add_action( 'save_post_obp_order_bump',   [ $this, 'clear_bump_cache' ] );
         add_action( 'delete_post',            [ $this, 'clear_bump_cache' ] );
     }
 
