@@ -219,7 +219,7 @@ class OBP_Admin {
      * Handle form save (admin-post.php).
      */
     public function handle_save() {
-        if ( ! wp_verify_nonce( $_POST['obp_nonce'] ?? '', 'obp_save_bump' ) ) {
+        if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['obp_nonce'] ?? '' ) ), 'obp_save_bump' ) ) {
             wp_die( esc_html__( 'Security check failed.', 'wp-order-bump' ) );
         }
         if ( ! current_user_can( 'manage_woocommerce' ) ) {
@@ -228,7 +228,7 @@ class OBP_Admin {
 
         $bump_id  = intval( $_POST['bump_id'] ?? 0 );
         $title    = sanitize_text_field( $_POST['bump_title'] ?? 'Order Bump' );
-        $settings = $_POST['obp_settings'] ?? [];
+        $settings = wp_unslash( $_POST['obp_settings'] ?? [] );
 
         // Validate title
         if ( empty( trim( $title ) ) ) {
@@ -312,7 +312,7 @@ class OBP_Admin {
         // Redirect with status
         $active_tab = sanitize_key( $_POST['active_tab'] ?? 'design' );
         $status     = empty( $clean['products'] ) ? 'saved_no_products' : 'saved';
-        wp_redirect( admin_url( 'admin.php?page=obp-edit&edit=' . $bump_id . '&obp_status=' . $status . '&tab=' . $active_tab ) );
+        wp_safe_redirect( admin_url( 'admin.php?page=obp-edit&edit=' . $bump_id . '&obp_status=' . $status . '&tab=' . $active_tab ) );
         exit;
     }
 }

@@ -56,7 +56,7 @@ class OBP_Ajax {
     public function delete_bump() {
         $id = intval( $_POST['id'] ?? 0 );
 
-        if ( ! wp_verify_nonce( $_POST['nonce'] ?? '', 'obp_delete_' . $id ) ) {
+        if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ?? '' ) ), 'obp_delete_' . $id ) ) {
             wp_send_json_error( [ 'message' => __( 'Security check failed.', 'wp-order-bump' ) ] );
         }
         if ( ! current_user_can( 'manage_woocommerce' ) ) {

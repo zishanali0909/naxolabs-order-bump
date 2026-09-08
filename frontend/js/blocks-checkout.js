@@ -25,7 +25,7 @@
     try {
         settingsData = wc.wcSettings.getSetting('wp-order-bump_data', {});
     } catch (e) {
-        console.warn('OBP: Could not get settings data', e);
+        // Silent fail for missing settings data
     }
 
     var bumps   = settingsData.bumps || [];
