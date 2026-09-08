@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
     <div class="obp-stats-row">
         <div class="obp-stat-card">
-            <span class="obp-stat-number"><?php echo count( $bumps ); ?></span>
+            <span class="obp-stat-number"><?php echo intval( count( $bumps ) ); ?></span>
             <span class="obp-stat-label"><?php esc_html_e( 'Total Bumps', 'wp-order-bump' ); ?></span>
         </div>
         <div class="obp-stat-card">
@@ -40,7 +40,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
             <span class="obp-stat-label"><?php esc_html_e( 'Active', 'wp-order-bump' ); ?></span>
         </div>
         <div class="obp-stat-card">
-            <span class="obp-stat-number"><?php echo count( $bumps ) - $active; ?></span>
+            <span class="obp-stat-number"><?php echo intval( count( $bumps ) - $active ); ?></span>
             <span class="obp-stat-label"><?php esc_html_e( 'Inactive', 'wp-order-bump' ); ?></span>
         </div>
     </div>

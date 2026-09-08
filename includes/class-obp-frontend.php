@@ -203,85 +203,85 @@ class OBP_Frontend {
             $check_id    = 'obp-check-' . $bump_id . '-' . $idx;
             $added_class = $in_cart ? 'obp-bump-is-added' : '';
 
-            // Price HTML
+            // Price HTML (wc_price already returns safe HTML)
             ob_start(); ?>
             <div class="obp-bump-prices">
                 <?php if ( $show_orig && $regular > $offer_price ): ?>
-                    <del class="obp-price-orig"><?php echo  wc_price($regular) ?></del>
+                    <del class="obp-price-orig"><?php echo wp_kses_post( wc_price( $regular ) ); ?></del>
                 <?php endif; ?>
-                <span class="obp-price-final"><?php echo  wc_price($offer_price) ?></span>
+                <span class="obp-price-final"><?php echo wp_kses_post( wc_price( $offer_price ) ); ?></span>
             </div>
             <?php $price_html = ob_get_clean(); ?>
 
-            <div class="obp-bump-wrap obp-skin-<?php echo  esc_attr($skin) ?> <?php echo  $added_class ?> <?php echo  ($show_badge && $badge_text) ? 'obp-has-badge' : '' ?>"
-                 id="<?php echo  $wrap_id ?>"
-                 data-product-id="<?php echo  $product->get_id() ?>"
-                 data-qty="<?php echo  intval($pm['qty'] ?? 1) ?>">
+            <div class="obp-bump-wrap obp-skin-<?php echo esc_attr( $skin ); ?> <?php echo esc_attr( $added_class ); ?> <?php echo ( $show_badge && $badge_text ) ? 'obp-has-badge' : ''; ?>"
+                 id="<?php echo esc_attr( $wrap_id ); ?>"
+                 data-product-id="<?php echo intval( $product->get_id() ); ?>"
+                 data-qty="<?php echo intval( $pm['qty'] ?? 1 ); ?>">
 
                 <?php if ( $skin === 'skin2' ): ?>
                     <!-- ═══ SKIN 2: Teal border, badge above, image+text row, CTA bottom ═══ -->
 
                     <?php if ( $show_badge && $badge_text ): ?>
-                        <div class="obp-bump-badge"><?php echo  esc_html($badge_text) ?></div>
+                        <div class="obp-bump-badge"><?php echo esc_html( $badge_text ); ?></div>
                     <?php endif; ?>
 
                     <div style="display:flex;gap:14px;align-items:flex-start;padding:12px 16px 10px;">
                         <?php if ( $img_html ): ?>
-                            <div style="flex-shrink:0;"><?php echo  $img_html ?></div>
+                            <div style="flex-shrink:0;"><?php echo wp_kses_post( $img_html ); ?></div>
                         <?php endif; ?>
                         <?php if ( $description ): ?>
                             <div style="flex:1;min-width:0;">
-                                <div class="obp-bump-description"><?php echo  wp_kses_post($description) ?></div>
+                                <div class="obp-bump-description"><?php echo wp_kses_post( $description ); ?></div>
                             </div>
                         <?php endif; ?>
                     </div>
 
-                    <div style="border-top:1.5px dashed #2bbfbf;padding:10px 14px;display:flex;align-items:center;gap:8px;background:<?php echo  esc_attr($header_color) ?>;">
+                    <div style="border-top:1.5px dashed #2bbfbf;padding:10px 14px;display:flex;align-items:center;gap:8px;background:<?php echo esc_attr( $header_color ); ?>;">
                         <div class="obp-bump-arrow" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;min-width:20px;flex-shrink:0;">
                             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible;">
                                 <path d="M1 6H11M11 6L7 2M11 6L7 10" stroke="#E15334" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                         </div>
-                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;margin:0;" for="<?php echo  $check_id ?>">
-                            <input type="checkbox" class="obp-bump-checkbox" id="<?php echo  $check_id ?>" <?php echo  $in_cart ? 'checked' : '' ?>>
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;margin:0;" for="<?php echo esc_attr( $check_id ); ?>">
+                            <input type="checkbox" class="obp-bump-checkbox" id="<?php echo esc_attr( $check_id ); ?>" <?php checked( $in_cart ); ?>>
                             <span class="obp-bump-checkmark"></span>
-                            <span style="font-size:14px;font-weight:800;color:<?php echo  esc_attr($header_text_color) ?>;"><?php echo  $headline_html ?></span>
+                            <span style="font-size:14px;font-weight:800;color:<?php echo esc_attr( $header_text_color ); ?>;"><?php echo wp_kses_post( $headline_html ); ?></span>
                         </label>
-                        <?php echo  $price_html ?>
+                        <?php echo wp_kses_post( $price_html ); ?>
                     </div>
 
                 <?php else: ?>
                     <!-- ═══ SKIN 1: Classic yellow header ═══ -->
                     <?php if ( $show_badge && $badge_text ): ?>
-                        <div class="obp-bump-badge"><?php echo  esc_html($badge_text) ?></div>
+                        <div class="obp-bump-badge"><?php echo esc_html( $badge_text ); ?></div>
                     <?php endif; ?>
-                    <div class="obp-bump-headline-row" style="display:flex !important; align-items:center !important; flex-wrap:nowrap !important; gap:8px; padding:<?php echo  ($show_badge && $badge_text) ? '28px' : '11px' ?> 12px 11px 12px; background:<?php echo  esc_attr($header_color) ?> !important; color:<?php echo  esc_attr($header_text_color) ?> !important;">
+                    <div class="obp-bump-headline-row" style="display:flex !important; align-items:center !important; flex-wrap:nowrap !important; gap:8px; padding:<?php echo esc_attr( ( $show_badge && $badge_text ) ? '28px' : '11px' ); ?> 12px 11px 12px; background:<?php echo esc_attr( $header_color ); ?> !important; color:<?php echo esc_attr( $header_text_color ); ?> !important;">
                         <div class="obp-bump-arrow" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;min-width:20px;flex-shrink:0;align-self:center;">
                             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible;">
                                 <path d="M1 6H11M11 6L7 2M11 6L7 10" stroke="#E15334" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                         </div>
-                        <label class="obp-bump-check-label" for="<?php echo  $check_id ?>" style="display:inline-flex !important;align-items:center !important;gap:8px;flex:1;min-width:0;cursor:pointer;margin:0;padding:0;font-weight:normal;">
-                            <input type="checkbox" class="obp-bump-checkbox" id="<?php echo  $check_id ?>" <?php echo  $in_cart ? 'checked' : '' ?>>
+                        <label class="obp-bump-check-label" for="<?php echo esc_attr( $check_id ); ?>" style="display:inline-flex !important;align-items:center !important;gap:8px;flex:1;min-width:0;cursor:pointer;margin:0;padding:0;font-weight:normal;">
+                            <input type="checkbox" class="obp-bump-checkbox" id="<?php echo esc_attr( $check_id ); ?>" <?php checked( $in_cart ); ?>>
                             <span class="obp-bump-checkmark"></span>
-                            <span class="obp-bump-headline-text"><?php echo  $headline_html ?></span>
+                            <span class="obp-bump-headline-text"><?php echo wp_kses_post( $headline_html ); ?></span>
                         </label>
-                        <?php echo  $price_html ?>
+                        <?php echo wp_kses_post( $price_html ); ?>
                     </div>
                     <?php if ( $description || $img_html ): ?>
                         <div class="obp-bump-body">
                             <?php if ( $img_html && $img_position === 'left' ): ?>
                                 <div style="display:flex;gap:12px;align-items:flex-start;">
-                                    <?php echo  $img_html ?>
-                                    <?php if($description): ?><div class="obp-bump-description"><?php echo  wp_kses_post($description) ?></div><?php endif; ?>
+                                    <?php echo wp_kses_post( $img_html ); ?>
+                                    <?php if ( $description ): ?><div class="obp-bump-description"><?php echo wp_kses_post( $description ); ?></div><?php endif; ?>
                                 </div>
                             <?php elseif ( $img_html && $img_position === 'right' ): ?>
                                 <div style="display:flex;gap:12px;align-items:flex-start;">
-                                    <?php if($description): ?><div class="obp-bump-description" style="flex:1;"><?php echo  wp_kses_post($description) ?></div><?php endif; ?>
-                                    <?php echo  $img_html ?>
+                                    <?php if ( $description ): ?><div class="obp-bump-description" style="flex:1;"><?php echo wp_kses_post( $description ); ?></div><?php endif; ?>
+                                    <?php echo wp_kses_post( $img_html ); ?>
                                 </div>
                             <?php else: ?>
-                                <?php if($description): ?><div class="obp-bump-description"><?php echo  wp_kses_post($description) ?></div><?php endif; ?>
+                                <?php if ( $description ): ?><div class="obp-bump-description"><?php echo wp_kses_post( $description ); ?></div><?php endif; ?>
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>

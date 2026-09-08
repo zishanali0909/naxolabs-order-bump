@@ -121,7 +121,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                                 data-index="<?php echo intval( $pi ); ?>"
                                                 data-thumb="<?php echo esc_url( $pp['thumb'] ?? '' ); ?>"
                                                 id="obp-swbtn-<?php echo intval( $pi ); ?>">
-                                            <?php echo $name; ?>
+                                            <?php echo esc_html( $name ); ?>
                                         </button>
                                     <?php endforeach; ?>
                                 </div>
@@ -135,7 +135,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                             ? 'display:block;'
                                             : 'position:absolute;top:0;left:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;';
                                     ?>
-                                        <div id="obp-desc-panel-<?php echo intval( $pi ); ?>" class="obp-desc-panel" style="<?php echo $wrap_style; ?>">
+                                        <div id="obp-desc-panel-<?php echo intval( $pi ); ?>" class="obp-desc-panel" style="<?php echo esc_attr( $wrap_style ); ?>">
                                             <?php wp_editor(
                                                 $pp['description'] ?? '',
                                                 $eid,

@@ -42,7 +42,10 @@ $is_in_stock   = $stock_product && $stock_product->is_in_stock();
                     <?php esc_html_e( '% Sale', 'wp-order-bump' ); ?>
                 </option>
                 <option value="flat" <?php selected( $p['discount_type'] ?? '', 'flat' ); ?>>
-                    <?php esc_html_e( 'Flat ₹', 'wp-order-bump' ); ?>
+                    <?php
+                    /* translators: %s: currency symbol */
+                    printf( esc_html__( 'Flat %s', 'wp-order-bump' ), esc_html( get_woocommerce_currency_symbol() ) );
+                    ?>
                 </option>
             </select>
             <input type="number" name="<?php echo esc_attr( $field_prefix ); ?>[qty]"
