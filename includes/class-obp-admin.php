@@ -169,7 +169,7 @@ class OBP_Admin {
             'trigger_products'     => [],
             'trigger_categories'   => [],
             'minimum_order_amount' => '',
-            'headline'             => '<span style="color:#E15334">Yes!</span> Add {{product_name}} to my order',
+            'headline'             => 'Yes! Add {{product_name}} to my order',
             'badge_text'           => 'Special Offer',
             'show_badge'           => 0,
             'show_original_price'  => 1,

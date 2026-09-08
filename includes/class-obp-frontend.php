@@ -191,7 +191,7 @@ class OBP_Frontend {
                 if ( $img_type === 'custom' && $img_custom_url ) {
                     $img_src = esc_url($img_custom_url);
                 } else {
-                    $img_src = wp_get_attachment_image_url( $product->get_image_id(), 'thumbnail' );
+                    $img_src = wp_get_attachment_image_url( $product->get_image_id(), 'woocommerce_thumbnail' );
                 }
                 if ( $img_src ) {
                     $w = max(40, min(300, $img_width));

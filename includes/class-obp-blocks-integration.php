@@ -106,7 +106,7 @@ class OBP_Blocks_Integration implements IntegrationInterface {
                     if ( $img_type === 'custom' && ! empty( $meta['image_custom_url'] ) ) {
                         $img_url = $meta['image_custom_url'];
                     } else {
-                        $img_url = wp_get_attachment_image_url( $product->get_image_id(), 'thumbnail' ) ?: '';
+                        $img_url = wp_get_attachment_image_url( $product->get_image_id(), 'woocommerce_thumbnail' ) ?: '';
                     }
                 }
 

@@ -368,11 +368,11 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                                 if ( $first_prod ) {
                                                     $img_id = $first_prod->get_image_id();
                                                     if ( $img_id ) {
-                                                        $prev_img_url = wp_get_attachment_image_url( $img_id, 'thumbnail' );
+                                                        $prev_img_url = wp_get_attachment_image_url( $img_id, 'woocommerce_thumbnail' );
                                                     }
                                                     // Try 2: Extract from WC get_image()
                                                     if ( ! $prev_img_url ) {
-                                                        $img_html = $first_prod->get_image( 'thumbnail' );
+                                                        $img_html = $first_prod->get_image( 'woocommerce_thumbnail' );
                                                         if ( preg_match( '/src=["\']([^"\']+)/', $img_html, $m ) ) {
                                                             $prev_img_url = $m[1];
                                                         }
@@ -384,7 +384,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                                 }
                                                 // Try 4: WooCommerce placeholder
                                                 if ( ! $prev_img_url ) {
-                                                    $prev_img_url = wc_placeholder_img_src( 'thumbnail' );
+                                                    $prev_img_url = wc_placeholder_img_src( 'woocommerce_thumbnail' );
                                                 }
                                             }
                                         }

@@ -322,7 +322,7 @@ jQuery(function($) {
                 });
                 $('#obp-product-results').html(html).addClass('open');
             });
-        }, 280);
+        }, 200);
     });
 
     $(document).on('click', '#obp-product-results .obp-product-item', function() {
@@ -423,7 +423,7 @@ jQuery(function($) {
                 });
                 $('#obp-trigger-results').html(html).addClass('open');
             });
-        }, 280);
+        }, 200);
     });
 
     $(document).on('click', '#obp-trigger-results .obp-product-item', function() {

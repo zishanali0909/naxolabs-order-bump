@@ -92,7 +92,7 @@ class OBP_Ajax {
         $query = new WP_Query( [
             'post_type'      => 'product',
             'post_status'    => 'publish',
-            'posts_per_page' => 20,
+            'posts_per_page' => 10,
             's'              => $q,
         ] );
 
