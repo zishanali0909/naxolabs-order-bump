@@ -271,14 +271,14 @@ class OBP_Frontend {
                     <?php if ( $description || $img_html ): ?>
                         <div class="obp-bump-body">
                             <?php if ( $img_html && $img_position === 'left' ): ?>
-                                <div style="display:flex;gap:12px;align-items:flex-start;">
-                                    <?php echo wp_kses_post( $img_html ); ?>
+                                <div class="obp-bump-body-inner obp-img-left">
+                                    <div class="obp-bump-body-img obp-float-left"><?php echo wp_kses_post( $img_html ); ?></div>
                                     <?php if ( $description ): ?><div class="obp-bump-description"><?php echo wp_kses_post( $description ); ?></div><?php endif; ?>
                                 </div>
                             <?php elseif ( $img_html && $img_position === 'right' ): ?>
-                                <div style="display:flex;gap:12px;align-items:flex-start;">
-                                    <?php if ( $description ): ?><div class="obp-bump-description" style="flex:1;"><?php echo wp_kses_post( $description ); ?></div><?php endif; ?>
-                                    <?php echo wp_kses_post( $img_html ); ?>
+                                <div class="obp-bump-body-inner obp-img-right">
+                                    <div class="obp-bump-body-img obp-float-right"><?php echo wp_kses_post( $img_html ); ?></div>
+                                    <?php if ( $description ): ?><div class="obp-bump-description"><?php echo wp_kses_post( $description ); ?></div><?php endif; ?>
                                 </div>
                             <?php else: ?>
                                 <?php if ( $description ): ?><div class="obp-bump-description"><?php echo wp_kses_post( $description ); ?></div><?php endif; ?>
