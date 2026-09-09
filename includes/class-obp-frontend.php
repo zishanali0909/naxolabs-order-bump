@@ -40,8 +40,8 @@ class OBP_Frontend {
      */
     public function enqueue_assets() {
         if ( ! is_checkout() ) return;
-        wp_enqueue_style(  'obp-frontend', OBP_URL . 'frontend/css/frontend.css', [], OBP_VERSION );
-        wp_enqueue_script( 'obp-frontend', OBP_URL . 'frontend/js/frontend.js', ['jquery'], OBP_VERSION, true );
+        wp_enqueue_style(  'obp-frontend', OBP_URL . 'frontend/css/frontend.css', [], filemtime( plugin_dir_path( dirname( __FILE__ ) ) . 'frontend/css/frontend.css' ) );
+        wp_enqueue_script( 'obp-frontend', OBP_URL . 'frontend/js/frontend.js', ['jquery'], filemtime( plugin_dir_path( dirname( __FILE__ ) ) . 'frontend/js/frontend.js' ), true );
         wp_localize_script( 'obp-frontend', 'obpFrontend', [
             'ajaxUrl'         => admin_url('admin-ajax.php'),
             'nonce'           => wp_create_nonce('obp_frontend_nonce'),

@@ -28,7 +28,7 @@ class OBP_Blocks_Integration implements IntegrationInterface {
             'obp-blocks-checkout',
             OBP_URL . 'frontend/js/blocks-checkout.js',
             [ 'wp-element', 'wp-plugins', 'wc-blocks-checkout', 'jquery' ],
-            OBP_VERSION,
+            filemtime( plugin_dir_path( dirname( __FILE__ ) ) . 'frontend/js/blocks-checkout.js' ),
             true
         );
 
@@ -36,7 +36,7 @@ class OBP_Blocks_Integration implements IntegrationInterface {
             'obp-blocks-checkout',
             OBP_URL . 'frontend/css/frontend.css',
             [],
-            OBP_VERSION
+            filemtime( plugin_dir_path( dirname( __FILE__ ) ) . 'frontend/css/frontend.css' )
         );
 
         // Enqueue styles alongside the script
