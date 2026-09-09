@@ -561,7 +561,8 @@ jQuery(function($) {
                     wp.editor.initialize(editorId, {
                         tinymce: {
                             wpautop: true,
-                            toolbar1: 'formatselect,fontsizeselect,|,bold,italic,underline,strikethrough,|,alignleft,aligncenter,alignright,|,bullist,numlist,|,link,unlink,|,removeformat',
+                            toolbar1: 'formatselect,fontsizeselect,|,bold,italic,underline,strikethrough,|,forecolor,backcolor,|,alignleft,aligncenter,alignright,|,bullist,numlist,|,link,unlink,|,removeformat',
+                            plugins: 'textcolor,lists,link',
                             block_formats: 'Paragraph=p;Heading 3=h3;Heading 4=h4;Heading 5=h5',
                             fontsize_formats: '12px 13px 14px 16px 18px 20px 24px',
                             toolbar2: '',
