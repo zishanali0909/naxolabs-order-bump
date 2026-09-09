@@ -99,12 +99,12 @@
 
 /* Description content styles */
 .obp-bump-description { font-size: 14px; line-height: 1.6; color: #374151; margin: 0; }
-.obp-bump-description p  { margin: 0 0 8px; }
-.obp-bump-description ul { padding-left: 20px; margin: 6px 0; list-style-type: disc !important; }
-.obp-bump-description ol { padding-left: 20px; margin: 6px 0; list-style-type: decimal !important; }
-.obp-bump-description li { margin-bottom: 4px; display: list-item !important; list-style: inherit !important; }
-.obp-bump-description h2 { font-size: 15px; font-weight: 800; margin: 10px 0 5px; }
-.obp-bump-description h3 { font-size: 13px; font-weight: 700; margin: 8px 0 4px; }
+.obp-bump-description p  { margin: 0 0 12px !important; }
+.obp-bump-description ul { padding-left: 20px; margin: 10px 0 !important; list-style-type: disc !important; }
+.obp-bump-description ol { padding-left: 20px; margin: 10px 0 !important; list-style-type: decimal !important; }
+.obp-bump-description li { margin-bottom: 5px !important; display: list-item !important; list-style: inherit !important; }
+.obp-bump-description h2 { font-size: 15px; font-weight: 800; margin: 14px 0 6px !important; }
+.obp-bump-description h3 { font-size: 13px; font-weight: 700; margin: 12px 0 5px !important; }
 .obp-bump-description img { max-width: 100%; border-radius: 5px; margin: 6px 0; display: block; }
 .obp-bump-description img.emoji,.obp-bump-description img.wp-smiley { display: inline !important; width: 1em !important; height: 1em !important; vertical-align: -0.1em; margin: 0 2px; border-radius: 0; }
 .obp-bump-description strong { font-weight: 700; }

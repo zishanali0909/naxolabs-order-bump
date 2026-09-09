@@ -156,7 +156,7 @@
 .obp-preview-desc{padding:8px 10px;font-size:11px;color:#374151;overflow:hidden;}
 .obp-preview-desc img{max-width:100%;height:auto;border-radius:4px;}
 .obp-preview-desc img.emoji,.obp-preview-desc img.wp-smiley{display:inline !important;width:1em !important;height:1em !important;vertical-align:-0.1em;margin:0 2px;border-radius:0}
-.obp-preview-desc p{margin:0 0 4px;}
+.obp-preview-desc p{margin:0 0 8px !important;}
 .obp-preview-desc ul{padding-left:16px;margin:4px 0;font-size:11px;list-style-type:disc !important;}
 .obp-preview-desc ol{padding-left:16px;margin:4px 0;font-size:11px;list-style-type:decimal !important;}
 .obp-preview-desc li{margin-bottom:2px;display:list-item !important;list-style:inherit !important;}
