@@ -181,7 +181,7 @@ class OBP_Frontend {
             $in_cart      = $this->is_in_cart( $product->get_id() );
             $headline_html = str_replace(
                 '{{product_name}}',
-                '<strong>' . esc_html($prod_name) . '</strong>',
+                esc_html($prod_name),
                 wp_kses_post($headline)
             );
 
@@ -191,7 +191,7 @@ class OBP_Frontend {
                 if ( $img_type === 'custom' && $img_custom_url ) {
                     $img_src = esc_url($img_custom_url);
                 } else {
-                    $img_src = wp_get_attachment_image_url( $product->get_image_id(), 'woocommerce_thumbnail' );
+                    $img_src = wp_get_attachment_image_url( $product->get_image_id(), 'medium' );
                 }
                 if ( $img_src ) {
                     $w = max(40, min(300, $img_width));
