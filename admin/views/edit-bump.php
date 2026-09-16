@@ -394,20 +394,20 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                         $prev_img_width = intval( $meta['image_width'] ?? 96 );
                                         $prev_img_pos   = $meta['image_position'] ?? 'left';
                                         ?>
-                                        <div id="obp-preview-img-wrap" class="<?php echo ( $show_img_preview && $prev_img_url ) ? 'obp-img-visible' : ''; ?>" data-pos="<?php echo esc_attr($prev_img_pos); ?>">
+                                        <div id="obp-preview-img-wrap" class="obp-preview-desc <?php echo ( $show_img_preview && $prev_img_url ) ? 'obp-img-visible' : ''; ?>" data-pos="<?php echo esc_attr($prev_img_pos); ?>">
                                             <img id="obp-preview-product-img"
                                                  src="<?php echo $prev_img_url ? esc_url( $prev_img_url ) : ''; ?>"
                                                  style="width:<?php echo intval( $prev_img_width ); ?>px;height:auto;border-radius:4px;float:<?php echo $prev_img_pos === 'right' ? 'right' : 'left'; ?>;margin:<?php echo $prev_img_pos === 'right' ? '0 0 6px 8px' : '0 8px 6px 0'; ?>;">
-                                        </div>
-                                        <div id="obp-preview-desc-text">
-                                        <?php
-                                        if ( ! empty( $saved_products ) ) {
-                                            $d = $saved_products[0]['description'] ?? '';
-                                            echo $d ? wp_kses_post( $d ) : '<em style="color:#9CA3AF">' . esc_html__( 'No description set.', 'wp-order-bump' ) . '</em>';
-                                        } else {
-                                            echo '<em style="color:#9CA3AF">' . esc_html__( 'Add products to see preview.', 'wp-order-bump' ) . '</em>';
-                                        }
-                                        ?>
+                                            <span id="obp-preview-desc-text">
+                                            <?php
+                                            if ( ! empty( $saved_products ) ) {
+                                                $d = $saved_products[0]['description'] ?? '';
+                                                echo $d ? wp_kses_post( wpautop($d) ) : '<em style="color:#9CA3AF">' . esc_html__( 'No description set.', 'wp-order-bump' ) . '</em>';
+                                            } else {
+                                                echo '<em style="color:#9CA3AF">' . esc_html__( 'Add products to see preview.', 'wp-order-bump' ) . '</em>';
+                                            }
+                                            ?>
+                                            </span>
                                         </div>
                                     </div>
                                     <div class="obp-preview-cta-row" id="obp-preview-cta-row" style="display:none;">
