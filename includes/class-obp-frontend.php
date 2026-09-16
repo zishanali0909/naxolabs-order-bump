@@ -231,7 +231,7 @@ class OBP_Frontend {
                         <?php endif; ?>
                         <?php if ( $description ): ?>
                             <div style="flex:1;min-width:0;">
-                                <div class="obp-bump-description"><?php echo wp_kses_post( $description ); ?></div>
+                                <div class="obp-bump-description"><?php echo wp_kses_post( wpautop( $description ) ); ?></div>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -273,15 +273,15 @@ class OBP_Frontend {
                             <?php if ( $img_html && $img_position === 'left' ): ?>
                                 <div class="obp-bump-body-inner obp-img-left obp-bump-description">
                                     <div class="obp-bump-body-img obp-float-left"><?php echo wp_kses_post( $img_html ); ?></div>
-                                    <?php if ( $description ): echo wp_kses_post( $description ); endif; ?>
+                                    <?php if ( $description ): echo wp_kses_post( wpautop( $description ) ); endif; ?>
                                 </div>
                             <?php elseif ( $img_html && $img_position === 'right' ): ?>
                                 <div class="obp-bump-body-inner obp-img-right obp-bump-description">
                                     <div class="obp-bump-body-img obp-float-right"><?php echo wp_kses_post( $img_html ); ?></div>
-                                    <?php if ( $description ): echo wp_kses_post( $description ); endif; ?>
+                                    <?php if ( $description ): echo wp_kses_post( wpautop( $description ) ); endif; ?>
                                 </div>
                             <?php else: ?>
-                                <?php if ( $description ): ?><div class="obp-bump-description"><?php echo wp_kses_post( $description ); ?></div><?php endif; ?>
+                                <?php if ( $description ): ?><div class="obp-bump-description"><?php echo wp_kses_post( wpautop( $description ) ); ?></div><?php endif; ?>
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
