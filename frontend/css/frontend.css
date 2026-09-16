@@ -289,7 +289,7 @@
 
 
 /* Float-based image layout - text wraps below image */
-.obp-bump-body-inner { overflow: hidden; }
+.obp-bump-body-inner { /* clearfix via ::after */ }
 .obp-bump-body-inner::after { content: ''; display: table; clear: both; }
 .obp-float-left { float: left; margin: 0 14px 8px 0; }
 .obp-float-right { float: right; margin: 0 0 8px 14px; }
