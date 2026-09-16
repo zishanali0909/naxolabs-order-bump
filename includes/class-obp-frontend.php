@@ -84,7 +84,7 @@ class OBP_Frontend {
      */
     private function get_all_bumps_cached() {
         $cached = get_transient( 'obp_published_bumps' );
-        if ( $cached !== false ) return $cached;
+        if ( false !== $cached ) return $cached;
 
         $all  = get_posts(['post_type'=>'obp_order_bump','post_status'=>'publish','posts_per_page'=>-1]);
         $data = [];

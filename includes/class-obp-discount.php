@@ -33,7 +33,7 @@ class OBP_Discount {
 
         // Find all published bumps that include this product (use transient cache)
         $cached = get_transient( 'obp_published_bumps' );
-        if ( $cached === false ) {
+        if ( false === $cached ) {
             $bumps_posts = get_posts([
                 'post_type'      => 'obp_order_bump',
                 'post_status'    => 'publish',

@@ -44,7 +44,7 @@ class OBP_Admin {
      * Enqueue admin CSS/JS assets.
      */
     public function enqueue_assets( $hook ) {
-        if ( strpos( $hook, 'order-bump' ) === false && strpos( $hook, 'obp-' ) === false ) return;
+        if ( strpos( 'order-bump', $hook ) === false && strpos( $hook, 'obp-' ) === false ) return;
 
         $css_path = plugin_dir_path( dirname( __FILE__ ) ) . 'admin/css/admin.css';
         $js_path  = plugin_dir_path( dirname( __FILE__ ) ) . 'admin/js/admin.js';
@@ -141,18 +141,23 @@ class OBP_Admin {
     private function get_bump_revenue() {
         global $wpdb;
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $result = $wpdb->get_var(
-            "SELECT COALESCE( SUM( oim_total.meta_value ), 0 )
-             FROM {$wpdb->prefix}woocommerce_order_itemmeta AS oim_bump
-             INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS oim_total
-                 ON oim_bump.order_item_id = oim_total.order_item_id
-                 AND oim_total.meta_key = '_line_total'
-             INNER JOIN {$wpdb->prefix}woocommerce_order_items AS oi
-                 ON oi.order_item_id = oim_bump.order_item_id
-             INNER JOIN {$wpdb->posts} AS p
-                 ON p.ID = oi.order_id
-                 AND p.post_status IN ( 'wc-completed', 'wc-processing' )
-             WHERE oim_bump.meta_key = '_obp_bump_id'"
+            $wpdb->prepare(
+                "SELECT COALESCE( SUM( oim_total.meta_value ), 0 )
+                 FROM {$wpdb->prefix}woocommerce_order_itemmeta AS oim_bump
+                 INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS oim_total
+                     ON oim_bump.order_item_id = oim_total.order_item_id
+                     AND oim_total.meta_key = %s
+                 INNER JOIN {$wpdb->prefix}woocommerce_order_items AS oi
+                     ON oi.order_item_id = oim_bump.order_item_id
+                 INNER JOIN {$wpdb->posts} AS p
+                     ON p.ID = oi.order_id
+                     AND p.post_status IN ( 'wc-completed', 'wc-processing' )
+                 WHERE oim_bump.meta_key = %s",
+                '_line_total',
+                '_obp_bump_id'
+            )
         );
 
         return floatval( $result );
