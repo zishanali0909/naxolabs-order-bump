@@ -191,10 +191,10 @@ class OBP_Frontend {
                 if ( $img_type === 'custom' && $img_custom_url ) {
                     $img_src = esc_url($img_custom_url);
                 } else {
-                    $img_src = wp_get_attachment_image_url( $product->get_image_id(), 'large' );
+                    $img_src = wp_get_attachment_image_url( $product->get_image_id(), 'woocommerce_single' );
                 }
                 if ( $img_src ) {
-                    $w = max(40, min(300, $img_width));
+                    $w = max(50, min(200, $img_width));
                     $img_html = '<img src="'.esc_url($img_src).'" alt="'.esc_attr($prod_name).'" style="width:'.$w.'px;height:'.$w.'px;object-fit:cover;border-radius:6px;flex-shrink:0;display:block;">';
                 }
             }

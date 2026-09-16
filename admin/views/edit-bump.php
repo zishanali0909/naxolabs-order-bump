@@ -302,7 +302,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
                                     <div class="obp-field">
                                         <label class="obp-label"><?php esc_html_e( 'Width (px)', 'wp-order-bump' ); ?></label>
-                                        <input type="number" name="obp_settings[image_width]" value="<?php echo esc_attr( $meta['image_width'] ?? 96 ); ?>" class="obp-input" min="40" max="300" placeholder="96">
+                                        <input type="number" name="obp_settings[image_width]" value="<?php echo esc_attr( $meta['image_width'] ?? 96 ); ?>" class="obp-input" min="50" max="200" placeholder="96">
                                     </div>
 
                                     <div class="obp-field">
