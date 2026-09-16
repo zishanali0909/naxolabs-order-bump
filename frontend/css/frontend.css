@@ -98,8 +98,9 @@
 .obp-price-final { font-size: 17px; font-weight: 800; color: #6C63FF; white-space: nowrap; }
 
 /* Description content styles */
-.obp-bump-description { font-size: 14px; line-height: 1.6; color: #374151; margin: 0; }
-.obp-bump-description p  { margin: 0 0 12px !important; }
+.obp-bump-description { font-size: 14px; line-height: 1.6; color: #374151; margin: 0; overflow: hidden; word-wrap: break-word; }
+.obp-bump-description p  { margin: 0 0 12px !important; padding-bottom: 2px; }
+.obp-bump-description br { display: block; content: ''; margin-top: 8px; }
 .obp-bump-description ul { padding-left: 20px; margin: 10px 0 !important; list-style-type: disc !important; }
 .obp-bump-description ol { padding-left: 20px; margin: 10px 0 !important; list-style-type: decimal !important; }
 .obp-bump-description li { margin-bottom: 5px !important; display: list-item !important; list-style: inherit !important; }
