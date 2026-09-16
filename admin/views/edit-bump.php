@@ -394,11 +394,10 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                         $prev_img_width = intval( $meta['image_width'] ?? 96 );
                                         $prev_img_pos   = $meta['image_position'] ?? 'left';
                                         ?>
-                                        <div id="obp-preview-img-wrap" class="<?php echo ( $show_img_preview && $prev_img_url ) ? 'obp-img-visible' : ''; ?>" style="flex-direction:<?php echo $prev_img_pos === 'right' ? 'row-reverse' : 'row'; ?>;gap:8px;align-items:flex-start;margin-bottom:6px;">
+                                        <div id="obp-preview-img-wrap" class="<?php echo ( $show_img_preview && $prev_img_url ) ? 'obp-img-visible' : ''; ?>" data-pos="<?php echo esc_attr($prev_img_pos); ?>">
                                             <img id="obp-preview-product-img"
                                                  src="<?php echo $prev_img_url ? esc_url( $prev_img_url ) : ''; ?>"
-                                                 style="width:<?php echo intval( $prev_img_width ); ?>px;height:<?php echo intval( $prev_img_width ); ?>px;object-fit:cover;border-radius:4px;flex-shrink:0;">
-                                            <div id="obp-preview-img-desc-spacer" style="flex:1;min-width:0;"></div>
+                                                 style="width:<?php echo intval( $prev_img_width ); ?>px;height:auto;border-radius:4px;float:<?php echo $prev_img_pos === 'right' ? 'right' : 'left'; ?>;margin:<?php echo $prev_img_pos === 'right' ? '0 0 6px 8px' : '0 8px 6px 0'; ?>;">
                                         </div>
                                         <div id="obp-preview-desc-text">
                                         <?php

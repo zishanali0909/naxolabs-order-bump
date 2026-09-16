@@ -132,7 +132,9 @@ jQuery(function($) {
 
     // Image position — live update in preview
     $('select[name="obp_settings[image_position]"]').on('change', function() {
-        $('#obp-preview-img-wrap').css('flex-direction', $(this).val() === 'right' ? 'row-reverse' : 'row');
+        var pos = $(this).val();
+        var $img = $('#obp-preview-product-img');
+        $img.css({ 'float': pos === 'right' ? 'right' : 'left', 'margin': pos === 'right' ? '0 0 6px 8px' : '0 8px 6px 0' });
     });
 
     /* ═══════════════════════════════════════
