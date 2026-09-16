@@ -1,6 +1,6 @@
 === WP Order Bump ===
 Contributors: zishanali0909
-Tags: woocommerce, order bump, checkout upsell, cart bump, upsell
+Tags: woocommerce, order bump, checkout upsell, one click upsell, sales boost
 Requires at least: 5.8
 Tested up to: 6.8
 Requires PHP: 7.4
