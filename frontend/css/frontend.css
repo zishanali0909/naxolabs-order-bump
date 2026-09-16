@@ -295,13 +295,12 @@
 .obp-float-right { float: right; margin: 0 0 8px 14px; }
 .obp-float-left img, .obp-float-right img { 
     display: block; 
-    width: 120px; 
     height: auto; 
     border-radius: 6px; 
     border: 1px solid #e5e7eb; 
 }
 @media (max-width: 480px) {
-    .obp-float-left img, .obp-float-right img { width: 100px; }
+    .obp-float-left img, .obp-float-right img { max-width: 100px; }
 }
 
 /* Responsive */

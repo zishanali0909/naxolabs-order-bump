@@ -184,7 +184,7 @@ class OBP_Admin {
             'show_product_image'   => 0,
             'image_type'           => 'product',
             'image_width'          => 96,
-            'image_position'       => 'left',
+            'image_position'       => 'right',
             'image_custom_url'     => '',
             'position'             => 'before_payment',
             'bump_status'          => 'publish',
@@ -256,7 +256,7 @@ class OBP_Admin {
         // Image settings — clamped values
         $clean['image_type']       = in_array( $settings['image_type'] ?? '', [ 'product', 'custom' ], true ) ? $settings['image_type'] : 'product';
         $clean['image_width']      = max( 40, min( 300, intval( $settings['image_width'] ?? 96 ) ) );
-        $clean['image_position']   = in_array( $settings['image_position'] ?? '', [ 'left', 'right' ], true ) ? $settings['image_position'] : 'left';
+        $clean['image_position']   = in_array( $settings['image_position'] ?? '', [ 'left', 'right' ], true ) ? $settings['image_position'] : 'right';
         $clean['image_custom_url'] = esc_url_raw( $settings['image_custom_url'] ?? '' );
 
         // Layout & skin — whitelist values
