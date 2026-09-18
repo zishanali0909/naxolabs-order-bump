@@ -216,6 +216,7 @@ class OBP_Frontend {
             <div class="obp-bump-wrap obp-skin-<?php echo esc_attr( $skin ); ?> <?php echo esc_attr( $added_class ); ?> <?php echo ( $show_badge && $badge_text ) ? 'obp-has-badge' : ''; ?>"
                  id="<?php echo esc_attr( $wrap_id ); ?>"
                  data-product-id="<?php echo intval( $product->get_id() ); ?>"
+                 data-bump-id="<?php echo intval( $bump_id ); ?>"
                  data-qty="<?php echo intval( $pm['qty'] ?? 1 ); ?>">
 
                 <?php if ( $skin === 'skin2' ): ?>

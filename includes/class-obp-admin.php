@@ -141,24 +141,50 @@ class OBP_Admin {
     private function get_bump_revenue() {
         global $wpdb;
 
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-        $result = $wpdb->get_var(
-            $wpdb->prepare(
-                "SELECT COALESCE( SUM( oim_total.meta_value ), 0 )
-                 FROM {$wpdb->prefix}woocommerce_order_itemmeta AS oim_bump
-                 INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS oim_total
-                     ON oim_bump.order_item_id = oim_total.order_item_id
-                     AND oim_total.meta_key = %s
-                 INNER JOIN {$wpdb->prefix}woocommerce_order_items AS oi
-                     ON oi.order_item_id = oim_bump.order_item_id
-                 INNER JOIN {$wpdb->posts} AS p
-                     ON p.ID = oi.order_id
-                     AND p.post_status IN ( 'wc-completed', 'wc-processing' )
-                 WHERE oim_bump.meta_key = %s",
-                '_line_total',
-                '_obp_bump_id'
-            )
-        );
+        // HPOS-compatible: use wc_orders table if available, fallback to posts
+        $orders_table = $wpdb->prefix . 'wc_orders';
+        $use_hpos = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $orders_table ) ) === $orders_table;
+
+        if ( $use_hpos ) {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+            $result = $wpdb->get_var(
+                $wpdb->prepare(
+                    "SELECT COALESCE( SUM( oim_total.meta_value ), 0 )
+                     FROM {$wpdb->prefix}woocommerce_order_itemmeta AS oim_bump
+                     INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS oim_total
+                         ON oim_bump.order_item_id = oim_total.order_item_id
+                         AND oim_total.meta_key = %s
+                     INNER JOIN {$wpdb->prefix}woocommerce_order_items AS oi
+                         ON oi.order_item_id = oim_bump.order_item_id
+                     INNER JOIN {$wpdb->prefix}wc_orders AS o
+                         ON o.id = oi.order_id
+                         AND o.status IN ( 'wc-completed', 'wc-processing' )
+                     WHERE oim_bump.meta_key = %s",
+                    '_line_total',
+                    '_obp_bump_id'
+                )
+            );
+        } else {
+            // Legacy: orders in wp_posts
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+            $result = $wpdb->get_var(
+                $wpdb->prepare(
+                    "SELECT COALESCE( SUM( oim_total.meta_value ), 0 )
+                     FROM {$wpdb->prefix}woocommerce_order_itemmeta AS oim_bump
+                     INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS oim_total
+                         ON oim_bump.order_item_id = oim_total.order_item_id
+                         AND oim_total.meta_key = %s
+                     INNER JOIN {$wpdb->prefix}woocommerce_order_items AS oi
+                         ON oi.order_item_id = oim_bump.order_item_id
+                     INNER JOIN {$wpdb->posts} AS p
+                         ON p.ID = oi.order_id
+                         AND p.post_status IN ( 'wc-completed', 'wc-processing' )
+                     WHERE oim_bump.meta_key = %s",
+                    '_line_total',
+                    '_obp_bump_id'
+                )
+            );
+        }
 
         return floatval( $result );
     }

@@ -121,8 +121,9 @@ class OBP_Ajax {
     public function add_to_cart() {
         check_ajax_referer( 'obp_frontend_nonce', 'nonce' );
 
-        $pid = intval( $_POST['product_id'] ?? 0 );
-        $qty = max( 1, min( 99, intval( $_POST['qty'] ?? 1 ) ) );
+        $pid     = intval( $_POST['product_id'] ?? 0 );
+        $qty     = max( 1, min( 99, intval( $_POST['qty'] ?? 1 ) ) );
+        $bump_id = intval( $_POST['bump_id'] ?? 0 );
 
         if ( ! $pid ) {
             wp_send_json_error( [ 'message' => __( 'Invalid product.', 'wp-order-bump' ) ] );
@@ -141,7 +142,23 @@ class OBP_Ajax {
             }
         }
 
-        if ( WC()->cart->add_to_cart( $pid, $qty ) ) {
+        $cart_item_data = [];
+        if ( $bump_id ) {
+            $cart_item_data['obp_bump_id'] = $bump_id;
+            // Get discount info from bump settings
+            $bump_meta = get_post_meta( $bump_id, '_obp_settings', true );
+            if ( is_array( $bump_meta ) && ! empty( $bump_meta['products'] ) ) {
+                foreach ( $bump_meta['products'] as $bp ) {
+                    if ( intval( $bp['id'] ) === $pid ) {
+                        $cart_item_data['obp_discount']      = floatval( $bp['discount'] ?? 0 );
+                        $cart_item_data['obp_discount_type']  = sanitize_text_field( $bp['discount_type'] ?? 'percentage' );
+                        break;
+                    }
+                }
+            }
+        }
+
+        if ( WC()->cart->add_to_cart( $pid, $qty, 0, [], $cart_item_data ) ) {
             WC()->cart->calculate_totals();
             wp_send_json_success( [ 'added' => true, 'total' => WC()->cart->get_total() ] );
         }

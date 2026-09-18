@@ -121,6 +121,7 @@ jQuery(function($) {
             data: {
                 action:     adding ? 'obp_add_to_cart' : 'obp_remove_from_cart',
                 product_id: pid,
+                bump_id:    $wrap.data('bump-id') || 0,
                 qty:        qty,
                 nonce:      obpFrontend.nonce
             },
