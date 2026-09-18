@@ -638,6 +638,20 @@ jQuery(function($) {
         descTextEl.innerHTML = content || '<em style="color:#9CA3AF">' + (obpAdmin.i18n.noDescription || 'No description set.') + '</em>';
     }
 
+    // Sync active editor to preview on product switch
+    $(document).on('click', '.obp-prod-switch-btn', function() {
+        var idx = $(this).data('index');
+        var editorId = 'obp_prod_editor_' + idx;
+        setTimeout(function() {
+            obpSyncDescToPreview(editorId);
+        }, 200);
+    });
+
+    // Also sync on textarea change (Code view)
+    $(document).on('input change', 'textarea[id^="obp_prod_editor_"]', function() {
+        obpSyncDescToPreview(this.id);
+    });
+
     function obpBindTinyMCELive() {
         if (typeof tinyMCE === 'undefined') {
             setTimeout(obpBindTinyMCELive, 300);
@@ -677,18 +691,27 @@ jQuery(function($) {
 
     obpBindTinyMCELive();
 
-    // Reset TinyMCE dirty flags after init to prevent false "unsaved changes" popup
-    setTimeout(function() {
+    // Prevent false "unsaved changes" popup
+    function obpClearDirtyFlags() {
         if (typeof tinyMCE !== 'undefined' && tinyMCE.editors) {
             tinyMCE.editors.forEach(function(editor) {
-                if (editor.id.indexOf('obp_prod_editor_') === 0) {
-                    editor.isNotDirty = true;
-                }
+                editor.isNotDirty = true;
             });
         }
-        // Remove WordPress default beforeunload warning on our admin pages
-        $(window).off('beforeunload.edit-post');
-    }, 1000);
+        $(window).off('beforeunload');
+        window.onbeforeunload = null;
+    }
+    // Clear on page load
+    setTimeout(obpClearDirtyFlags, 500);
+    setTimeout(obpClearDirtyFlags, 1500);
+    // Clear on form submit
+    $('form#obp-edit-form, form.obp-edit-form').on('submit', function() {
+        obpClearDirtyFlags();
+    });
+    // Also clear when Save button is clicked
+    $(document).on('click', '.obp-btn-save, [type="submit"]', function() {
+        obpClearDirtyFlags();
+    });
 
     /* ═══════════════════════════════════════
        NOTICE HELPER
