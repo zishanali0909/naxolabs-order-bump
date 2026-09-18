@@ -800,4 +800,80 @@ jQuery(function($) {
         updatePlaceholder();
     })();
 
+
+
+    /* ===== Overlap Warning: Bump Products vs Trigger Products ===== */
+    function obpCheckProductOverlap() {
+        // Get bump product IDs
+        var bumpIds = [];
+        $('#obp-products-list .obp-product-row').each(function() {
+            bumpIds.push(String($(this).data('product-id')));
+        });
+
+        // Get trigger product IDs (Cart Items rule)
+        var triggerIds = [];
+        $('#obp-trigger-tags .obp-tag').each(function() {
+            triggerIds.push(String($(this).data('id')));
+        });
+
+        // Find overlapping IDs
+        var overlap = bumpIds.filter(function(id) {
+            return triggerIds.indexOf(id) > -1;
+        });
+
+        // Remove old warnings
+        $('.obp-overlap-warn').remove();
+
+        if (overlap.length === 0) return;
+
+        // Show inline warning on each overlapping product row
+        overlap.forEach(function(id) {
+            var $row = $('#obp-products-list .obp-product-row[data-product-id="' + id + '"]');
+            if ($row.length && !$row.find('.obp-overlap-warn').length) {
+                $row.append(
+                    '<div class="obp-overlap-warn">' +
+                    '<span class="obp-warn-icon">⚠️</span> ' +
+                    'This product is also in your trigger rules. Customer already has it in cart when bump shows.' +
+                    '</div>'
+                );
+            }
+
+            // Also mark the trigger tag
+            var $tag = $('#obp-trigger-tags .obp-tag[data-id="' + id + '"]');
+            if ($tag.length && !$tag.hasClass('obp-tag-warn')) {
+                $tag.addClass('obp-tag-warn');
+            }
+        });
+
+        // Show page-level notice (only once)
+        if (!$('.obp-overlap-page-warn').length) {
+            var names = [];
+            overlap.forEach(function(id) {
+                var $row = $('#obp-products-list .obp-product-row[data-product-id="' + id + '"]');
+                var name = $row.find('.obp-product-name').text().trim() || 'Product #' + id;
+                names.push(name);
+            });
+            var msg = '<div class="obp-overlap-page-warn">' +
+                      '<span class="obp-warn-icon">⚠️</span> <strong>Overlap detected:</strong> ' +
+                      names.join(', ') +
+                      ' — same product is both a bump offer and a trigger condition. ' +
+                      'Customer will see this product offered when they already have it in cart.' +
+                      '</div>';
+            $('.obp-name-bar').after(msg);
+        }
+    }
+
+    // Run on page load
+    setTimeout(obpCheckProductOverlap, 500);
+
+    // Run when products added/removed
+    $(document).on('DOMNodeInserted DOMNodeRemoved', '#obp-products-list, #obp-trigger-tags', function() {
+        setTimeout(obpCheckProductOverlap, 100);
+    });
+
+    // Run when trigger type changes
+    $(document).on('change', '#obp-trigger-type', function() {
+        setTimeout(obpCheckProductOverlap, 200);
+    });
+
 });
