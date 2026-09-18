@@ -341,6 +341,14 @@ class OBP_Admin {
 
         update_post_meta( $bump_id, '_obp_settings', $clean );
 
+        /**
+         * Fires after an order bump is saved.
+         *
+         * @param int   $bump_id The bump post ID.
+         * @param array $clean   The sanitized bump settings.
+         */
+        do_action( 'obp_after_bump_saved', $bump_id, $clean );
+
         // Redirect with status
         $active_tab = sanitize_key( $_POST['active_tab'] ?? 'design' );
         $status     = empty( $clean['products'] ) ? 'saved_no_products' : 'saved';

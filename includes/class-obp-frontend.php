@@ -101,12 +101,36 @@ class OBP_Frontend {
     private function get_bumps( $position ) {
         $all_bumps = $this->get_all_bumps_cached();
         $out = [];
+
+        // Pro feature flags (default: disabled in free)
+        $has_conditional = apply_filters( 'obp_enable_conditional_logic', false );
+        $has_scheduling  = apply_filters( 'obp_enable_scheduling', false );
+        $has_bogo        = apply_filters( 'obp_enable_bogo', false );
+        $has_analytics   = apply_filters( 'obp_enable_analytics', false );
+
         foreach ( $all_bumps as $bump_data ) {
             $meta = $bump_data['meta'];
             if ( ($meta['position'] ?? 'before_payment') !== $position ) continue;
-            if ( !$this->check_trigger($meta) ) continue;
+            if ( ! $this->check_trigger( $meta ) ) continue;
+
+            // Pro: scheduling check (hook point for Pro add-on)
+            if ( $has_scheduling && ! apply_filters( 'obp_is_bump_scheduled', true, $bump_data ) ) {
+                continue;
+            }
+
+            // Pro: advanced conditional logic (hook point for Pro add-on)
+            if ( $has_conditional && ! apply_filters( 'obp_passes_conditions', true, $bump_data ) ) {
+                continue;
+            }
+
             $out[] = $bump_data;
         }
+
+        // Pro: analytics tracking hook
+        if ( $has_analytics ) {
+            do_action( 'obp_bumps_displayed', $out, $position );
+        }
+
         return $out;
     }
 
@@ -142,19 +166,42 @@ class OBP_Frontend {
     public function render_after_payment()  { $this->render_bumps('after_payment'); }
 
     private function render_bumps( $position ) {
-        foreach ( $this->get_bumps($position) as $b )
+        $bumps     = $this->get_bumps( $position );
+        $max_bumps = apply_filters( 'obp_max_bumps', 2 );
+        $bumps     = array_slice( $bumps, 0, $max_bumps );
+
+        /**
+         * Fires before bump rendering on checkout.
+         *
+         * @param array  $bumps    List of bump data arrays.
+         * @param string $position Checkout position (before_payment|after_payment).
+         */
+        do_action( 'obp_before_checkout', $bumps, $position );
+
+        foreach ( $bumps as $b ) {
             $this->render_single_bump( $b['id'], $b['meta'] );
+        }
     }
 
     private function render_single_bump( $bump_id, $meta ) {
         $products_meta = $meta['products'] ?? [];
         if ( empty($products_meta) ) return;
 
+        /**
+         * Fires before a single bump is rendered.
+         *
+         * @param int   $bump_id The bump post ID.
+         * @param array $meta    The bump settings.
+         */
+        do_action( 'obp_before_bump_render', $bump_id, $meta );
+
         $headline        = $meta['headline']  ?? 'Yes! Add {{product_name}} to my order';
         $show_badge      = !empty( $meta['show_badge'] );
         $badge_text      = $meta['badge_text'] ?? 'Special Offer';
         $show_orig       = !empty( $meta['show_original_price'] );
         $skin            = $meta['skin'] ?? 'skin1';
+        $bump_types      = apply_filters( 'obp_bump_types', array( 'checkbox' ) );
+        $design_options  = apply_filters( 'obp_bump_design_options', array( 'skin1', 'skin2' ) );
         $header_color      = $skin === 'skin2' ? ($meta['skin2_bg_color'] ?? '#e8f7f9') : ($meta['skin1_bg_color'] ?? '#FFFDE7');
         $header_text_color = $skin === 'skin2' ? ($meta['skin2_text_color'] ?? '#155724') : ($meta['skin1_text_color'] ?? '#155724');
         $show_img        = !empty( $meta['show_product_image'] );
