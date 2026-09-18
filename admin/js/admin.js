@@ -700,4 +700,81 @@ jQuery(function($) {
         setTimeout(function() { $n.fadeOut(400, function() { $(this).remove(); }); }, 3000);
     }
 
+
+
+    /* ===== Category Multi-Select Dropdown ===== */
+    (function() {
+        var $toggle = $('#obp-cat-toggle');
+        var $dropdown = $('#obp-cat-dropdown');
+        var $tags = $('#obp-cat-tags');
+        var $search = $('#obp-cat-search');
+
+        if (!$toggle.length) return;
+
+        // Toggle dropdown
+        $toggle.on('click', function() {
+            var isOpen = $dropdown.is(':visible');
+            $dropdown.toggle(!isOpen);
+            $toggle.toggleClass('obp-cat-open', !isOpen);
+            if (!isOpen) $search.val('').trigger('input').focus();
+        });
+
+        // Close on outside click
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.obp-cat-select-wrap').length) {
+                $dropdown.hide();
+                $toggle.removeClass('obp-cat-open');
+            }
+        });
+
+        // Search filter
+        $search.on('input', function() {
+            var q = $(this).val().toLowerCase();
+            $dropdown.find('.obp-cat-item').each(function() {
+                var text = $(this).text().toLowerCase();
+                $(this).toggle(text.indexOf(q) > -1);
+            });
+        });
+
+        // Checkbox change — add/remove tag
+        $dropdown.on('change', 'input[type="checkbox"]', function() {
+            var $cb = $(this);
+            var id = $cb.val();
+            var name = $cb.closest('.obp-cat-item').text().trim();
+
+            if ($cb.is(':checked')) {
+                // Add tag
+                var tag = '<span class="obp-cat-tag" data-id="' + id + '">' +
+                          name +
+                          '<button type="button" class="obp-cat-tag-remove">&times;</button>' +
+                          '</span>';
+                $tags.append(tag);
+            } else {
+                // Remove tag
+                $tags.find('.obp-cat-tag[data-id="' + id + '"]').remove();
+            }
+            updatePlaceholder();
+        });
+
+        // Remove tag click
+        $tags.on('click', '.obp-cat-tag-remove', function() {
+            var $tag = $(this).closest('.obp-cat-tag');
+            var id = $tag.data('id');
+            // Uncheck checkbox
+            $dropdown.find('input[value="' + id + '"]').prop('checked', false);
+            $tag.remove();
+            updatePlaceholder();
+        });
+
+        function updatePlaceholder() {
+            var count = $tags.find('.obp-cat-tag').length;
+            if (count > 0) {
+                $toggle.find('.obp-cat-placeholder').text(count + ' ' + (count === 1 ? 'category' : 'categories') + ' selected');
+            } else {
+                $toggle.find('.obp-cat-placeholder').text('Select categories...');
+            }
+        }
+        updatePlaceholder();
+    })();
+
 });

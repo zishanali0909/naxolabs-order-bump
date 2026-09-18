@@ -505,15 +505,38 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
                         <div class="obp-rule-val" id="rule-category" style="<?php echo $meta['trigger_type'] !== 'category' ? 'display:none' : ''; ?>">
                             <span class="obp-rule-hint"><?php esc_html_e( 'matches any of', 'wp-order-bump' ); ?></span>
-                            <select name="obp_settings[trigger_categories][]" class="obp-select" multiple style="height:120px;min-width:200px">
-                                <?php
-                                $trig_cats = is_array( $meta['trigger_categories'] ) ? $meta['trigger_categories'] : [];
-                                foreach ( $all_categories as $cat ) : ?>
-                                    <option value="<?php echo intval( $cat->term_id ); ?>" <?php echo in_array( $cat->term_id, $trig_cats ) ? 'selected' : ''; ?>>
-                                        <?php echo esc_html( $cat->name ); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
+                            <?php $trig_cats = is_array( $meta['trigger_categories'] ) ? $meta['trigger_categories'] : []; ?>
+                            <div class="obp-cat-select-wrap">
+                                <div class="obp-cat-selected-tags" id="obp-cat-tags">
+                                    <?php foreach ( $all_categories as $cat ) :
+                                        if ( in_array( $cat->term_id, $trig_cats ) ) : ?>
+                                            <span class="obp-cat-tag" data-id="<?php echo intval( $cat->term_id ); ?>">
+                                                <?php echo esc_html( $cat->name ); ?>
+                                                <button type="button" class="obp-cat-tag-remove">&times;</button>
+                                            </span>
+                                        <?php endif;
+                                    endforeach; ?>
+                                </div>
+                                <div class="obp-cat-dropdown-toggle" id="obp-cat-toggle">
+                                    <span class="obp-cat-placeholder"><?php esc_html_e( 'Select categories...', 'wp-order-bump' ); ?></span>
+                                    <span class="obp-cat-arrow">&#9662;</span>
+                                </div>
+                                <div class="obp-cat-dropdown" id="obp-cat-dropdown" style="display:none;">
+                                    <input type="text" class="obp-cat-search" id="obp-cat-search" placeholder="<?php esc_attr_e( 'Search...', 'wp-order-bump' ); ?>">
+                                    <div class="obp-cat-list">
+                                        <?php foreach ( $all_categories as $cat ) :
+                                            $checked = in_array( $cat->term_id, $trig_cats ) ? 'checked' : '';
+                                        ?>
+                                        <label class="obp-cat-item">
+                                            <input type="checkbox" name="obp_settings[trigger_categories][]"
+                                                   value="<?php echo intval( $cat->term_id ); ?>" <?php echo $checked; ?>>
+                                            <span class="obp-cat-check"></span>
+                                            <?php echo esc_html( $cat->name ); ?>
+                                        </label>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="obp-rule-val" id="rule-minimum_order" style="<?php echo $meta['trigger_type'] !== 'minimum_order' ? 'display:none' : ''; ?>">
