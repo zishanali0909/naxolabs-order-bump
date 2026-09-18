@@ -261,8 +261,9 @@
 #obp-preview-bump { font-size: 12px; overflow: visible; position: relative; }
 
 /* Bulletproof image visibility — hidden by default, visible only with class */
-#obp-preview-img-wrap { display: none; overflow: hidden; }
-#obp-preview-img-wrap.obp-img-visible { display: block !important; }
+#obp-preview-img-wrap { display: block; overflow: hidden; }
+/* img-wrap always visible since it contains desc text too */
+#obp-preview-img-wrap #obp-preview-product-img { display: none; }
 #obp-preview-img-wrap.obp-img-visible #obp-preview-product-img { display: block !important; }
 
 /* Skin 1 */
