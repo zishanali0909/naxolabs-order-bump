@@ -20,9 +20,20 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                 <p><?php esc_html_e( 'Boost revenue with smart checkout upsells', 'wp-order-bump' ); ?></p>
             </div>
         </div>
+        <?php
+            $max_bumps = apply_filters( 'obp_max_bumps', OBP_MAX_BUMPS );
+            $current_count = wp_count_posts( 'obp_order_bump' );
+            $total_bumps = intval( $current_count->publish ?? 0 ) + intval( $current_count->draft ?? 0 );
+            if ( $total_bumps < $max_bumps ) :
+        ?>
         <a href="<?php echo esc_url( admin_url( 'admin.php?page=obp-edit' ) ); ?>" class="obp-btn obp-btn-primary">
             + <?php esc_html_e( 'Add New Order Bump', 'wp-order-bump' ); ?>
         </a>
+        <?php else : ?>
+        <span class="obp-btn" style="background:#f3f4f6;color:#6b7280;cursor:not-allowed;" title="<?php echo esc_attr( sprintf( __( 'Maximum %d order bumps allowed.', 'wp-order-bump' ), $max_bumps ) ); ?>">
+            <?php echo esc_html( sprintf( __( 'Limit: %d/%d Bumps', 'wp-order-bump' ), $total_bumps, $max_bumps ) ); ?>
+        </span>
+        <?php endif; ?>
     </div>
 
     <?php if ( isset( $_GET['saved'] ) ) : ?>

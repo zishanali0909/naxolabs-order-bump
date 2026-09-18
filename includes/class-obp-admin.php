@@ -99,6 +99,7 @@ class OBP_Admin {
             'firstProductImg'=> $first_prod_img,
             'customImageUrl' => $custom_img_url,
             'imageType'      => $image_type,
+            'maxProducts'    => apply_filters( 'obp_max_products_per_bump', OBP_MAX_PRODUCTS_PER_BUMP ),
             'i18n'           => [
                 'deleteConfirm'  => __( 'Delete this Order Bump?', 'wp-order-bump' ),
                 'productAdded'   => __( 'Product added! Go to Design tab to set its description.', 'wp-order-bump' ),
@@ -110,6 +111,11 @@ class OBP_Admin {
                 'errorDeleting'  => __( 'Error deleting.', 'wp-order-bump' ),
                 'error'          => __( 'Error.', 'wp-order-bump' ),
                 'inStock'        => __( 'in-stock', 'wp-order-bump' ),
+                'maxProductsMsg' => sprintf(
+                    /* translators: %d: maximum products per bump */
+                    __( 'Maximum %d products per bump allowed.', 'wp-order-bump' ),
+                    apply_filters( 'obp_max_products_per_bump', OBP_MAX_PRODUCTS_PER_BUMP )
+                ),
             ],
         ] );
     }
@@ -194,6 +200,24 @@ class OBP_Admin {
      */
     public function render_edit_page() {
         $edit_id = isset( $_GET['edit'] ) ? intval( $_GET['edit'] ) : 0;
+
+        // Check bump limit for NEW bumps (editing existing is always allowed)
+        if ( ! $edit_id ) {
+            $max_bumps = apply_filters( 'obp_max_bumps', OBP_MAX_BUMPS );
+            $current_count = wp_count_posts( 'obp_order_bump' );
+            $total = intval( $current_count->publish ?? 0 ) + intval( $current_count->draft ?? 0 );
+            if ( $total >= $max_bumps ) {
+                wp_die(
+                    sprintf(
+                        /* translators: %d: maximum bumps allowed */
+                        esc_html__( 'Maximum %d order bumps allowed. Delete an existing bump to create a new one.', 'wp-order-bump' ),
+                        $max_bumps
+                    ),
+                    esc_html__( 'Bump Limit Reached', 'wp-order-bump' ),
+                    [ 'back_link' => true ]
+                );
+            }
+        }
         $bump    = $edit_id ? get_post( $edit_id ) : null;
         $raw     = $edit_id ? ( get_post_meta( $edit_id, '_obp_settings', true ) ?: [] ) : [];
 
@@ -304,7 +328,8 @@ class OBP_Admin {
 
         // Products — max 10, each with validated fields
         $clean['products'] = [];
-        $raw_products = array_slice( (array) ( $settings['products'] ?? [] ), 0, 10 );
+        $max_products = apply_filters( 'obp_max_products_per_bump', OBP_MAX_PRODUCTS_PER_BUMP );
+        $raw_products = array_slice( (array) ( $settings['products'] ?? [] ), 0, $max_products );
         foreach ( $raw_products as $p ) {
             if ( empty( $p['id'] ) ) continue;
             $dtype    = in_array( $p['discount_type'] ?? '', [ 'percentage', 'flat' ], true ) ? $p['discount_type'] : 'percentage';

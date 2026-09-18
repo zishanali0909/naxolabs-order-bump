@@ -48,6 +48,8 @@ function obp_check_woocommerce() {
 define( 'OBP_VERSION', '1.0.0' );
 define( 'OBP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'OBP_URL', plugin_dir_url( __FILE__ ) );
+define( 'OBP_MAX_BUMPS', 2 );
+define( 'OBP_MAX_PRODUCTS_PER_BUMP', 2 );
 
 require_once OBP_PATH . 'includes/class-obp-post-type.php';
 require_once OBP_PATH . 'includes/class-obp-admin.php';

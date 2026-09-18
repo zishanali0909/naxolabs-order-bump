@@ -335,6 +335,22 @@ jQuery(function($) {
             $('#obp-product-search').val('');
             return;
         }
+        // Check product limit per bump
+        var maxProducts = parseInt(obpAdmin.maxProducts) || 2;
+        if ($('#obp-products-list .obp-product-row').length >= maxProducts) {
+            alert(obpAdmin.i18n.maxProductsMsg || 'Maximum ' + maxProducts + ' products per bump allowed.');
+            $('#obp-product-results').removeClass('open');
+            $('#obp-product-search').val('');
+            return;
+        }
+        // Check product limit per bump
+        var maxProducts = parseInt(obpAdmin.maxProducts) || 2;
+        if ($('#obp-products-list .obp-product-row').length >= maxProducts) {
+            alert(obpAdmin.i18n.maxProductsMsg || 'Maximum ' + maxProducts + ' products per bump allowed.');
+            $('#obp-product-results').removeClass('open');
+            $('#obp-product-search').val('');
+            return;
+        }
         addProductRow(p);
         $('#obp-product-results').removeClass('open');
         $('#obp-product-search').val('');
