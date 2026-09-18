@@ -158,6 +158,16 @@ class OBP_Ajax {
             }
         }
 
+        /**
+         * Filter cart item data before adding bump product to cart.
+         * Extendable via filters.
+         *
+         * @param array $cart_item_data Cart item data with bump info.
+         * @param int   $pid           Product ID being added.
+         * @param int   $bump_id       Bump post ID.
+         */
+        $cart_item_data = apply_filters( 'obp_cart_item_data', $cart_item_data, $pid, $bump_id );
+
         if ( WC()->cart->add_to_cart( $pid, $qty, 0, [], $cart_item_data ) ) {
             WC()->cart->calculate_totals();
             wp_send_json_success( [ 'added' => true, 'total' => WC()->cart->get_total() ] );
