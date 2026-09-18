@@ -102,40 +102,31 @@ class OBP_Frontend {
         $all_bumps = $this->get_all_bumps_cached();
         $out = [];
 
-        // Pro feature flags (default: disabled in free)
-        $has_conditional = apply_filters( 'obp_enable_conditional_logic', false );
-        $has_scheduling  = apply_filters( 'obp_enable_scheduling', false );
-        $has_bogo        = apply_filters( 'obp_enable_bogo', false );
-        $has_analytics   = apply_filters( 'obp_enable_analytics', false );
-        $has_ab_testing  = apply_filters( 'obp_enable_ab_testing', false );
-
         foreach ( $all_bumps as $bump_data ) {
             $meta = $bump_data['meta'];
             if ( ($meta['position'] ?? 'before_payment') !== $position ) continue;
             if ( ! $this->check_trigger( $meta ) ) continue;
 
-            // Pro: scheduling check (hook point for Pro add-on)
-            if ( $has_scheduling && ! apply_filters( 'obp_is_bump_scheduled', true, $bump_data ) ) {
+            // Extendable via filters — allows scheduling checks.
+            if ( ! apply_filters( 'obp_is_bump_scheduled', true, $bump_data ) ) {
                 continue;
             }
 
-            // Pro: advanced conditional logic (hook point for Pro add-on)
-            if ( $has_conditional && ! apply_filters( 'obp_passes_conditions', true, $bump_data ) ) {
+            // Extendable via filters — allows advanced conditional logic.
+            if ( ! apply_filters( 'obp_passes_conditions', true, $bump_data ) ) {
                 continue;
             }
 
             $out[] = $bump_data;
         }
 
-        // Pro: A/B testing (hook point for Pro add-on)
-        if ( $has_ab_testing ) {
-            $out = apply_filters( 'obp_ab_test_bumps', $out, $position );
-        }
-
-        // Pro: analytics tracking hook
-        if ( $has_analytics ) {
-            do_action( 'obp_bumps_displayed', $out, $position );
-        }
+        /**
+         * Fires after bumps list is prepared, before rendering.
+         *
+         * @param array  $out      List of bump data arrays.
+         * @param string $position Checkout position.
+         */
+        do_action( 'obp_bumps_displayed', $out, $position );
 
         return $out;
     }

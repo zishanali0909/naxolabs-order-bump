@@ -61,10 +61,6 @@ require_once OBP_PATH . 'includes/class-obp-discount.php';
  * @since 1.0.0
  */
 function obp_init() {
-    // Pro extension loader
-    if ( file_exists( OBP_PATH . 'pro/load.php' ) ) {
-        require_once OBP_PATH . 'pro/load.php';
-    }
 
     if ( ! obp_check_woocommerce() ) return;
 
@@ -116,27 +112,6 @@ function obp_activate() {
  * @since 1.0.0
  */
 register_deactivation_hook( __FILE__, 'obp_deactivate' );
-
-/**
- * Register Pro-extensible feature filters.
- *
- * These filters return false by default in the free version.
- * The Pro add-on hooks into these to enable premium features.
- *
- * Available filters:
- * - obp_max_bumps           (int)   Max bumps per checkout. Default: 2.
- * - obp_bump_types          (array) Supported bump UI types. Default: ['checkbox'].
- * - obp_enable_conditional_logic (bool) Advanced conditional logic. Default: false.
- * - obp_enable_scheduling   (bool) Bump scheduling by date/time. Default: false.
- * - obp_enable_bogo         (bool) Buy One Get One offers. Default: false.
- * - obp_enable_analytics    (bool) Detailed bump analytics. Default: false.
- * - obp_bump_design_options (array) Available design/skin options.
- *
- * Available actions:
- * - obp_before_checkout     Fires before bumps render on checkout.
- * - obp_before_bump_render  Fires before a single bump is rendered.
- * - obp_after_bump_saved    Fires after a bump is saved in admin.
- */
 
 function obp_deactivate() {
     flush_rewrite_rules();
