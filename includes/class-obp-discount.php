@@ -93,6 +93,14 @@ class OBP_Discount {
             }
 
             $new_price = max( 0, $new_price );
+            /**
+             * Filter the discounted price before applying.
+             *
+             * @param float $new_price      Calculated discount price.
+             * @param float $original_price  Original product price.
+             * @param array $cart_item       Cart item data.
+             */
+            $new_price = apply_filters( 'obp_discount_price', $new_price, $original_price, $cart_item );
             $product->set_price( $new_price );
         }
     

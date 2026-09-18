@@ -107,6 +107,7 @@ class OBP_Frontend {
         $has_scheduling  = apply_filters( 'obp_enable_scheduling', false );
         $has_bogo        = apply_filters( 'obp_enable_bogo', false );
         $has_analytics   = apply_filters( 'obp_enable_analytics', false );
+        $has_ab_testing  = apply_filters( 'obp_enable_ab_testing', false );
 
         foreach ( $all_bumps as $bump_data ) {
             $meta = $bump_data['meta'];
@@ -124,6 +125,11 @@ class OBP_Frontend {
             }
 
             $out[] = $bump_data;
+        }
+
+        // Pro: A/B testing (hook point for Pro add-on)
+        if ( $has_ab_testing ) {
+            $out = apply_filters( 'obp_ab_test_bumps', $out, $position );
         }
 
         // Pro: analytics tracking hook
@@ -179,7 +185,18 @@ class OBP_Frontend {
         do_action( 'obp_before_checkout', $bumps, $position );
 
         foreach ( $bumps as $b ) {
+            ob_start();
             $this->render_single_bump( $b['id'], $b['meta'] );
+            $html = ob_get_clean();
+
+            /**
+             * Filter the rendered HTML of a single bump.
+             *
+             * @param string $html    The bump HTML output.
+             * @param int    $bump_id The bump post ID.
+             * @param array  $meta    The bump settings.
+             */
+            echo apply_filters( 'obp_bump_html', $html, $b['id'], $b['meta'] );
         }
     }
 
