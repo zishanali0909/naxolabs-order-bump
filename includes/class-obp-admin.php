@@ -44,7 +44,7 @@ class OBP_Admin {
      * Enqueue admin CSS/JS assets.
      */
     public function enqueue_assets( $hook ) {
-        if ( strpos( 'order-bump', $hook ) === false && strpos( $hook, 'obp-' ) === false ) return;
+        if ( false === strpos( $hook, 'order-bump' ) && false === strpos( $hook, 'obp-' ) ) return;
 
         $css_path = plugin_dir_path( dirname( __FILE__ ) ) . 'admin/css/admin.css';
         $js_path  = plugin_dir_path( dirname( __FILE__ ) ) . 'admin/js/admin.js';
