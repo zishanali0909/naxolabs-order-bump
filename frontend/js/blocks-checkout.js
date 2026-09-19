@@ -1,5 +1,5 @@
 /**
- * WP Order Bump — Block Checkout Integration
+ * Naxolabs Order Bump — Block Checkout Integration
  *
  * Renders order bumps inside WooCommerce Block-based Checkout
  * using wp.element (React) and wc.blocksCheckout slot fills.
