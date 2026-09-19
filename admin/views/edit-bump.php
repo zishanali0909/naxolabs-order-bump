@@ -11,12 +11,12 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 ?>
 <div class="wrap obp-wrap">
-    <h1 class="wp-heading-inline" style="display:none;"><?php esc_html_e( 'Edit Bump', 'wp-order-bump' ); ?></h1>
+    <h1 class="wp-heading-inline" style="display:none;"><?php esc_html_e( 'Edit Bump', 'naxolabs-order-bump' ); ?></h1>
     <hr class="wp-header-end">
     <div class="obp-header">
         <div class="obp-header-left">
             <a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-order-bump' ) ); ?>" class="obp-back-btn">
-                ← <?php esc_html_e( 'Back', 'wp-order-bump' ); ?>
+                ← <?php esc_html_e( 'Back', 'naxolabs-order-bump' ); ?>
             </a>
             <div class="obp-logo">⚡</div>
             <div>
@@ -24,13 +24,14 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                     <?php
                     if ( $edit_id ) {
                         /* translators: %s: bump title */
-                        printf( esc_html__( 'Edit: %s', 'wp-order-bump' ), esc_html( $bump->post_title ) );
+                        /* translators: %s: bump post title */
+                printf( esc_html__( 'Edit: %s', 'naxolabs-order-bump' ), esc_html( $bump->post_title ) );
                     } else {
-                        esc_html_e( 'New Order Bump', 'wp-order-bump' );
+                        esc_html_e( 'New Order Bump', 'naxolabs-order-bump' );
                     }
                     ?>
                 </h1>
-                <p><?php esc_html_e( 'Configure your checkout order bump', 'wp-order-bump' ); ?></p>
+                <p><?php esc_html_e( 'Configure your checkout order bump', 'naxolabs-order-bump' ); ?></p>
             </div>
         </div>
         <div style="display:flex;gap:10px;align-items:center;">
@@ -39,18 +40,18 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                 <span class="obp-toggle-slider"></span>
             </label>
             <span id="obp-status-label" style="font-weight:700;font-size:13px;">
-                <?php echo $meta['bump_status'] === 'publish' ? esc_html__( 'Active', 'wp-order-bump' ) : esc_html__( 'Inactive', 'wp-order-bump' ); ?>
+                <?php echo $meta['bump_status'] === 'publish' ? esc_html__( 'Active', 'naxolabs-order-bump' ) : esc_html__( 'Inactive', 'naxolabs-order-bump' ); ?>
             </span>
-            <button form="obp-edit-form" type="submit" class="obp-btn obp-btn-primary">💾 <?php esc_html_e( 'Save', 'wp-order-bump' ); ?></button>
+            <button form="obp-edit-form" type="submit" class="obp-btn obp-btn-primary">💾 <?php esc_html_e( 'Save', 'naxolabs-order-bump' ); ?></button>
         </div>
     </div>
 
     <?php
     $obp_status = isset( $_GET['obp_status'] ) ? sanitize_key( $_GET['obp_status'] ) : '';
     if ( $obp_status === 'saved' ) : ?>
-        <div class="obp-notice obp-notice-success" style="margin-top:10px;">✅ <?php esc_html_e( 'Order Bump saved successfully.', 'wp-order-bump' ); ?></div>
+        <div class="obp-notice obp-notice-success" style="margin-top:10px;">✅ <?php esc_html_e( 'Order Bump saved successfully.', 'naxolabs-order-bump' ); ?></div>
     <?php elseif ( $obp_status === 'saved_no_products' ) : ?>
-        <div class="obp-notice obp-notice-info" style="margin-top:10px;">⚠️ <?php esc_html_e( 'Saved, but no products added yet. Go to Products tab to add products.', 'wp-order-bump' ); ?></div>
+        <div class="obp-notice obp-notice-info" style="margin-top:10px;">⚠️ <?php esc_html_e( 'Saved, but no products added yet. Go to Products tab to add products.', 'naxolabs-order-bump' ); ?></div>
     <?php endif; ?>
 
     <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" id="obp-edit-form">
@@ -61,18 +62,18 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         <input type="hidden" name="obp_settings[bump_status]" id="obp-status-field" value="<?php echo esc_attr( $meta['bump_status'] ); ?>">
 
         <div class="obp-name-bar">
-            <label class="obp-label"><?php esc_html_e( 'Bump Name (Internal):', 'wp-order-bump' ); ?></label>
+            <label class="obp-label"><?php esc_html_e( 'Bump Name (Internal):', 'naxolabs-order-bump' ); ?></label>
             <input type="text" name="bump_title"
                    value="<?php echo esc_attr( $bump ? $bump->post_title : '' ); ?>"
                    class="obp-input obp-input-name"
-                   placeholder="<?php esc_attr_e( 'e.g. Accounting Upsell', 'wp-order-bump' ); ?>" required>
+                   placeholder="<?php esc_attr_e( 'e.g. Accounting Upsell', 'naxolabs-order-bump' ); ?>" required>
         </div>
 
         <div class="obp-tabs-wrap">
             <div class="obp-tabs">
-                <a href="#" class="obp-tab <?php echo $tab === 'design' ? 'active' : ''; ?>" data-tab="design">📐 <?php esc_html_e( 'Design', 'wp-order-bump' ); ?></a>
-                <a href="#" class="obp-tab <?php echo $tab === 'products' ? 'active' : ''; ?>" data-tab="products">🛍️ <?php esc_html_e( 'Products', 'wp-order-bump' ); ?></a>
-                <a href="#" class="obp-tab <?php echo $tab === 'rules' ? 'active' : ''; ?>" data-tab="rules">🎯 <?php esc_html_e( 'Rules', 'wp-order-bump' ); ?></a>
+                <a href="#" class="obp-tab <?php echo $tab === 'design' ? 'active' : ''; ?>" data-tab="design">📐 <?php esc_html_e( 'Design', 'naxolabs-order-bump' ); ?></a>
+                <a href="#" class="obp-tab <?php echo $tab === 'products' ? 'active' : ''; ?>" data-tab="products">🛍️ <?php esc_html_e( 'Products', 'naxolabs-order-bump' ); ?></a>
+                <a href="#" class="obp-tab <?php echo $tab === 'rules' ? 'active' : ''; ?>" data-tab="rules">🎯 <?php esc_html_e( 'Rules', 'naxolabs-order-bump' ); ?></a>
             </div>
         </div>
 
@@ -83,17 +84,18 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
                     <!-- CTA -->
                     <div class="obp-card">
-                        <div class="obp-card-header">📣 <?php esc_html_e( 'Call To Action Text', 'wp-order-bump' ); ?></div>
+                        <div class="obp-card-header">📣 <?php esc_html_e( 'Call To Action Text', 'naxolabs-order-bump' ); ?></div>
                         <div class="obp-card-body">
                             <input type="text" name="obp_settings[headline]"
                                    value="<?php echo esc_attr( $meta['headline'] ); ?>"
                                    maxlength="200"
                                    class="obp-input"
-                                   placeholder="<?php esc_attr_e( 'Yes! Add {{product_name}} to my order', 'wp-order-bump' ); ?>">
+                                   placeholder="<?php esc_attr_e( 'Yes! Add {{product_name}} to my order', 'naxolabs-order-bump' ); ?>">
                             <p class="obp-help">
                                 <?php
                                 /* translators: %s: template tag */
-                                printf( esc_html__( 'Use %s to show product name dynamically.', 'wp-order-bump' ), '<code>{{product_name}}</code>' );
+                                /* translators: %s: template tag code */
+                    printf( esc_html__( 'Use %s to show product name dynamically.', 'naxolabs-order-bump' ), '<code>{{product_name}}</code>' );
                                 ?>
                             </p>
                         </div>
@@ -101,7 +103,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
                     <!-- Per-product description -->
                     <div class="obp-card" id="obp-design-desc-card">
-                        <div class="obp-card-header">📝 <?php esc_html_e( 'Product Descriptions', 'wp-order-bump' ); ?></div>
+                        <div class="obp-card-header">📝 <?php esc_html_e( 'Product Descriptions', 'naxolabs-order-bump' ); ?></div>
                         <div class="obp-card-body" style="padding:14px 16px;">
                             <?php if ( ! empty( $saved_products ) ) : ?>
                                 <?php
@@ -161,7 +163,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                 </div>
 
                                 <p class="obp-help" style="margin-top:6px;">
-                                    <?php esc_html_e( 'Use short promotional text. HTML supported: <b>, <i>, <ul>, <li> etc.', 'wp-order-bump' ); ?>
+                                    <?php esc_html_e( 'Use short promotional text. HTML supported: <b>, <i>, <ul>, <li> etc.', 'naxolabs-order-bump' ); ?>
                                 </p>
 
                             <?php else : ?>
@@ -169,7 +171,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                     <?php
                                     /* translators: %1$s: opening HTML tag, %2$s: closing HTML tag */
                                     printf(
-                                        esc_html__( 'First add products in the %1$sProducts tab%2$s.', 'wp-order-bump' ),
+                                        esc_html__( 'First add products in the %1$sProducts tab%2$s.', 'naxolabs-order-bump' ),
                                         '<strong>', '</strong>'
                                     );
                                     ?>
@@ -180,52 +182,52 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
                     <!-- Display Options -->
                     <div class="obp-card">
-                        <div class="obp-card-header">🎨 <?php esc_html_e( 'Display Options', 'wp-order-bump' ); ?></div>
+                        <div class="obp-card-header">🎨 <?php esc_html_e( 'Display Options', 'naxolabs-order-bump' ); ?></div>
                         <div class="obp-card-body obp-grid-2">
                             <div class="obp-field">
-                                <label class="obp-label"><?php esc_html_e( 'Position on Checkout', 'wp-order-bump' ); ?></label>
+                                <label class="obp-label"><?php esc_html_e( 'Position on Checkout', 'naxolabs-order-bump' ); ?></label>
                                 <select name="obp_settings[position]" class="obp-select">
-                                    <option value="before_payment" <?php selected( $meta['position'], 'before_payment' ); ?>><?php esc_html_e( 'Before Payment Button (Default)', 'wp-order-bump' ); ?></option>
-                                    <option value="after_payment" <?php selected( $meta['position'], 'after_payment' ); ?>><?php esc_html_e( 'After Payment Button', 'wp-order-bump' ); ?></option>
+                                    <option value="before_payment" <?php selected( $meta['position'], 'before_payment' ); ?>><?php esc_html_e( 'Before Payment Button (Default)', 'naxolabs-order-bump' ); ?></option>
+                                    <option value="after_payment" <?php selected( $meta['position'], 'after_payment' ); ?>><?php esc_html_e( 'After Payment Button', 'naxolabs-order-bump' ); ?></option>
                                 </select>
                             </div>
                             <div class="obp-field">
-                                <label class="obp-label"><?php esc_html_e( 'Skin / Layout', 'wp-order-bump' ); ?></label>
+                                <label class="obp-label"><?php esc_html_e( 'Skin / Layout', 'naxolabs-order-bump' ); ?></label>
                                 <select name="obp_settings[skin]" class="obp-select">
-                                    <option value="skin1" <?php selected( $meta['skin'], 'skin1' ); ?>><?php esc_html_e( 'Skin 1', 'wp-order-bump' ); ?></option>
-                                    <option value="skin2" <?php selected( $meta['skin'], 'skin2' ); ?>><?php esc_html_e( 'Skin 2', 'wp-order-bump' ); ?></option>
+                                    <option value="skin1" <?php selected( $meta['skin'], 'skin1' ); ?>><?php esc_html_e( 'Skin 1', 'naxolabs-order-bump' ); ?></option>
+                                    <option value="skin2" <?php selected( $meta['skin'], 'skin2' ); ?>><?php esc_html_e( 'Skin 2', 'naxolabs-order-bump' ); ?></option>
                                 </select>
                             </div>
                             <div class="obp-field">
-                                <label class="obp-label"><?php esc_html_e( 'Header Color', 'wp-order-bump' ); ?></label>
+                                <label class="obp-label"><?php esc_html_e( 'Header Color', 'naxolabs-order-bump' ); ?></label>
                                 <!-- Skin 1 colors -->
                                 <div id="obp-colors-skin1" style="<?php echo ( $meta['skin'] ?? 'skin1' ) === 'skin2' ? 'display:none' : 'display:flex'; ?>;align-items:center;gap:16px;flex-wrap:nowrap;">
                                     <div style="display:flex;align-items:center;gap:8px;">
-                                        <span style="font-size:13px;color:#374151;"><?php esc_html_e( 'Background', 'wp-order-bump' ); ?></span>
+                                        <span style="font-size:13px;color:#374151;"><?php esc_html_e( 'Background', 'naxolabs-order-bump' ); ?></span>
                                         <input type="color" name="obp_settings[skin1_bg_color]" id="obp-skin1-bg" value="<?php echo esc_attr( $meta['skin1_bg_color'] ?? '#FFFDE7' ); ?>" style="width:40px;height:32px;border:1px solid #E5E2FF;border-radius:6px;cursor:pointer;padding:2px;">
                                     </div>
                                     <div style="display:flex;align-items:center;gap:8px;">
-                                        <span style="font-size:13px;color:#374151;"><?php esc_html_e( 'Text', 'wp-order-bump' ); ?></span>
+                                        <span style="font-size:13px;color:#374151;"><?php esc_html_e( 'Text', 'naxolabs-order-bump' ); ?></span>
                                         <input type="color" name="obp_settings[skin1_text_color]" id="obp-skin1-text" value="<?php echo esc_attr( $meta['skin1_text_color'] ?? '#155724' ); ?>" style="width:40px;height:32px;border:1px solid #E5E2FF;border-radius:6px;cursor:pointer;padding:2px;">
                                     </div>
                                 </div>
                                 <!-- Skin 2 colors -->
                                 <div id="obp-colors-skin2" style="<?php echo ( $meta['skin'] ?? 'skin1' ) === 'skin1' ? 'display:none' : 'display:flex'; ?>;align-items:center;gap:16px;flex-wrap:nowrap;">
                                     <div style="display:flex;align-items:center;gap:8px;">
-                                        <span style="font-size:13px;color:#374151;"><?php esc_html_e( 'Background', 'wp-order-bump' ); ?></span>
+                                        <span style="font-size:13px;color:#374151;"><?php esc_html_e( 'Background', 'naxolabs-order-bump' ); ?></span>
                                         <input type="color" name="obp_settings[skin2_bg_color]" id="obp-skin2-bg" value="<?php echo esc_attr( $meta['skin2_bg_color'] ?? '#e8f7f9' ); ?>" style="width:40px;height:32px;border:1px solid #E5E2FF;border-radius:6px;cursor:pointer;padding:2px;">
                                     </div>
                                     <div style="display:flex;align-items:center;gap:8px;">
-                                        <span style="font-size:13px;color:#374151;"><?php esc_html_e( 'Text', 'wp-order-bump' ); ?></span>
+                                        <span style="font-size:13px;color:#374151;"><?php esc_html_e( 'Text', 'naxolabs-order-bump' ); ?></span>
                                         <input type="color" name="obp_settings[skin2_text_color]" id="obp-skin2-text" value="<?php echo esc_attr( $meta['skin2_text_color'] ?? '#155724' ); ?>" style="width:40px;height:32px;border:1px solid #E5E2FF;border-radius:6px;cursor:pointer;padding:2px;">
                                     </div>
                                 </div>
                             </div>
                             <div class="obp-field">
-                                <label class="obp-label"><?php esc_html_e( 'Options', 'wp-order-bump' ); ?></label>
+                                <label class="obp-label"><?php esc_html_e( 'Options', 'naxolabs-order-bump' ); ?></label>
                                 <label class="obp-checkbox-label">
                                     <input type="checkbox" name="obp_settings[show_original_price]" value="1" <?php checked( $meta['show_original_price'] ); ?>>
-                                    <?php esc_html_e( 'Show Original (Strikethrough) Price', 'wp-order-bump' ); ?>
+                                    <?php esc_html_e( 'Show Original (Strikethrough) Price', 'naxolabs-order-bump' ); ?>
                                 </label>
                             </div>
                         </div>
@@ -233,12 +235,12 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
                     <!-- Badge Options -->
                     <div class="obp-card">
-                        <div class="obp-card-header">🏷️ <?php esc_html_e( 'Badge / Ribbon', 'wp-order-bump' ); ?></div>
+                        <div class="obp-card-header">🏷️ <?php esc_html_e( 'Badge / Ribbon', 'naxolabs-order-bump' ); ?></div>
                         <div class="obp-card-body">
                             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
                                 <div>
-                                    <strong style="font-size:13px;"><?php esc_html_e( 'Show Badge', 'wp-order-bump' ); ?></strong>
-                                    <p class="obp-help" style="margin:3px 0 0;"><?php esc_html_e( 'Display a ribbon/badge on the order bump (e.g. "Special Offer").', 'wp-order-bump' ); ?></p>
+                                    <strong style="font-size:13px;"><?php esc_html_e( 'Show Badge', 'naxolabs-order-bump' ); ?></strong>
+                                    <p class="obp-help" style="margin:3px 0 0;"><?php esc_html_e( 'Display a ribbon/badge on the order bump (e.g. "Special Offer").', 'naxolabs-order-bump' ); ?></p>
                                 </div>
                                 <label class="obp-toggle" style="cursor:pointer;">
                                     <input type="checkbox"
@@ -250,24 +252,24 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                 </label>
                             </div>
                             <div id="obp-badge-text-wrap" style="<?php echo empty( $meta['show_badge'] ) ? 'display:none;' : 'display:block;'; ?>border-top:1px solid #F0EEFF;padding-top:14px;">
-                                <label class="obp-label"><?php esc_html_e( 'Badge Text', 'wp-order-bump' ); ?></label>
+                                <label class="obp-label"><?php esc_html_e( 'Badge Text', 'naxolabs-order-bump' ); ?></label>
                                 <input type="text" name="obp_settings[badge_text]"
                                        value="<?php echo esc_attr( $meta['badge_text'] ?? 'Special Offer' ); ?>"
                                        maxlength="50"
                                        class="obp-input"
-                                       placeholder="<?php esc_attr_e( 'Special Offer', 'wp-order-bump' ); ?>">
+                                       placeholder="<?php esc_attr_e( 'Special Offer', 'naxolabs-order-bump' ); ?>">
                             </div>
                         </div>
                     </div>
 
                     <!-- Product Image Option -->
                     <div class="obp-card">
-                        <div class="obp-card-header">🖼️ <?php esc_html_e( 'Product Image', 'wp-order-bump' ); ?></div>
+                        <div class="obp-card-header">🖼️ <?php esc_html_e( 'Product Image', 'naxolabs-order-bump' ); ?></div>
                         <div class="obp-card-body">
                             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
                                 <div>
-                                    <strong style="font-size:13px;"><?php esc_html_e( 'Show Product Image', 'wp-order-bump' ); ?></strong>
-                                    <p class="obp-help" style="margin:3px 0 0;"><?php esc_html_e( 'When enabled, the product image will be displayed on the checkout page.', 'wp-order-bump' ); ?></p>
+                                    <strong style="font-size:13px;"><?php esc_html_e( 'Show Product Image', 'naxolabs-order-bump' ); ?></strong>
+                                    <p class="obp-help" style="margin:3px 0 0;"><?php esc_html_e( 'When enabled, the product image will be displayed on the checkout page.', 'naxolabs-order-bump' ); ?></p>
                                 </div>
                                 <label class="obp-toggle" style="cursor:pointer;">
                                     <input type="checkbox"
@@ -283,42 +285,42 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                 <div class="obp-grid-2" style="gap:12px;">
 
                                     <div class="obp-field">
-                                        <label class="obp-label"><?php esc_html_e( 'Image Type', 'wp-order-bump' ); ?></label>
+                                        <label class="obp-label"><?php esc_html_e( 'Image Type', 'naxolabs-order-bump' ); ?></label>
                                         <input type="hidden" name="obp_settings[image_type]" id="obp-img-type-val" value="<?php echo esc_attr( $meta['image_type'] ?? 'product' ); ?>">
                                         <div style="display:flex;border:1.5px solid #E5E2FF;border-radius:8px;overflow:hidden;">
                                             <button type="button" id="obp-imgtype-product"
                                                     class="obp-imgtype-btn <?php echo ( $meta['image_type'] ?? 'product' ) === 'product' ? 'obp-switch-active' : ''; ?>"
                                                     data-type="product"
                                                     style="flex:1;text-align:center;padding:9px 0;font-size:13px;font-weight:700;cursor:pointer;border:none;">
-                                                <?php esc_html_e( 'Product', 'wp-order-bump' ); ?>
+                                                <?php esc_html_e( 'Product', 'naxolabs-order-bump' ); ?>
                                             </button>
                                             <button type="button" id="obp-imgtype-custom"
                                                     class="obp-imgtype-btn <?php echo ( $meta['image_type'] ?? 'product' ) === 'custom' ? 'obp-switch-active' : ''; ?>"
                                                     data-type="custom"
                                                     style="flex:1;text-align:center;padding:9px 0;font-size:13px;font-weight:700;cursor:pointer;border:none;border-left:1.5px solid #E5E2FF;">
-                                                <?php esc_html_e( 'Custom', 'wp-order-bump' ); ?>
+                                                <?php esc_html_e( 'Custom', 'naxolabs-order-bump' ); ?>
                                             </button>
                                         </div>
                                     </div>
 
                                     <div class="obp-field">
-                                        <label class="obp-label"><?php esc_html_e( 'Width (px)', 'wp-order-bump' ); ?></label>
+                                        <label class="obp-label"><?php esc_html_e( 'Width (px)', 'naxolabs-order-bump' ); ?></label>
                                         <input type="number" name="obp_settings[image_width]" value="<?php echo esc_attr( $meta['image_width'] ?? 96 ); ?>" class="obp-input" min="50" max="200" placeholder="96">
                                     </div>
 
                                     <div class="obp-field">
-                                        <label class="obp-label"><?php esc_html_e( 'Image Position', 'wp-order-bump' ); ?></label>
+                                        <label class="obp-label"><?php esc_html_e( 'Image Position', 'naxolabs-order-bump' ); ?></label>
                                         <select name="obp_settings[image_position]" class="obp-select">
-                                            <option value="left" <?php selected( $meta['image_position'] ?? 'left', 'left' ); ?>><?php esc_html_e( 'Left', 'wp-order-bump' ); ?></option>
-                                            <option value="right" <?php selected( $meta['image_position'] ?? 'left', 'right' ); ?>><?php esc_html_e( 'Right', 'wp-order-bump' ); ?></option>
+                                            <option value="left" <?php selected( $meta['image_position'] ?? 'left', 'left' ); ?>><?php esc_html_e( 'Left', 'naxolabs-order-bump' ); ?></option>
+                                            <option value="right" <?php selected( $meta['image_position'] ?? 'left', 'right' ); ?>><?php esc_html_e( 'Right', 'naxolabs-order-bump' ); ?></option>
                                         </select>
                                     </div>
 
                                     <div class="obp-field" id="obp-custom-img-wrap" style="<?php echo ( $meta['image_type'] ?? 'product' ) !== 'custom' ? 'display:none;' : ''; ?>">
-                                        <label class="obp-label"><?php esc_html_e( 'Custom Image URL', 'wp-order-bump' ); ?></label>
+                                        <label class="obp-label"><?php esc_html_e( 'Custom Image URL', 'naxolabs-order-bump' ); ?></label>
                                         <div style="display:flex;gap:6px;">
                                             <input type="text" name="obp_settings[image_custom_url]" value="<?php echo esc_attr( $meta['image_custom_url'] ?? '' ); ?>" class="obp-input" id="obp-custom-img-url" placeholder="https://...">
-                                            <button type="button" class="obp-btn obp-btn-secondary" id="obp-select-img-btn" style="white-space:nowrap;padding:8px 12px;">📁 <?php esc_html_e( 'Select', 'wp-order-bump' ); ?></button>
+                                            <button type="button" class="obp-btn obp-btn-secondary" id="obp-select-img-btn" style="white-space:nowrap;padding:8px 12px;">📁 <?php esc_html_e( 'Select', 'naxolabs-order-bump' ); ?></button>
                                         </div>
                                         <?php if ( ! empty( $meta['image_custom_url'] ) ) : ?>
                                             <img src="<?php echo esc_url( $meta['image_custom_url'] ); ?>" style="margin-top:8px;max-width:80px;border-radius:4px;">
@@ -335,7 +337,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                 <!-- Sidebar: Preview -->
                 <div class="obp-edit-sidebar">
                     <div class="obp-card">
-                        <div class="obp-card-header">👁️ <?php esc_html_e( 'Preview', 'wp-order-bump' ); ?></div>
+                        <div class="obp-card-header">👁️ <?php esc_html_e( 'Preview', 'naxolabs-order-bump' ); ?></div>
                         <div class="obp-card-body" style="padding:10px;">
                             <div class="obp-preview-wrap" id="obp-preview-wrap-box">
                                 <?php
@@ -403,9 +405,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                             <?php
                                             if ( ! empty( $saved_products ) ) {
                                                 $d = $saved_products[0]['description'] ?? '';
-                                                echo $d ? wp_kses_post( wpautop($d) ) : '<em style="color:#9CA3AF">' . esc_html__( 'No description set.', 'wp-order-bump' ) . '</em>';
+                                                echo $d ? wp_kses_post( wpautop($d) ) : '<em style="color:#9CA3AF">' . esc_html__( 'No description set.', 'naxolabs-order-bump' ) . '</em>';
                                             } else {
-                                                echo '<em style="color:#9CA3AF">' . esc_html__( 'Add products to see preview.', 'wp-order-bump' ) . '</em>';
+                                                echo '<em style="color:#9CA3AF">' . esc_html__( 'Add products to see preview.', 'naxolabs-order-bump' ) . '</em>';
                                             }
                                             ?>
                                             </span>
@@ -428,22 +430,22 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         <div class="obp-tab-content" id="tab-products" style="<?php echo $tab !== 'products' ? 'display:none' : ''; ?>">
             <div class="obp-card">
                 <div class="obp-card-header">
-                    🛍️ <?php esc_html_e( 'All Products', 'wp-order-bump' ); ?>
-                    <span style="font-size:12px;font-weight:400;color:#6B7280;">— <?php esc_html_e( 'Each product can have its own description', 'wp-order-bump' ); ?></span>
+                    🛍️ <?php esc_html_e( 'All Products', 'naxolabs-order-bump' ); ?>
+                    <span style="font-size:12px;font-weight:400;color:#6B7280;">— <?php esc_html_e( 'Each product can have its own description', 'naxolabs-order-bump' ); ?></span>
                 </div>
                 <div class="obp-card-body">
 
                     <!-- Product Search -->
                     <div class="obp-add-product-row">
                         <input type="text" id="obp-product-search" class="obp-input"
-                               placeholder="🔍 <?php esc_attr_e( 'Search & add product...', 'wp-order-bump' ); ?>"
+                               placeholder="🔍 <?php esc_attr_e( 'Search & add product...', 'naxolabs-order-bump' ); ?>"
                                autocomplete="off">
                         <div id="obp-product-results" class="obp-product-dropdown"></div>
                     </div>
 
                     <!-- No products message -->
                     <div id="obp-no-products-msg" class="obp-no-products" <?php echo ! empty( $saved_products ) ? 'style="display:none"' : ''; ?>>
-                        <?php esc_html_e( 'No products added yet. Search above to add.', 'wp-order-bump' ); ?>
+                        <?php esc_html_e( 'No products added yet. Search above to add.', 'naxolabs-order-bump' ); ?>
                     </div>
 
                     <!-- Products list -->
@@ -456,14 +458,14 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
                     <!-- Behaviour -->
                     <div style="margin-top:24px;border-top:1px solid #F0EEFF;padding-top:18px;">
-                        <label class="obp-label" style="margin-bottom:10px;display:block;"><?php esc_html_e( 'Behaviour', 'wp-order-bump' ); ?></label>
+                        <label class="obp-label" style="margin-bottom:10px;display:block;"><?php esc_html_e( 'Behaviour', 'naxolabs-order-bump' ); ?></label>
                         <label class="obp-radio-label">
                             <input type="radio" name="obp_settings[behaviour]" value="add" <?php checked( $meta['behaviour'] ?? 'add', 'add' ); ?>>
-                            <?php esc_html_e( 'Add Order Bumps to Cart Items', 'wp-order-bump' ); ?>
+                            <?php esc_html_e( 'Add Order Bumps to Cart Items', 'naxolabs-order-bump' ); ?>
                         </label>
                         <label class="obp-radio-label">
                             <input type="radio" name="obp_settings[behaviour]" value="replace" <?php checked( $meta['behaviour'] ?? 'add', 'replace' ); ?>>
-                            <?php esc_html_e( 'Replace Cart Items with Order Bump', 'wp-order-bump' ); ?>
+                            <?php esc_html_e( 'Replace Cart Items with Order Bump', 'naxolabs-order-bump' ); ?>
                         </label>
                     </div>
                 </div>
@@ -473,21 +475,21 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         <!-- ═══ TAB: RULES ═══ -->
         <div class="obp-tab-content" id="tab-rules" style="<?php echo $tab !== 'rules' ? 'display:none' : ''; ?>">
             <div class="obp-card">
-                <div class="obp-card-header">🎯 <?php esc_html_e( 'Display Rules — When to show?', 'wp-order-bump' ); ?></div>
+                <div class="obp-card-header">🎯 <?php esc_html_e( 'Display Rules — When to show?', 'naxolabs-order-bump' ); ?></div>
                 <div class="obp-card-body">
                     <div class="obp-rule-row">
-                        <span class="obp-rule-label"><?php esc_html_e( 'For', 'wp-order-bump' ); ?></span>
+                        <span class="obp-rule-label"><?php esc_html_e( 'For', 'naxolabs-order-bump' ); ?></span>
                         <select name="obp_settings[trigger_type]" class="obp-select obp-rule-select" id="obp-trigger-type">
-                            <option value="all" <?php selected( $meta['trigger_type'], 'all' ); ?>><?php esc_html_e( 'No Rules (Always Show)', 'wp-order-bump' ); ?></option>
-                            <option value="specific_product" <?php selected( $meta['trigger_type'], 'specific_product' ); ?>><?php esc_html_e( 'Cart Item(s)', 'wp-order-bump' ); ?></option>
-                            <option value="category" <?php selected( $meta['trigger_type'], 'category' ); ?>><?php esc_html_e( 'Cart Category(s)', 'wp-order-bump' ); ?></option>
-                            <option value="minimum_order" <?php selected( $meta['trigger_type'], 'minimum_order' ); ?>><?php esc_html_e( 'Cart Total', 'wp-order-bump' ); ?></option>
+                            <option value="all" <?php selected( $meta['trigger_type'], 'all' ); ?>><?php esc_html_e( 'No Rules (Always Show)', 'naxolabs-order-bump' ); ?></option>
+                            <option value="specific_product" <?php selected( $meta['trigger_type'], 'specific_product' ); ?>><?php esc_html_e( 'Cart Item(s)', 'naxolabs-order-bump' ); ?></option>
+                            <option value="category" <?php selected( $meta['trigger_type'], 'category' ); ?>><?php esc_html_e( 'Cart Category(s)', 'naxolabs-order-bump' ); ?></option>
+                            <option value="minimum_order" <?php selected( $meta['trigger_type'], 'minimum_order' ); ?>><?php esc_html_e( 'Cart Total', 'naxolabs-order-bump' ); ?></option>
                         </select>
 
                         <div class="obp-rule-val" id="rule-specific_product" style="<?php echo $meta['trigger_type'] !== 'specific_product' ? 'display:none' : ''; ?>">
-                            <span class="obp-rule-hint"><?php esc_html_e( 'matches any of', 'wp-order-bump' ); ?></span>
+                            <span class="obp-rule-hint"><?php esc_html_e( 'matches any of', 'naxolabs-order-bump' ); ?></span>
                             <div style="position:relative;flex:1">
-                                <input type="text" id="obp-trigger-search" class="obp-input" placeholder="<?php esc_attr_e( 'Search products...', 'wp-order-bump' ); ?>" autocomplete="off">
+                                <input type="text" id="obp-trigger-search" class="obp-input" placeholder="<?php esc_attr_e( 'Search products...', 'naxolabs-order-bump' ); ?>" autocomplete="off">
                                 <div id="obp-trigger-results" class="obp-product-dropdown"></div>
                             </div>
                             <div id="obp-trigger-tags" style="width:100%;margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;">
@@ -505,7 +507,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                         </div>
 
                         <div class="obp-rule-val" id="rule-category" style="<?php echo $meta['trigger_type'] !== 'category' ? 'display:none' : ''; ?>">
-                            <span class="obp-rule-hint"><?php esc_html_e( 'matches any of', 'wp-order-bump' ); ?></span>
+                            <span class="obp-rule-hint"><?php esc_html_e( 'matches any of', 'naxolabs-order-bump' ); ?></span>
                             <?php $trig_cats = is_array( $meta['trigger_categories'] ) ? $meta['trigger_categories'] : []; ?>
                             <div class="obp-cat-select-wrap">
                                 <div class="obp-cat-selected-tags" id="obp-cat-tags">
@@ -519,11 +521,11 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                     endforeach; ?>
                                 </div>
                                 <div class="obp-cat-dropdown-toggle" id="obp-cat-toggle">
-                                    <span class="obp-cat-placeholder"><?php esc_html_e( 'Select categories...', 'wp-order-bump' ); ?></span>
+                                    <span class="obp-cat-placeholder"><?php esc_html_e( 'Select categories...', 'naxolabs-order-bump' ); ?></span>
                                     <span class="obp-cat-arrow">&#9662;</span>
                                 </div>
                                 <div class="obp-cat-dropdown" id="obp-cat-dropdown" style="display:none;">
-                                    <input type="text" class="obp-cat-search" id="obp-cat-search" placeholder="<?php esc_attr_e( 'Search...', 'wp-order-bump' ); ?>">
+                                    <input type="text" class="obp-cat-search" id="obp-cat-search" placeholder="<?php esc_attr_e( 'Search...', 'naxolabs-order-bump' ); ?>">
                                     <div class="obp-cat-list">
                                         <?php foreach ( $all_categories as $cat ) :
                                             $checked = in_array( $cat->term_id, $trig_cats ) ? 'checked' : '';
@@ -541,7 +543,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                         </div>
 
                         <div class="obp-rule-val" id="rule-minimum_order" style="<?php echo $meta['trigger_type'] !== 'minimum_order' ? 'display:none' : ''; ?>">
-                            <span class="obp-rule-hint"><?php esc_html_e( 'is greater than ', 'wp-order-bump' ); ?></span>
+                            <span class="obp-rule-hint"><?php esc_html_e( 'is greater than ', 'naxolabs-order-bump' ); ?></span>
                             <input type="number" name="obp_settings[minimum_order_amount]"
                                    value="<?php echo esc_attr( $meta['minimum_order_amount'] ); ?>"
                                    class="obp-input" placeholder="500" style="width:140px">

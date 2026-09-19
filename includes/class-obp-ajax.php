@@ -33,14 +33,14 @@ class OBP_Ajax {
         check_ajax_referer( 'obp_admin_nonce', 'nonce' );
 
         if ( ! current_user_can( 'manage_woocommerce' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permission denied.', 'wp-order-bump' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Permission denied.', 'naxolabs-order-bump' ) ] );
         }
 
         $id = intval( $_POST['id'] ?? 0 );
         $p  = get_post( $id );
 
         if ( ! $p || $p->post_type !== 'obp_order_bump' ) {
-            wp_send_json_error( [ 'message' => __( 'Invalid order bump.', 'wp-order-bump' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Invalid order bump.', 'naxolabs-order-bump' ) ] );
         }
 
         $new = $p->post_status === 'publish' ? 'draft' : 'publish';
@@ -57,15 +57,15 @@ class OBP_Ajax {
         $id = intval( $_POST['id'] ?? 0 );
 
         if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ?? '' ) ), 'obp_delete_' . $id ) ) {
-            wp_send_json_error( [ 'message' => __( 'Security check failed.', 'wp-order-bump' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Security check failed.', 'naxolabs-order-bump' ) ] );
         }
         if ( ! current_user_can( 'manage_woocommerce' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permission denied.', 'wp-order-bump' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Permission denied.', 'naxolabs-order-bump' ) ] );
         }
 
         $p = get_post( $id );
         if ( ! $p || $p->post_type !== 'obp_order_bump' ) {
-            wp_send_json_error( [ 'message' => __( 'Invalid order bump.', 'wp-order-bump' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Invalid order bump.', 'naxolabs-order-bump' ) ] );
         }
 
         wp_delete_post( $id, true );
@@ -81,10 +81,10 @@ class OBP_Ajax {
         check_ajax_referer( 'obp_admin_nonce', 'nonce' );
 
         if ( ! current_user_can( 'manage_woocommerce' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permission denied.', 'wp-order-bump' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Permission denied.', 'naxolabs-order-bump' ) ] );
         }
 
-        $q = sanitize_text_field( wp_unslash( $_POST['q'] ) ?? '' );
+        $q = ( isset( $_POST['q'] ) ? sanitize_text_field( wp_unslash( $_POST['q'] ) ) : ''  ?? '' );
         if ( mb_strlen( $q ) < 2 ) {
             wp_send_json_success( [] );
         }
@@ -126,12 +126,12 @@ class OBP_Ajax {
         $bump_id = intval( $_POST['bump_id'] ?? 0 );
 
         if ( ! $pid ) {
-            wp_send_json_error( [ 'message' => __( 'Invalid product.', 'wp-order-bump' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Invalid product.', 'naxolabs-order-bump' ) ] );
         }
 
         $product = wc_get_product( $pid );
         if ( ! $product || ! $product->is_purchasable() || ! $product->is_in_stock() ) {
-            wp_send_json_error( [ 'message' => __( 'This product is not available.', 'wp-order-bump' ) ] );
+            wp_send_json_error( [ 'message' => __( 'This product is not available.', 'naxolabs-order-bump' ) ] );
         }
 
         // Already in cart?
@@ -173,7 +173,7 @@ class OBP_Ajax {
             wp_send_json_success( [ 'added' => true, 'total' => WC()->cart->get_total() ] );
         }
 
-        wp_send_json_error( [ 'message' => __( 'Could not add product to cart.', 'wp-order-bump' ) ] );
+        wp_send_json_error( [ 'message' => __( 'Could not add product to cart.', 'naxolabs-order-bump' ) ] );
     }
 
     /**
@@ -186,7 +186,7 @@ class OBP_Ajax {
 
         $pid = intval( $_POST['product_id'] ?? 0 );
         if ( ! $pid ) {
-            wp_send_json_error( [ 'message' => __( 'Invalid product.', 'wp-order-bump' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Invalid product.', 'naxolabs-order-bump' ) ] );
         }
 
         $removed = false;

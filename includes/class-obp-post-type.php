@@ -23,17 +23,17 @@ class OBP_Post_Type {
      */
     public function register_post_type() {
         $labels = [
-            'name'               => __( 'Order Bumps', 'wp-order-bump' ),
-            'singular_name'      => __( 'Order Bump', 'wp-order-bump' ),
-            'add_new'            => __( 'Add New Bump', 'wp-order-bump' ),
-            'add_new_item'       => __( 'Add New Order Bump', 'wp-order-bump' ),
-            'edit_item'          => __( 'Edit Order Bump', 'wp-order-bump' ),
-            'new_item'           => __( 'New Order Bump', 'wp-order-bump' ),
-            'view_item'          => __( 'View Order Bump', 'wp-order-bump' ),
-            'search_items'       => __( 'Search Order Bumps', 'wp-order-bump' ),
-            'not_found'          => __( 'No order bumps found', 'wp-order-bump' ),
-            'not_found_in_trash' => __( 'No order bumps found in Trash', 'wp-order-bump' ),
-            'menu_name'          => __( 'Order Bumps', 'wp-order-bump' ),
+            'name'               => __( 'Order Bumps', 'naxolabs-order-bump' ),
+            'singular_name'      => __( 'Order Bump', 'naxolabs-order-bump' ),
+            'add_new'            => __( 'Add New Bump', 'naxolabs-order-bump' ),
+            'add_new_item'       => __( 'Add New Order Bump', 'naxolabs-order-bump' ),
+            'edit_item'          => __( 'Edit Order Bump', 'naxolabs-order-bump' ),
+            'new_item'           => __( 'New Order Bump', 'naxolabs-order-bump' ),
+            'view_item'          => __( 'View Order Bump', 'naxolabs-order-bump' ),
+            'search_items'       => __( 'Search Order Bumps', 'naxolabs-order-bump' ),
+            'not_found'          => __( 'No order bumps found', 'naxolabs-order-bump' ),
+            'not_found_in_trash' => __( 'No order bumps found in Trash', 'naxolabs-order-bump' ),
+            'menu_name'          => __( 'Order Bumps', 'naxolabs-order-bump' ),
         ];
 
         register_post_type( 'obp_order_bump', [

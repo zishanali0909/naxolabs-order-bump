@@ -23,16 +23,16 @@ class OBP_Admin {
     public function add_menu() {
         add_submenu_page(
             'woocommerce',
-            __( 'Order Bumps', 'wp-order-bump' ),
-            __( 'Order Bumps', 'wp-order-bump' ),
+            __( 'Order Bumps', 'naxolabs-order-bump' ),
+            __( 'Order Bumps', 'naxolabs-order-bump' ),
             'manage_woocommerce',
-            'wp-order-bump',
+            'naxolabs-order-bump',
             [ $this, 'render_dashboard' ]
         );
         // Hidden page (no menu item) for editing/creating bumps
         add_submenu_page(
             null,
-            __( 'Edit Order Bump', 'wp-order-bump' ),
+            __( 'Edit Order Bump', 'naxolabs-order-bump' ),
             '',
             'manage_woocommerce',
             'obp-edit',
@@ -101,19 +101,19 @@ class OBP_Admin {
             'imageType'      => $image_type,
             'maxProducts'    => apply_filters( 'obp_max_products_per_bump', OBP_MAX_PRODUCTS_PER_BUMP ),
             'i18n'           => [
-                'deleteConfirm'  => __( 'Delete this Order Bump?', 'wp-order-bump' ),
-                'productAdded'   => __( 'Product added! Go to Design tab to set its description.', 'wp-order-bump' ),
-                'alreadyAdded'   => __( 'is already added.', 'wp-order-bump' ),
-                'noProducts'     => __( 'No products found.', 'wp-order-bump' ),
-                'active'         => __( 'Active', 'wp-order-bump' ),
-                'inactive'       => __( 'Inactive', 'wp-order-bump' ),
-                'noDescription'  => __( 'No description set.', 'wp-order-bump' ),
-                'errorDeleting'  => __( 'Error deleting.', 'wp-order-bump' ),
-                'error'          => __( 'Error.', 'wp-order-bump' ),
-                'inStock'        => __( 'in-stock', 'wp-order-bump' ),
+                'deleteConfirm'  => __( 'Delete this Order Bump?', 'naxolabs-order-bump' ),
+                'productAdded'   => __( 'Product added! Go to Design tab to set its description.', 'naxolabs-order-bump' ),
+                'alreadyAdded'   => __( 'is already added.', 'naxolabs-order-bump' ),
+                'noProducts'     => __( 'No products found.', 'naxolabs-order-bump' ),
+                'active'         => __( 'Active', 'naxolabs-order-bump' ),
+                'inactive'       => __( 'Inactive', 'naxolabs-order-bump' ),
+                'noDescription'  => __( 'No description set.', 'naxolabs-order-bump' ),
+                'errorDeleting'  => __( 'Error deleting.', 'naxolabs-order-bump' ),
+                'error'          => __( 'Error.', 'naxolabs-order-bump' ),
+                'inStock'        => __( 'in-stock', 'naxolabs-order-bump' ),
                 'maxProductsMsg' => sprintf(
                     /* translators: %d: maximum products per bump */
-                    __( 'Maximum %d products per bump allowed.', 'wp-order-bump' ),
+                    __( 'Maximum %d products per bump allowed.', 'naxolabs-order-bump' ),
                     apply_filters( 'obp_max_products_per_bump', OBP_MAX_PRODUCTS_PER_BUMP )
                 ),
             ],
@@ -210,10 +210,10 @@ class OBP_Admin {
                 wp_die(
                     sprintf(
                         /* translators: %d: maximum bumps allowed */
-                        esc_html__( 'Maximum %d order bumps allowed. Delete an existing bump to create a new one.', 'wp-order-bump' ),
+                        esc_html__( 'Maximum %d order bumps allowed. Delete an existing bump to create a new one.', 'naxolabs-order-bump' ),
                         $max_bumps
                     ),
-                    esc_html__( 'Bump Limit Reached', 'wp-order-bump' ),
+                    esc_html__( 'Bump Limit Reached', 'naxolabs-order-bump' ),
                     [ 'back_link' => true ]
                 );
             }
@@ -276,10 +276,10 @@ class OBP_Admin {
      */
     public function handle_save() {
         if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['obp_nonce'] ?? '' ) ), 'obp_save_bump' ) ) {
-            wp_die( esc_html__( 'Security check failed.', 'wp-order-bump' ) );
+            wp_die( esc_html__( 'Security check failed.', 'naxolabs-order-bump' ) );
         }
         if ( ! current_user_can( 'manage_woocommerce' ) ) {
-            wp_die( esc_html__( 'Unauthorized.', 'wp-order-bump' ) );
+            wp_die( esc_html__( 'Unauthorized.', 'naxolabs-order-bump' ) );
         }
 
         $bump_id  = intval( $_POST['bump_id'] ?? 0 );
@@ -289,7 +289,7 @@ class OBP_Admin {
 
         // Validate title
         if ( empty( trim( $title ) ) ) {
-            $title = __( 'Order Bump', 'wp-order-bump' );
+            $title = __( 'Order Bump', 'naxolabs-order-bump' );
         }
 
         $clean = [];

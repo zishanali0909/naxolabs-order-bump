@@ -17,7 +17,7 @@ class OBP_Blocks_Integration implements IntegrationInterface {
      * Integration name identifier.
      */
     public function get_name() {
-        return 'wp-order-bump';
+        return 'naxolabs-order-bump';
     }
 
     /**

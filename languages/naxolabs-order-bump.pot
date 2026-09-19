@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Antigravity IDE\n"
-"X-Domain: wp-order-bump\n"
+"X-Domain: naxolabs-order-bump\n"
 
 #. Plugin Name
 msgid "Naxolabs Order Bump"

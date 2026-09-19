@@ -187,6 +187,7 @@ class OBP_Frontend {
              * @param int    $bump_id The bump post ID.
              * @param array  $meta    The bump settings.
              */
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML is built safely above, filter allows customization
             echo apply_filters( 'obp_bump_html', $html, $b['id'], $b['meta'] );
         }
     }

@@ -6,7 +6,7 @@
  * Version:     1.0.0
  * Author:      Zishan Ali
  * Author URI:  https://github.com/zishanali0909
- * Text Domain: wp-order-bump
+ * Text Domain: naxolabs-order-bump
  * Domain Path: /languages
  * Requires Plugins: woocommerce
  * Requires at least: 5.8
@@ -33,7 +33,7 @@ function obp_check_woocommerce() {
                 wp_kses_post(
                     sprintf(
                         /* translators: %1$s: plugin name, %2$s: dependency name */
-                        __( '<strong>%1$s</strong> requires <strong>%2$s</strong> to be installed and active.', 'wp-order-bump' ),
+                        __( '<strong>%1$s</strong> requires <strong>%2$s</strong> to be installed and active.', 'naxolabs-order-bump' ),
                         'Naxolabs Order Bump',
                         'WooCommerce'
                     )
@@ -99,6 +99,7 @@ register_activation_hook( __FILE__, 'obp_activate' );
 function obp_activate() {
     // Migrate old post type 'order_bump' to 'obp_order_bump' if needed
     global $wpdb;
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
     $wpdb->update(
         $wpdb->posts,
         [ 'post_type' => 'obp_order_bump' ],
