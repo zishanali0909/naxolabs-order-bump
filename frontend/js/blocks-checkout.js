@@ -23,7 +23,7 @@
     // Get bump data passed from PHP via IntegrationInterface::get_script_data()
     var settingsData = {};
     try {
-        settingsData = wc.wcSettings.getSetting('wp-order-bump_data', {});
+        settingsData = wc.wcSettings.getSetting('naxolabs-order-bump_data', {});
     } catch (e) {
         // Silent fail for missing settings data
     }
@@ -316,7 +316,7 @@
     /* ═══════════════════════════════════════════════
        Register as WooCommerce Checkout Plugin
     ═══════════════════════════════════════════════ */
-    registerPlugin('wp-order-bump-blocks', {
+    registerPlugin('naxolabs-order-bump-blocks', {
         render: function () {
             return el(OrderMetaSlot, null,
                 el(OrderBumpBlockComponent)

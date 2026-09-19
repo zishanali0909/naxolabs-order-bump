@@ -58,7 +58,7 @@ class OBP_Blocks_Integration implements IntegrationInterface {
     }
 
     /**
-     * Data passed to JS via wc.wcSettings.getSetting('wp-order-bump_data').
+     * Data passed to JS via wc.wcSettings.getSetting('naxolabs-order-bump_data').
      * Contains all published bumps with their product details.
      */
     public function get_script_data() {

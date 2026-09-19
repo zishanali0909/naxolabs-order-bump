@@ -62,7 +62,7 @@ Increase your average order value effortlessly by offering relevant products rig
 
 == Installation ==
 
-1. Upload the `wp-order-bump` folder to `/wp-content/plugins/`
+1. Upload the `naxolabs-order-bump` folder to `/wp-content/plugins/`
 2. Activate the plugin through the **Plugins** menu in WordPress
 3. Make sure **WooCommerce** is installed and active
 4. Navigate to **WooCommerce > Order Bumps** in the admin sidebar
