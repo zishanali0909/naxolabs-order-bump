@@ -47,6 +47,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
     </div>
 
     <?php
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- status flag from redirect, no data modification
     $obp_status = isset( $_GET['obp_status'] ) ? sanitize_key( $_GET['obp_status'] ) : '';
     if ( $obp_status === 'saved' ) : ?>
         <div class="obp-notice obp-notice-success" style="margin-top:10px;">✅ <?php esc_html_e( 'Order Bump saved successfully.', 'naxolabs-order-bump' ); ?></div>
@@ -169,10 +170,12 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                             <?php else : ?>
                                 <p class="obp-help" style="padding:12px 0;text-align:center;">
                                     <?php
-                                    /* translators: %1$s: opening HTML tag, %2$s: closing HTML tag */
-                                    printf(
-                                        esc_html__( 'First add products in the %1$sProducts tab%2$s.', 'naxolabs-order-bump' ),
-                                        '<strong>', '</strong>'
+                                    echo wp_kses_post(
+                                        sprintf(
+                                            /* translators: %1$s: opening HTML tag, %2$s: closing HTML tag */
+                                            __( 'First add products in the %1$sProducts tab%2$s.', 'naxolabs-order-bump' ),
+                                            '<strong>', '</strong>'
+                                        )
                                     );
                                     ?>
                                 </p>
@@ -532,7 +535,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                         ?>
                                         <label class="obp-cat-item">
                                             <input type="checkbox" name="obp_settings[trigger_categories][]"
-                                                   value="<?php echo intval( $cat->term_id ); ?>" <?php echo $checked; ?>>
+                                                   value="<?php echo intval( $cat->term_id ); ?>" <?php echo esc_attr( $checked ); ?>>
                                             <span class="obp-cat-check"></span>
                                             <?php echo esc_html( $cat->name ); ?>
                                         </label>

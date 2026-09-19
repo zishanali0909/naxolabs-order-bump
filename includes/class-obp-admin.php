@@ -56,6 +56,7 @@ class OBP_Admin {
             wp_enqueue_media();
         }
 
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only page routing
         $edit_id   = isset( $_GET['edit'] ) ? intval( $_GET['edit'] ) : 0;
         $edit_meta = $edit_id ? ( get_post_meta( $edit_id, '_obp_settings', true ) ?: [] ) : [];
 
@@ -149,6 +150,7 @@ class OBP_Admin {
 
         // HPOS-compatible: use wc_orders table if available, fallback to posts
         $orders_table = $wpdb->prefix . 'wc_orders';
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $use_hpos = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $orders_table ) ) === $orders_table;
 
         if ( $use_hpos ) {
@@ -199,6 +201,7 @@ class OBP_Admin {
      * Render edit/create bump page — delegates to template.
      */
     public function render_edit_page() {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only page routing
         $edit_id = isset( $_GET['edit'] ) ? intval( $_GET['edit'] ) : 0;
 
         // Check bump limit for NEW bumps (editing existing is always allowed)
@@ -211,7 +214,7 @@ class OBP_Admin {
                     sprintf(
                         /* translators: %d: maximum bumps allowed */
                         esc_html__( 'Maximum %d order bumps allowed. Delete an existing bump to create a new one.', 'naxolabs-order-bump' ),
-                        $max_bumps
+                        $max_bumps // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- integer, inside esc_html__
                     ),
                     esc_html__( 'Bump Limit Reached', 'naxolabs-order-bump' ),
                     [ 'back_link' => true ]
@@ -266,6 +269,7 @@ class OBP_Admin {
         }
 
         $all_categories = get_terms( [ 'taxonomy' => 'product_cat', 'hide_empty' => false ] );
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only tab routing
         $tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'design';
 
         include OBP_PATH . 'admin/views/edit-bump.php';
@@ -283,7 +287,7 @@ class OBP_Admin {
         }
 
         $bump_id  = intval( $_POST['bump_id'] ?? 0 );
-        $title    = sanitize_text_field( $_POST['bump_title'] ?? 'Order Bump' );
+        $title    = sanitize_text_field( wp_unslash( $_POST['bump_title'] ?? 'Order Bump' ) );
         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- deeply sanitized below
         $settings = wp_unslash( $_POST['obp_settings'] ?? [] );
 
