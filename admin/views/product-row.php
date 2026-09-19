@@ -25,11 +25,13 @@ $is_in_stock   = $stock_product && $stock_product->is_in_stock();
             <span class="obp-muted">
                 <?php
                 /* translators: %s: regular price */
-                printf( esc_html__( 'Regular: %s', 'wp-order-bump' ), wc_price( $p['regular_price'] ) );
+                /* translators: %s: formatted price with HTML */
+                echo wp_kses_post( sprintf( __( 'Regular: %s', 'wp-order-bump' ), wc_price( $p['regular_price'] ) ) );
                 ?> |
                 <?php
                 /* translators: %s: sale price */
-                printf( esc_html__( 'Sale: %s', 'wp-order-bump' ), wc_price( $p['price'] ) );
+                /* translators: %s: formatted price with HTML */
+                echo wp_kses_post( sprintf( __( 'Sale: %s', 'wp-order-bump' ), wc_price( $p['price'] ) ) );
                 ?>
             </span>
         </div>

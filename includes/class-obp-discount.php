@@ -28,7 +28,8 @@ class OBP_Discount {
         // Only tag items added via our AJAX actions
         if ( ! wp_doing_ajax() ) return $cart_item_data;
 
-        $action = isset( $_POST['action'] ) ? sanitize_text_field( $_POST['action'] ) : '';
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified in OBP_Ajax handler
+        $action = isset( $_POST['action'] ) ? sanitize_text_field( wp_unslash( $_POST['action'] ) ) : '';
         if ( $action !== 'obp_add_to_cart' ) return $cart_item_data;
 
         // Find all published bumps that include this product (use transient cache)

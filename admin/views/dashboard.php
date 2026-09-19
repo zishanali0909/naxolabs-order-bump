@@ -30,16 +30,18 @@ if ( ! defined( 'ABSPATH' ) ) exit;
             + <?php esc_html_e( 'Add New Order Bump', 'wp-order-bump' ); ?>
         </a>
         <?php else : ?>
-        <span class="obp-btn" style="background:#f3f4f6;color:#6b7280;cursor:not-allowed;" title="<?php echo esc_attr( sprintf( __( 'Maximum %d order bumps allowed.', 'wp-order-bump' ), $max_bumps ) ); ?>">
-            <?php echo esc_html( sprintf( __( 'Limit: %d/%d Bumps', 'wp-order-bump' ), $total_bumps, $max_bumps ) ); ?>
+        <span class="obp-btn" style="background:#f3f4f6;color:#6b7280;cursor:not-allowed;" title="<?php /* translators: %d: maximum bumps allowed */
+        echo esc_attr( sprintf( __( 'Maximum %d order bumps allowed.', 'wp-order-bump' ), $max_bumps ) ); ?>">
+            <?php /* translators: %1$d: current bump count, %2$d: maximum bumps allowed */
+            echo esc_html( sprintf( __( 'Limit: %1$d/%2$d Bumps', 'wp-order-bump' ), $total_bumps, $max_bumps ) ); ?>
         </span>
         <?php endif; ?>
     </div>
 
-    <?php if ( isset( $_GET['saved'] ) ) : ?>
+    <?php if ( isset( $_GET['saved'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
         <div class="obp-notice obp-notice-success">✅ <?php esc_html_e( 'Saved successfully.', 'wp-order-bump' ); ?></div>
     <?php endif; ?>
-    <?php if ( isset( $_GET['deleted'] ) ) : ?>
+    <?php if ( isset( $_GET['deleted'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
         <div class="obp-notice obp-notice-success">🗑️ <?php esc_html_e( 'Deleted.', 'wp-order-bump' ); ?></div>
     <?php endif; ?>
 

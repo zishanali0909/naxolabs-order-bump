@@ -66,11 +66,10 @@ function obp_init() {
 
     if ( ! obp_check_woocommerce() ) return;
 
-    load_plugin_textdomain( 'wp-order-bump', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
-
     // One-time auto-migration: old post type -> new
     if ( ! get_option( 'obp_migrated_post_type' ) ) {
         global $wpdb;
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $wpdb->update( $wpdb->posts, [ 'post_type' => 'obp_order_bump' ], [ 'post_type' => 'order_bump' ] );
         delete_transient( 'obp_published_bumps' );
         update_option( 'obp_migrated_post_type', '1', 'no' );

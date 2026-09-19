@@ -167,8 +167,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                             <?php else : ?>
                                 <p class="obp-help" style="padding:12px 0;text-align:center;">
                                     <?php
+                                    /* translators: %1$s: opening HTML tag, %2$s: closing HTML tag */
                                     printf(
-                                        esc_html__( 'First add products in the %sProducts tab%s.', 'wp-order-bump' ),
+                                        esc_html__( 'First add products in the %1$sProducts tab%2$s.', 'wp-order-bump' ),
                                         '<strong>', '</strong>'
                                     );
                                     ?>

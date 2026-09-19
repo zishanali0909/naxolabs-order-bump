@@ -84,7 +84,7 @@ class OBP_Ajax {
             wp_send_json_error( [ 'message' => __( 'Permission denied.', 'wp-order-bump' ) ] );
         }
 
-        $q = sanitize_text_field( $_POST['q'] ?? '' );
+        $q = sanitize_text_field( wp_unslash( $_POST['q'] ) ?? '' );
         if ( mb_strlen( $q ) < 2 ) {
             wp_send_json_success( [] );
         }

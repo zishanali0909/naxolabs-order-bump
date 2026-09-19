@@ -284,6 +284,7 @@ class OBP_Admin {
 
         $bump_id  = intval( $_POST['bump_id'] ?? 0 );
         $title    = sanitize_text_field( $_POST['bump_title'] ?? 'Order Bump' );
+        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- deeply sanitized below
         $settings = wp_unslash( $_POST['obp_settings'] ?? [] );
 
         // Validate title

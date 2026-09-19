@@ -1,6 +1,6 @@
 <?php
 /**
- * WP Order Bump — Uninstall Script
+ * WP Order Bump ï¿½ Uninstall Script
  *
  * Runs when the plugin is deleted via WordPress admin.
  * By default, plugin data (bumps, settings) is preserved so users
@@ -12,6 +12,10 @@
 
 // Exit if not called by WordPress
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
+    exit;
+}
+
+if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 

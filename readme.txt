@@ -2,7 +2,7 @@
 Contributors: zishanali0909
 Tags: woocommerce, order bump, checkout upsell, one click upsell, sales boost
 Requires at least: 5.8
-Tested up to: 6.8
+Tested up to: 7.1
 Requires PHP: 7.4
 Stable tag: 1.0.0
 License: GPLv2 or later
