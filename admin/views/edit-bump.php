@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
     <hr class="wp-header-end">
     <div class="obp-header">
         <div class="obp-header-left">
-            <a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-order-bump' ) ); ?>" class="obp-back-btn">
+            <a href="<?php echo esc_url( admin_url( 'admin.php?page=naxolabs-order-bump' ) ); ?>" class="obp-back-btn">
                 ← <?php esc_html_e( 'Back', 'naxolabs-order-bump' ); ?>
             </a>
             <div class="obp-logo">⚡</div>

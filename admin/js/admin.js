@@ -496,7 +496,7 @@ jQuery(function($) {
         var $btn = $(this);
         $btn.text('Deleting...').css('pointer-events', 'none');
         $.post(obpAdmin.ajaxUrl, { action: 'obp_delete_bump', id: id, nonce: nonce }, function(res) {
-            if (res.success) window.location = obpAdmin.ajaxUrl.replace('admin-ajax.php', '') + 'admin.php?page=wp-order-bump&deleted=1';
+            if (res.success) window.location = obpAdmin.ajaxUrl.replace('admin-ajax.php', '') + 'admin.php?page=naxolabs-order-bump&deleted=1';
             else { alert(obpAdmin.i18n.errorDeleting || 'Error deleting.'); $btn.text('Delete').css('pointer-events', ''); }
         }).fail(function() {
             alert(obpAdmin.i18n.error || 'Error. Please try again.');
