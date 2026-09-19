@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WP Order Bump
  * Plugin URI:  https://github.com/zishanali0909/wp-order-bump
- * Description: Add order bumps to WooCommerce checkout page — boost average order value with one-click upsells.
+ * Description: Add order bumps to WooCommerce checkout page. Boost average order value with one-click upsells.
  * Version:     1.0.0
  * Author:      Zishan Ali
  * Author URI:  https://github.com/zishanali0909
