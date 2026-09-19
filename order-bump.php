@@ -1,7 +1,7 @@
 <?php
 /**
- * Plugin Name: WP Order Bump
- * Plugin URI:  https://github.com/zishanali0909/wp-order-bump
+ * Plugin Name: Naxolabs Order Bump
+ * Plugin URI:  https://github.com/zishanali0909/naxolabs-order-bump
  * Description: Add order bumps to WooCommerce checkout page. Boost average order value with one-click upsells.
  * Version:     1.0.0
  * Author:      Zishan Ali
@@ -14,7 +14,7 @@
  * License:     GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package WPOrderBump
+ * @package NaxolabsOrderBump
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -34,7 +34,7 @@ function obp_check_woocommerce() {
                     sprintf(
                         /* translators: %1$s: plugin name, %2$s: dependency name */
                         __( '<strong>%1$s</strong> requires <strong>%2$s</strong> to be installed and active.', 'wp-order-bump' ),
-                        'WP Order Bump',
+                        'Naxolabs Order Bump',
                         'WooCommerce'
                     )
                 )

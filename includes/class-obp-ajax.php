@@ -2,7 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
- * OBP_Ajax — Handles all AJAX requests for WP Order Bump.
+ * OBP_Ajax — Handles all AJAX requests for Naxolabs Order Bump.
  *
  * Admin endpoints: toggle bump status, delete bump, search products.
  * Frontend endpoints: add/remove products from cart.

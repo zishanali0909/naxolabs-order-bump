@@ -1,4 +1,4 @@
-=== WP Order Bump ===
+=== Naxolabs Order Bump ===
 Contributors: zishanali0909
 Tags: woocommerce, order bump, checkout upsell, one click upsell, sales boost
 Requires at least: 5.8
@@ -12,7 +12,7 @@ Add smart order bumps to your WooCommerce checkout page to boost revenue with on
 
 == Description ==
 
-**WP Order Bump** lets you create beautiful, conversion-optimized order bumps that display on your WooCommerce checkout page. When customers check a box, the bump product is instantly added to their cart at a special discounted price.
+**Naxolabs Order Bump** lets you create beautiful, conversion-optimized order bumps that display on your WooCommerce checkout page. When customers check a box, the bump product is instantly added to their cart at a special discounted price.
 
 Increase your average order value effortlessly by offering relevant products right before checkout.
 
@@ -102,7 +102,7 @@ Yes, you can set display rules based on:
 
 = Does it work with the new WooCommerce Block Checkout? =
 
-Yes! WP Order Bump is compatible with both the classic shortcode checkout and the newer WooCommerce Block-based checkout.
+Yes! Naxolabs Order Bump is compatible with both the classic shortcode checkout and the newer WooCommerce Block-based checkout.
 
 = Is it compatible with HPOS (High-Performance Order Storage)? =
 
@@ -110,7 +110,7 @@ Yes, the plugin fully declares HPOS compatibility and works seamlessly with WooC
 
 = Will it conflict with my theme or other plugins? =
 
-WP Order Bump is designed with full isolation. All CSS classes use the obp- prefix, all JavaScript is namespaced, and all PHP functions use the obp_ prefix to prevent any conflicts.
+Naxolabs Order Bump is designed with full isolation. All CSS classes use the obp- prefix, all JavaScript is namespaced, and all PHP functions use the obp_ prefix to prevent any conflicts.
 
 = Does it track revenue from order bumps? =
 

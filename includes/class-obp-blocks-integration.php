@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Blocks\Integrations\IntegrationInterface;
  * Registers scripts/styles and passes bump data to the block checkout
  * so order bumps render in the new Gutenberg-based checkout.
  *
- * @package WPOrderBump
+ * @package NaxolabsOrderBump
  */
 class OBP_Blocks_Integration implements IntegrationInterface {
 

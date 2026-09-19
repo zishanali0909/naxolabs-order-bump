@@ -2,12 +2,12 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
- * OBP_Admin — Admin controller for WP Order Bump.
+ * OBP_Admin — Admin controller for Naxolabs Order Bump.
  *
  * Handles menu registration, asset enqueueing, rendering (via templates),
  * and form save processing. HTML templates are in admin/views/.
  *
- * @package WPOrderBump
+ * @package NaxolabsOrderBump
  */
 class OBP_Admin {
 

@@ -1,10 +1,10 @@
-# WP Order Bump Translation Template
+# Naxolabs Order Bump Translation Template
 # Copyright (C) 2026 Zishan Ali
 # This file is distributed under the GPLv2 or later.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: WP Order Bump 1.0.0\n"
+"Project-Id-Version: Naxolabs Order Bump 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-07 00:00+0530\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -19,7 +19,7 @@ msgstr ""
 "X-Domain: wp-order-bump\n"
 
 #. Plugin Name
-msgid "WP Order Bump"
+msgid "Naxolabs Order Bump"
 msgstr ""
 
 #. Description

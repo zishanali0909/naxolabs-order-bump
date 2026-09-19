@@ -1,10 +1,10 @@
 <?php
 /**
- * Admin Dashboard Template — WP Order Bump
+ * Admin Dashboard Template — Naxolabs Order Bump
  *
  * Variables available: $bumps, $active
  *
- * @package WPOrderBump
+ * @package NaxolabsOrderBump
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         <div class="obp-header-left">
             <div class="obp-logo">⚡</div>
             <div>
-                <h1><?php esc_html_e( 'WP Order Bump', 'wp-order-bump' ); ?></h1>
+                <h1><?php esc_html_e( 'Naxolabs Order Bump', 'wp-order-bump' ); ?></h1>
                 <p><?php esc_html_e( 'Boost revenue with smart checkout upsells', 'wp-order-bump' ); ?></p>
             </div>
         </div>

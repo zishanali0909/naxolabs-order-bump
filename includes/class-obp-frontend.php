@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * Handles both classic shortcode-based checkout and Block checkout.
  *
  * @since   1.0.0
- * @package WPOrderBump
+ * @package NaxolabsOrderBump
  */
 class OBP_Frontend {
 

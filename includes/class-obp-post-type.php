@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * OBP_Post_Type — Registers the 'obp_order_bump' custom post type.
  *
  * @since 1.0.0
- * @package WPOrderBump
+ * @package NaxolabsOrderBump
  */
 class OBP_Post_Type {
 

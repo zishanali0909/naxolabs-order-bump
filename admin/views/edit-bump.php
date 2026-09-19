@@ -1,11 +1,11 @@
 <?php
 /**
- * Edit Bump Template — WP Order Bump
+ * Edit Bump Template — Naxolabs Order Bump
  *
  * Variables available from OBP_Admin::render_edit_page():
  *   $edit_id, $bump, $meta, $saved_products, $all_categories, $tab
  *
- * @package WPOrderBump
+ * @package NaxolabsOrderBump
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;

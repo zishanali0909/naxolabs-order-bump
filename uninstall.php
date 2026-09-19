@@ -1,13 +1,13 @@
 <?php
 /**
- * WP Order Bump � Uninstall Script
+ * Naxolabs Order Bump � Uninstall Script
  *
  * Runs when the plugin is deleted via WordPress admin.
  * By default, plugin data (bumps, settings) is preserved so users
  * don't lose their configuration if they reinstall.
  * Only temporary cache data (transients) is cleaned up.
  *
- * @package WPOrderBump
+ * @package NaxolabsOrderBump
  */
 
 // Exit if not called by WordPress

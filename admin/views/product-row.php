@@ -1,10 +1,10 @@
 <?php
 /**
- * Product Row Template — WP Order Bump
+ * Product Row Template — Naxolabs Order Bump
  *
  * Variables available: $i, $p, $field_prefix, $is_new
  *
- * @package WPOrderBump
+ * @package NaxolabsOrderBump
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
