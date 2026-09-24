@@ -9,6 +9,8 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template file included in class method scope
+
 $stock_product = wc_get_product( $p['id'] );
 $is_in_stock   = $stock_product && $stock_product->is_in_stock();
 ?>

@@ -8,6 +8,8 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
+
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template file included in class method scope
 ?>
 <div class="wrap naxoorbu-wrap">
     <h1 class="wp-heading-inline" style="display:none;"><?php esc_html_e( 'Order Bumps', 'naxolabs-order-bump' ); ?></h1>
