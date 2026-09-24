@@ -44,14 +44,14 @@ class Naxoorbu_Admin {
      * Enqueue admin CSS/JS assets.
      */
     public function enqueue_assets( $hook ) {
-        if ( false === strpos( $hook, 'naxoorbu' ) && false === strpos( $hook, 'naxoorbu-' ) ) return;
+        if ( false === strpos( $hook, 'naxolabs-order-bump' ) && false === strpos( $hook, 'naxoorbu-edit' ) ) return;
 
         $css_path = plugin_dir_path( dirname( __FILE__ ) ) . 'admin/css/admin.css';
         $js_path  = plugin_dir_path( dirname( __FILE__ ) ) . 'admin/js/admin.js';
         wp_enqueue_style( 'naxoorbu-admin', NAXOORBU_URL . 'admin/css/admin.css', [], filemtime( $css_path ) );
         wp_enqueue_script( 'naxoorbu-admin', NAXOORBU_URL . 'admin/js/admin.js', [ 'jquery', 'jquery-ui-sortable' ], filemtime( $js_path ), true );
         // Only load TinyMCE and media on edit page (not dashboard)
-        if ( strpos( $hook, 'naxoorbu-' ) !== false ) {
+        if ( strpos( $hook, 'naxoorbu-edit' ) !== false ) {
             wp_enqueue_editor();
             wp_enqueue_media();
         }
