@@ -207,7 +207,7 @@
         // ── SKIN 2 layout ──
         if (skin === 'skin2') {
             return el('div', {
-                className: 'naxoorbu-bump-wrap naxoorbu-skin-skin2' + (checked ? ' naxoorbu-bump-is-added' : '') + (showBadge ? ' obp-has-badge' : ''),
+                className: 'naxoorbu-bump-wrap naxoorbu-skin-skin2' + (checked ? ' naxoorbu-bump-is-added' : '') + (showBadge ? ' naxoorbu-has-badge' : ''),
                 'data-product-id': product.id,
                 'data-qty': product.qty
             },
@@ -245,7 +245,7 @@
 
         // ── SKIN 1 layout (default) ──
         return el('div', {
-            className: 'naxoorbu-bump-wrap naxoorbu-skin-skin1' + (checked ? ' naxoorbu-bump-is-added' : '') + (showBadge ? ' obp-has-badge' : ''),
+            className: 'naxoorbu-bump-wrap naxoorbu-skin-skin1' + (checked ? ' naxoorbu-bump-is-added' : '') + (showBadge ? ' naxoorbu-has-badge' : ''),
             'data-product-id': product.id,
             'data-qty': product.qty
         },
