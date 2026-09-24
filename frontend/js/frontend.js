@@ -2,14 +2,14 @@ jQuery(function($) {
 
     var cartState = {};
     var pending   = {};
-    var isBlockCheckout = (typeof obpFrontend !== 'undefined' && obpFrontend.isBlockCheckout);
+    var isBlockCheckout = (typeof naxoorbuFrontend !== 'undefined' && naxoorbuFrontend.isBlockCheckout);
 
     /* ═══════════════════════════════════════════════
        BLOCK CHECKOUT: Inject bumps via MutationObserver
        (bumps are rendered hidden in wp_footer by PHP)
     ═══════════════════════════════════════════════ */
     if (isBlockCheckout) {
-        var $hiddenBumps = $('#obp-block-checkout-bumps');
+        var $hiddenBumps = $('#naxoorbu-block-checkout-bumps');
         if ($hiddenBumps.length && $hiddenBumps.children().length) {
             var injected = false;
 
@@ -35,7 +35,7 @@ jQuery(function($) {
                     $bumps.each(function() { $(this).css('display', ''); });
 
                     var $wrapper = $('<div>', {
-                        'class': 'obp-block-bumps-container',
+                        'class': 'naxoorbu-block-bumps-container',
                         css: { margin: '16px 0', padding: 0 }
                     });
                     $wrapper.append($bumps);
@@ -49,11 +49,11 @@ jQuery(function($) {
 
                     $hiddenBumps.remove();
 
-                    $wrapper.find('.obp-bump-wrap').each(function() {
+                    $wrapper.find('.naxoorbu-bump-wrap').each(function() {
                         var pid = parseInt($(this).data('product-id'), 10);
-                        var checked = $(this).find('.obp-bump-checkbox').is(':checked');
+                        var checked = $(this).find('.naxoorbu-bump-checkbox').is(':checked');
                         cartState[pid] = checked;
-                        if (checked) $(this).addClass('obp-bump-is-added');
+                        if (checked) $(this).addClass('naxoorbu-bump-is-added');
                     });
 
                     return true;
@@ -77,11 +77,11 @@ jQuery(function($) {
        CLASSIC CHECKOUT: Read initial state
     ═══════════════════════════════════════════════ */
     if (!isBlockCheckout) {
-        $('.obp-bump-wrap').each(function() {
+        $('.naxoorbu-bump-wrap').each(function() {
             var pid     = parseInt($(this).data('product-id'), 10);
-            var checked = $(this).find('.obp-bump-checkbox').is(':checked');
+            var checked = $(this).find('.naxoorbu-bump-checkbox').is(':checked');
             cartState[pid] = checked;
-            if (checked) $(this).addClass('obp-bump-is-added');
+            if (checked) $(this).addClass('naxoorbu-bump-is-added');
         });
     }
 
@@ -90,9 +90,9 @@ jQuery(function($) {
        - Disables checkbox during AJAX (prevents double-click)
        - Shows error state on failure
     ═══════════════════════════════════════════════ */
-    $(document).on('change', '.obp-bump-checkbox', function() {
+    $(document).on('change', '.naxoorbu-bump-checkbox', function() {
         var $cb    = $(this);
-        var $wrap  = $cb.closest('.obp-bump-wrap');
+        var $wrap  = $cb.closest('.naxoorbu-bump-wrap');
         var pid    = parseInt($wrap.data('product-id'), 10);
         var qty    = parseInt($wrap.data('qty'), 10) || 1;
         var adding = $cb.is(':checked');
@@ -105,30 +105,30 @@ jQuery(function($) {
 
         // Disable checkbox during AJAX — prevent rapid double-clicks
         $cb.prop('disabled', true);
-        $wrap.addClass('obp-bump-loading-state');
+        $wrap.addClass('naxoorbu-bump-loading-state');
 
         // Instant visual feedback
         cartState[pid] = adding;
-        $wrap.toggleClass('obp-bump-is-added', adding);
+        $wrap.toggleClass('naxoorbu-bump-is-added', adding);
 
         // Clear any previous error
-        $wrap.find('.obp-bump-error').remove();
+        $wrap.find('.naxoorbu-bump-error').remove();
 
         // AJAX
         pending[pid] = $.ajax({
-            url:    obpFrontend.ajaxUrl,
+            url:    naxoorbuFrontend.ajaxUrl,
             method: 'POST',
             data: {
-                action:     adding ? 'obp_add_to_cart' : 'obp_remove_from_cart',
+                action:     adding ? 'naxoorbu_add_to_cart' : 'naxoorbu_remove_from_cart',
                 product_id: pid,
                 bump_id:    $wrap.data('bump-id') || 0,
                 qty:        qty,
-                nonce:      obpFrontend.nonce
+                nonce:      naxoorbuFrontend.nonce
             },
             success: function(res) {
                 delete pending[pid];
                 $cb.prop('disabled', false);
-                $wrap.removeClass('obp-bump-loading-state');
+                $wrap.removeClass('naxoorbu-bump-loading-state');
 
                 if (res.success) {
                     if (isBlockCheckout) {
@@ -145,7 +145,7 @@ jQuery(function($) {
                 if (xhr.statusText === 'abort') return;
                 delete pending[pid];
                 $cb.prop('disabled', false);
-                $wrap.removeClass('obp-bump-loading-state');
+                $wrap.removeClass('naxoorbu-bump-loading-state');
                 revertState($cb, $wrap, pid, adding);
                 showBumpError($wrap, 'Connection error. Please try again.');
             }
@@ -157,7 +157,7 @@ jQuery(function($) {
      */
     function revertState($cb, $wrap, pid, adding) {
         cartState[pid] = !adding;
-        $wrap.toggleClass('obp-bump-is-added', !adding);
+        $wrap.toggleClass('naxoorbu-bump-is-added', !adding);
         $cb.prop('checked', !adding);
     }
 
@@ -165,7 +165,7 @@ jQuery(function($) {
      * Show a brief error message inside the bump wrap.
      */
     function showBumpError($wrap, message) {
-        var $err = $('<div class="obp-bump-error">' + message + '</div>');
+        var $err = $('<div class="naxoorbu-bump-error">' + message + '</div>');
         $wrap.append($err);
         setTimeout(function() {
             $err.fadeOut(300, function() { $(this).remove(); });
@@ -197,11 +197,11 @@ jQuery(function($) {
        CLASSIC CHECKOUT: Restore state after WC refresh
     ═══════════════════════════════════════════════ */
     $(document.body).on('updated_checkout', function() {
-        $('.obp-bump-wrap').each(function() {
+        $('.naxoorbu-bump-wrap').each(function() {
             var pid   = parseInt($(this).data('product-id'), 10);
             var state = cartState[pid] || false;
-            $(this).toggleClass('obp-bump-is-added', state);
-            $(this).find('.obp-bump-checkbox').prop('checked', state);
+            $(this).toggleClass('naxoorbu-bump-is-added', state);
+            $(this).find('.naxoorbu-bump-checkbox').prop('checked', state);
         });
     });
 

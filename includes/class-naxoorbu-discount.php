@@ -2,13 +2,13 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
- * OBP_Discount — Apply order bump discounted prices in WooCommerce cart.
+ * Naxoorbu_Discount — Apply order bump discounted prices in WooCommerce cart.
  *
  * When a product is added to cart via an order bump, we need to override
  * its price to match the discount configured in the bump settings.
  * This class hooks into WooCommerce cart calculations to do that.
  */
-class OBP_Discount {
+class Naxoorbu_Discount {
 
     public function __construct() {
         // Apply discount prices during cart calculation
@@ -28,25 +28,25 @@ class OBP_Discount {
         // Only tag items added via our AJAX actions
         if ( ! wp_doing_ajax() ) return $cart_item_data;
 
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified in OBP_Ajax handler
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified in Naxoorbu_Ajax handler
         $action = isset( $_POST['action'] ) ? sanitize_text_field( wp_unslash( $_POST['action'] ) ) : '';
-        if ( $action !== 'obp_add_to_cart' ) return $cart_item_data;
+        if ( $action !== 'naxoorbu_add_to_cart' ) return $cart_item_data;
 
         // Find all published bumps that include this product (use transient cache)
-        $cached = get_transient( 'obp_published_bumps' );
+        $cached = get_transient( 'naxoorbu_published_bumps' );
         if ( false === $cached ) {
             $bumps_posts = get_posts([
-                'post_type'      => 'obp_order_bump',
+                'post_type'      => 'naxoorbu_order_bump',
                 'post_status'    => 'publish',
                 'posts_per_page' => -1,
             ]);
             $cached = [];
             foreach ( $bumps_posts as $bump ) {
-                $meta = get_post_meta( $bump->ID, '_obp_settings', true );
+                $meta = get_post_meta( $bump->ID, '_naxoorbu_settings', true );
                 if ( empty( $meta ) ) continue;
                 $cached[] = [ 'id' => $bump->ID, 'meta' => $meta ];
             }
-            set_transient( 'obp_published_bumps', $cached, 5 * MINUTE_IN_SECONDS );
+            set_transient( 'naxoorbu_published_bumps', $cached, 5 * MINUTE_IN_SECONDS );
         }
 
         foreach ( $cached as $bump_data ) {
@@ -59,9 +59,9 @@ class OBP_Discount {
                     $discount_type = $pm['discount_type'] ?? 'percentage';
 
                     if ( $discount > 0 ) {
-                        $cart_item_data['obp_bump_id']       = $bump_data['id'];
-                        $cart_item_data['obp_discount']      = $discount;
-                        $cart_item_data['obp_discount_type']  = $discount_type;
+                        $cart_item_data['naxoorbu_bump_id']       = $bump_data['id'];
+                        $cart_item_data['naxoorbu_discount']      = $discount;
+                        $cart_item_data['naxoorbu_discount_type']  = $discount_type;
                     }
                     break 2;
                 }
@@ -79,12 +79,12 @@ class OBP_Discount {
         if ( did_action( 'woocommerce_before_calculate_totals' ) >= 2 ) return;
 
         foreach ( $cart->get_cart() as $cart_item ) {
-            if ( empty( $cart_item['obp_discount'] ) ) continue;
+            if ( empty( $cart_item['naxoorbu_discount'] ) ) continue;
 
             $product       = $cart_item['data'];
             $original_price = floatval( $product->get_price() );
-            $discount      = floatval( $cart_item['obp_discount'] );
-            $discount_type = $cart_item['obp_discount_type'] ?? 'percentage';
+            $discount      = floatval( $cart_item['naxoorbu_discount'] );
+            $discount_type = $cart_item['naxoorbu_discount_type'] ?? 'percentage';
 
             if ( $discount_type === 'percentage' ) {
                 $new_price = $original_price * ( 1 - $discount / 100 );
@@ -101,7 +101,7 @@ class OBP_Discount {
              * @param float $original_price  Original product price.
              * @param array $cart_item       Cart item data.
              */
-            $new_price = apply_filters( 'obp_discount_price', $new_price, $original_price, $cart_item );
+            $new_price = apply_filters( 'naxoorbu_discount_price', $new_price, $original_price, $cart_item );
             $product->set_price( $new_price );
         }
     
@@ -117,12 +117,12 @@ class OBP_Discount {
      * @param \WC_Order              $order  The order object.
      */
     public function save_bump_meta_to_order_item( $item, $cart_item_key, $values, $order ) {
-        if ( ! empty( $values['obp_bump_id'] ) ) {
-            $item->add_meta_data( '_obp_bump_id', intval( $values['obp_bump_id'] ), true );
+        if ( ! empty( $values['naxoorbu_bump_id'] ) ) {
+            $item->add_meta_data( '_naxoorbu_bump_id', intval( $values['naxoorbu_bump_id'] ), true );
         }
-        if ( ! empty( $values['obp_discount'] ) ) {
-            $item->add_meta_data( '_obp_discount', floatval( $values['obp_discount'] ), true );
-            $item->add_meta_data( '_obp_discount_type', sanitize_text_field( $values['obp_discount_type'] ?? 'percentage' ), true );
+        if ( ! empty( $values['naxoorbu_discount'] ) ) {
+            $item->add_meta_data( '_naxoorbu_discount', floatval( $values['naxoorbu_discount'] ), true );
+            $item->add_meta_data( '_naxoorbu_discount_type', sanitize_text_field( $values['naxoorbu_discount_type'] ?? 'percentage' ), true );
         }
     }
 }

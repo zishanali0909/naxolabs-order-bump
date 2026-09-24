@@ -20,4 +20,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Clean up transients (temporary cache only)
-delete_transient( 'obp_published_bumps' );
+delete_transient( 'naxoorbu_published_bumps' );

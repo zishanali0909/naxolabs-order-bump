@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * @since 1.0.0
  * @return bool
  */
-function obp_check_woocommerce() {
+function naxoorbu_check_woocommerce() {
     if ( ! class_exists( 'WooCommerce' ) ) {
         add_action( 'admin_notices', function() {
             printf(
@@ -45,43 +45,43 @@ function obp_check_woocommerce() {
     return true;
 }
 
-define( 'OBP_VERSION', '1.0.0' );
-define( 'OBP_PATH', plugin_dir_path( __FILE__ ) );
-define( 'OBP_URL', plugin_dir_url( __FILE__ ) );
-define( 'OBP_MAX_BUMPS', 2 );
-define( 'OBP_MAX_PRODUCTS_PER_BUMP', 2 );
+define( 'NAXOORBU_VERSION', '1.0.0' );
+define( 'NAXOORBU_PATH', plugin_dir_path( __FILE__ ) );
+define( 'NAXOORBU_URL', plugin_dir_url( __FILE__ ) );
+define( 'NAXOORBU_MAX_BUMPS', 2 );
+define( 'NAXOORBU_MAX_PRODUCTS_PER_BUMP', 2 );
 
-require_once OBP_PATH . 'includes/class-obp-post-type.php';
-require_once OBP_PATH . 'includes/class-obp-admin.php';
-require_once OBP_PATH . 'includes/class-obp-frontend.php';
-require_once OBP_PATH . 'includes/class-obp-ajax.php';
-require_once OBP_PATH . 'includes/class-obp-discount.php';
+require_once NAXOORBU_PATH . 'includes/class-naxoorbu-post-type.php';
+require_once NAXOORBU_PATH . 'includes/class-naxoorbu-admin.php';
+require_once NAXOORBU_PATH . 'includes/class-naxoorbu-frontend.php';
+require_once NAXOORBU_PATH . 'includes/class-naxoorbu-ajax.php';
+require_once NAXOORBU_PATH . 'includes/class-naxoorbu-discount.php';
 
 /**
  * Initialize plugin after all plugins are loaded.
  *
  * @since 1.0.0
  */
-function obp_init() {
+function naxoorbu_init() {
 
-    if ( ! obp_check_woocommerce() ) return;
+    if ( ! naxoorbu_check_woocommerce() ) return;
 
     // One-time auto-migration: old post type -> new
-    if ( ! get_option( 'obp_migrated_post_type' ) ) {
+    if ( ! get_option( 'naxoorbu_migrated_post_type' ) ) {
         global $wpdb;
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-        $wpdb->update( $wpdb->posts, [ 'post_type' => 'obp_order_bump' ], [ 'post_type' => 'order_bump' ] );
-        delete_transient( 'obp_published_bumps' );
-        update_option( 'obp_migrated_post_type', '1', 'no' );
+        $wpdb->update( $wpdb->posts, [ 'post_type' => 'naxoorbu_order_bump' ], [ 'post_type' => 'order_bump' ] );
+        delete_transient( 'naxoorbu_published_bumps' );
+        update_option( 'naxoorbu_migrated_post_type', '1', 'no' );
     }
 
-    new OBP_Post_Type();
-    new OBP_Admin();
-    new OBP_Frontend();
-    new OBP_Ajax();
-    new OBP_Discount();
+    new Naxoorbu_Post_Type();
+    new Naxoorbu_Admin();
+    new Naxoorbu_Frontend();
+    new Naxoorbu_Ajax();
+    new Naxoorbu_Discount();
 }
-add_action( 'plugins_loaded', 'obp_init' );
+add_action( 'plugins_loaded', 'naxoorbu_init' );
 
 // Declare WooCommerce HPOS compatibility
 add_action( 'before_woocommerce_init', function() {
@@ -95,14 +95,14 @@ add_action( 'before_woocommerce_init', function() {
  *
  * @since 1.0.0
  */
-register_activation_hook( __FILE__, 'obp_activate' );
-function obp_activate() {
-    // Migrate old post type 'order_bump' to 'obp_order_bump' if needed
+register_activation_hook( __FILE__, 'naxoorbu_activate' );
+function naxoorbu_activate() {
+    // Migrate old post type 'order_bump' to 'naxoorbu_order_bump' if needed
     global $wpdb;
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
     $wpdb->update(
         $wpdb->posts,
-        [ 'post_type' => 'obp_order_bump' ],
+        [ 'post_type' => 'naxoorbu_order_bump' ],
         [ 'post_type' => 'order_bump' ]
     );
     flush_rewrite_rules();
@@ -113,9 +113,9 @@ function obp_activate() {
  *
  * @since 1.0.0
  */
-register_deactivation_hook( __FILE__, 'obp_deactivate' );
+register_deactivation_hook( __FILE__, 'naxoorbu_deactivate' );
 
-function obp_deactivate() {
+function naxoorbu_deactivate() {
     flush_rewrite_rules();
 }
 
@@ -129,12 +129,12 @@ add_action( 'woocommerce_blocks_loaded', function() {
         return;
     }
 
-    require_once OBP_PATH . 'includes/class-obp-blocks-integration.php';
+    require_once NAXOORBU_PATH . 'includes/class-naxoorbu-blocks-integration.php';
 
     add_action(
         'woocommerce_blocks_checkout_block_registration',
         function( $integration_registry ) {
-            $integration_registry->register( new OBP_Blocks_Integration() );
+            $integration_registry->register( new Naxoorbu_Blocks_Integration() );
         }
     );
 } );

@@ -2,12 +2,12 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
- * OBP_Post_Type — Registers the 'obp_order_bump' custom post type.
+ * Naxoorbu_Post_Type — Registers the 'naxoorbu_order_bump' custom post type.
  *
  * @since 1.0.0
  * @package NaxolabsOrderBump
  */
-class OBP_Post_Type {
+class Naxoorbu_Post_Type {
 
     /**
      * Hook into WordPress init to register the post type.
@@ -17,7 +17,7 @@ class OBP_Post_Type {
     }
 
     /**
-     * Register the 'obp_order_bump' custom post type.
+     * Register the 'naxoorbu_order_bump' custom post type.
      *
      * @since 1.0.0
      */
@@ -36,7 +36,7 @@ class OBP_Post_Type {
             'menu_name'          => __( 'Order Bumps', 'naxolabs-order-bump' ),
         ];
 
-        register_post_type( 'obp_order_bump', [
+        register_post_type( 'naxoorbu_order_bump', [
             'labels'             => $labels,
             'public'             => false,
             'show_ui'            => true,

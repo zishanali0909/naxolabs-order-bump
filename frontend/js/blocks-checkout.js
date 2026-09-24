@@ -134,7 +134,7 @@
             abortRef.current = controller;
 
             var formData = new FormData();
-            formData.append('action', newChecked ? 'obp_add_to_cart' : 'obp_remove_from_cart');
+            formData.append('action', newChecked ? 'naxoorbu_add_to_cart' : 'naxoorbu_remove_from_cart');
             formData.append('product_id', product.id);
             formData.append('qty', product.qty || 1);
             formData.append('nonce', nonce);
@@ -171,16 +171,16 @@
         }
 
         // Price display
-        var priceEl = el('div', { className: 'obp-bump-prices', style: { marginLeft: 'auto', whiteSpace: 'nowrap' } },
+        var priceEl = el('div', { className: 'naxoorbu-bump-prices', style: { marginLeft: 'auto', whiteSpace: 'nowrap' } },
             (showOrig && product.regular_price > product.final_price)
-                ? el('del', { className: 'obp-price-orig', style: { marginRight: '4px', opacity: 0.6 } }, product.regular_html)
+                ? el('del', { className: 'naxoorbu-price-orig', style: { marginRight: '4px', opacity: 0.6 } }, product.regular_html)
                 : null,
-            el('span', { className: 'obp-price-final', style: { fontWeight: 700 } }, product.final_price_html)
+            el('span', { className: 'naxoorbu-price-final', style: { fontWeight: 700 } }, product.final_price_html)
         );
 
         // Badge
         var badgeEl = showBadge
-            ? el('div', { className: 'obp-bump-badge' }, bump.badge_text)
+            ? el('div', { className: 'naxoorbu-bump-badge' }, bump.badge_text)
             : null;
 
         // Image
@@ -197,17 +197,17 @@
 
         // Loading overlay
         var loadingEl = el('div', {
-            className: 'obp-bump-loading',
+            className: 'naxoorbu-bump-loading',
             style: { display: loading ? 'flex' : 'none' }
         },
-            el('div', { className: 'obp-bump-spinner' }),
+            el('div', { className: 'naxoorbu-bump-spinner' }),
             el('span', null, 'Updating order...')
         );
 
         // ── SKIN 2 layout ──
         if (skin === 'skin2') {
             return el('div', {
-                className: 'obp-bump-wrap obp-skin-skin2' + (checked ? ' obp-bump-is-added' : '') + (showBadge ? ' obp-has-badge' : ''),
+                className: 'naxoorbu-bump-wrap naxoorbu-skin-skin2' + (checked ? ' naxoorbu-bump-is-added' : '') + (showBadge ? ' obp-has-badge' : ''),
                 'data-product-id': product.id,
                 'data-qty': product.qty
             },
@@ -218,7 +218,7 @@
                 },
                     imgEl ? el('div', { style: { flexShrink: 0 } }, imgEl) : null,
                     product.description
-                        ? el('div', { style: { flex: 1, minWidth: 0 }, className: 'obp-bump-description', dangerouslySetInnerHTML: { __html: product.description } })
+                        ? el('div', { style: { flex: 1, minWidth: 0 }, className: 'naxoorbu-bump-description', dangerouslySetInnerHTML: { __html: product.description } })
                         : null
                 ) : null,
                 // CTA row
@@ -228,13 +228,13 @@
                         display: 'flex', alignItems: 'center', gap: '8px', background: bgColor
                     }
                 },
-                    el('div', { className: 'obp-bump-arrow', style: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', minWidth: '20px', flexShrink: 0 } }, ArrowIcon()),
+                    el('div', { className: 'naxoorbu-bump-arrow', style: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', minWidth: '20px', flexShrink: 0 } }, ArrowIcon()),
                     el('label', {
                         style: { display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', flex: 1, margin: 0 },
                         onClick: function (e) { e.preventDefault(); handleToggle(); }
                     },
-                        el('input', { type: 'checkbox', className: 'obp-bump-checkbox', checked: checked, readOnly: true }),
-                        el('span', { className: 'obp-bump-checkmark' }),
+                        el('input', { type: 'checkbox', className: 'naxoorbu-bump-checkbox', checked: checked, readOnly: true }),
+                        el('span', { className: 'naxoorbu-bump-checkmark' }),
                         el('span', { style: { fontSize: '14px', fontWeight: 800, color: txtColor }, dangerouslySetInnerHTML: { __html: headline } })
                     ),
                     priceEl
@@ -245,40 +245,40 @@
 
         // ── SKIN 1 layout (default) ──
         return el('div', {
-            className: 'obp-bump-wrap obp-skin-skin1' + (checked ? ' obp-bump-is-added' : '') + (showBadge ? ' obp-has-badge' : ''),
+            className: 'naxoorbu-bump-wrap naxoorbu-skin-skin1' + (checked ? ' naxoorbu-bump-is-added' : '') + (showBadge ? ' obp-has-badge' : ''),
             'data-product-id': product.id,
             'data-qty': product.qty
         },
             badgeEl,
             // Headline row
             el('div', {
-                className: 'obp-bump-headline-row',
+                className: 'naxoorbu-bump-headline-row',
                 style: {
                     display: 'flex', alignItems: 'center', flexWrap: 'nowrap', gap: '8px',
                     padding: (showBadge ? '28px' : '11px') + ' 12px 11px 12px',
                     background: bgColor, color: txtColor
                 }
             },
-                el('div', { className: 'obp-bump-arrow', style: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', minWidth: '20px', flexShrink: 0, alignSelf: 'center' } }, ArrowIcon()),
+                el('div', { className: 'naxoorbu-bump-arrow', style: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', minWidth: '20px', flexShrink: 0, alignSelf: 'center' } }, ArrowIcon()),
                 el('label', {
-                    className: 'obp-bump-check-label',
+                    className: 'naxoorbu-bump-check-label',
                     style: { display: 'inline-flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0, cursor: 'pointer', margin: 0, padding: 0, fontWeight: 'normal' },
                     onClick: function (e) { e.preventDefault(); handleToggle(); }
                 },
-                    el('input', { type: 'checkbox', className: 'obp-bump-checkbox', checked: checked, readOnly: true }),
-                    el('span', { className: 'obp-bump-checkmark' }),
-                    el('span', { className: 'obp-bump-headline-text', dangerouslySetInnerHTML: { __html: headline } })
+                    el('input', { type: 'checkbox', className: 'naxoorbu-bump-checkbox', checked: checked, readOnly: true }),
+                    el('span', { className: 'naxoorbu-bump-checkmark' }),
+                    el('span', { className: 'naxoorbu-bump-headline-text', dangerouslySetInnerHTML: { __html: headline } })
                 ),
                 priceEl
             ),
             // Body (description + image)
-            (product.description || imgEl) ? el('div', { className: 'obp-bump-body' },
+            (product.description || imgEl) ? el('div', { className: 'naxoorbu-bump-body' },
                 imgEl
                     ? el('div', { style: { display: 'flex', gap: '12px', alignItems: 'flex-start', flexDirection: imgPos === 'right' ? 'row-reverse' : 'row' } },
                         imgEl,
-                        product.description ? el('div', { className: 'obp-bump-description', style: { flex: 1 }, dangerouslySetInnerHTML: { __html: product.description } }) : null
+                        product.description ? el('div', { className: 'naxoorbu-bump-description', style: { flex: 1 }, dangerouslySetInnerHTML: { __html: product.description } }) : null
                     )
-                    : product.description ? el('div', { className: 'obp-bump-description', dangerouslySetInnerHTML: { __html: product.description } }) : null
+                    : product.description ? el('div', { className: 'naxoorbu-bump-description', dangerouslySetInnerHTML: { __html: product.description } }) : null
             ) : null,
             loadingEl
         );
@@ -310,7 +310,7 @@
 
         if (elements.length === 0) return null;
 
-        return el('div', { className: 'obp-blocks-checkout-wrap', style: { margin: '16px 0' } }, elements);
+        return el('div', { className: 'naxoorbu-blocks-checkout-wrap', style: { margin: '16px 0' } }, elements);
     }
 
     /* ═══════════════════════════════════════════════

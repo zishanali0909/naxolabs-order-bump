@@ -4,14 +4,14 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationInterface;
 
 /**
- * OBP_Blocks_Integration — WooCommerce Block Checkout integration.
+ * Naxoorbu_Blocks_Integration — WooCommerce Block Checkout integration.
  *
  * Registers scripts/styles and passes bump data to the block checkout
  * so order bumps render in the new Gutenberg-based checkout.
  *
  * @package NaxolabsOrderBump
  */
-class OBP_Blocks_Integration implements IntegrationInterface {
+class Naxoorbu_Blocks_Integration implements IntegrationInterface {
 
     /**
      * Integration name identifier.
@@ -25,29 +25,29 @@ class OBP_Blocks_Integration implements IntegrationInterface {
      */
     public function initialize() {
         wp_register_script(
-            'obp-blocks-checkout',
-            OBP_URL . 'frontend/js/blocks-checkout.js',
+            'naxoorbu-blocks-checkout',
+            NAXOORBU_URL . 'frontend/js/blocks-checkout.js',
             [ 'wp-element', 'wp-plugins', 'wc-blocks-checkout', 'jquery' ],
             filemtime( plugin_dir_path( dirname( __FILE__ ) ) . 'frontend/js/blocks-checkout.js' ),
             true
         );
 
         wp_register_style(
-            'obp-blocks-checkout',
-            OBP_URL . 'frontend/css/frontend.css',
+            'naxoorbu-blocks-checkout',
+            NAXOORBU_URL . 'frontend/css/frontend.css',
             [],
             filemtime( plugin_dir_path( dirname( __FILE__ ) ) . 'frontend/css/frontend.css' )
         );
 
         // Enqueue styles alongside the script
-        wp_enqueue_style( 'obp-blocks-checkout' );
+        wp_enqueue_style( 'naxoorbu-blocks-checkout' );
     }
 
     /**
      * Script handles to enqueue on the frontend block checkout.
      */
     public function get_script_handles() {
-        return [ 'obp-blocks-checkout' ];
+        return [ 'naxoorbu-blocks-checkout' ];
     }
 
     /**
@@ -70,14 +70,14 @@ class OBP_Blocks_Integration implements IntegrationInterface {
      */
     private function get_bumps_data() {
         $bumps_posts = get_posts( [
-            'post_type'      => 'obp_order_bump',
+            'post_type'      => 'naxoorbu_order_bump',
             'post_status'    => 'publish',
             'posts_per_page' => -1,
         ] );
 
         $bumps = [];
         foreach ( $bumps_posts as $bump ) {
-            $meta = get_post_meta( $bump->ID, '_obp_settings', true );
+            $meta = get_post_meta( $bump->ID, '_naxoorbu_settings', true );
             if ( empty( $meta ) || empty( $meta['products'] ) ) continue;
 
             // Build products with calculated prices
@@ -161,7 +161,7 @@ class OBP_Blocks_Integration implements IntegrationInterface {
         return [
             'bumps'   => $bumps,
             'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-            'nonce'   => wp_create_nonce( 'obp_frontend_nonce' ),
+            'nonce'   => wp_create_nonce( 'naxoorbu_frontend_nonce' ),
         ];
     }
 }

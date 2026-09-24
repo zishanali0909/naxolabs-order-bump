@@ -2,26 +2,26 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
- * OBP_Ajax — Handles all AJAX requests for Naxolabs Order Bump.
+ * Naxoorbu_Ajax — Handles all AJAX requests for Naxolabs Order Bump.
  *
  * Admin endpoints: toggle bump status, delete bump, search products.
  * Frontend endpoints: add/remove products from cart.
  *
  * @since 1.0.0
  */
-class OBP_Ajax {
+class Naxoorbu_Ajax {
 
     public function __construct() {
         // Admin-only actions
-        add_action( 'wp_ajax_obp_toggle_bump',     [ $this, 'toggle_bump' ] );
-        add_action( 'wp_ajax_obp_delete_bump',      [ $this, 'delete_bump' ] );
-        add_action( 'wp_ajax_obp_search_products',  [ $this, 'search_products' ] );
+        add_action( 'wp_ajax_naxoorbu_toggle_bump',     [ $this, 'toggle_bump' ] );
+        add_action( 'wp_ajax_naxoorbu_delete_bump',      [ $this, 'delete_bump' ] );
+        add_action( 'wp_ajax_naxoorbu_search_products',  [ $this, 'search_products' ] );
 
         // Frontend (logged-in + guest) actions
-        add_action( 'wp_ajax_obp_add_to_cart',           [ $this, 'add_to_cart' ] );
-        add_action( 'wp_ajax_nopriv_obp_add_to_cart',    [ $this, 'add_to_cart' ] );
-        add_action( 'wp_ajax_obp_remove_from_cart',      [ $this, 'remove_from_cart' ] );
-        add_action( 'wp_ajax_nopriv_obp_remove_from_cart', [ $this, 'remove_from_cart' ] );
+        add_action( 'wp_ajax_naxoorbu_add_to_cart',           [ $this, 'add_to_cart' ] );
+        add_action( 'wp_ajax_nopriv_naxoorbu_add_to_cart',    [ $this, 'add_to_cart' ] );
+        add_action( 'wp_ajax_naxoorbu_remove_from_cart',      [ $this, 'remove_from_cart' ] );
+        add_action( 'wp_ajax_nopriv_naxoorbu_remove_from_cart', [ $this, 'remove_from_cart' ] );
     }
 
     /**
@@ -30,7 +30,7 @@ class OBP_Ajax {
      * @since 1.0.0
      */
     public function toggle_bump() {
-        check_ajax_referer( 'obp_admin_nonce', 'nonce' );
+        check_ajax_referer( 'naxoorbu_admin_nonce', 'nonce' );
 
         if ( ! current_user_can( 'manage_woocommerce' ) ) {
             wp_send_json_error( [ 'message' => __( 'Permission denied.', 'naxolabs-order-bump' ) ] );
@@ -39,7 +39,7 @@ class OBP_Ajax {
         $id = intval( $_POST['id'] ?? 0 );
         $p  = get_post( $id );
 
-        if ( ! $p || $p->post_type !== 'obp_order_bump' ) {
+        if ( ! $p || $p->post_type !== 'naxoorbu_order_bump' ) {
             wp_send_json_error( [ 'message' => __( 'Invalid order bump.', 'naxolabs-order-bump' ) ] );
         }
 
@@ -56,7 +56,7 @@ class OBP_Ajax {
     public function delete_bump() {
         $id = intval( $_POST['id'] ?? 0 );
 
-        if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ?? '' ) ), 'obp_delete_' . $id ) ) {
+        if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ?? '' ) ), 'naxoorbu_delete_' . $id ) ) {
             wp_send_json_error( [ 'message' => __( 'Security check failed.', 'naxolabs-order-bump' ) ] );
         }
         if ( ! current_user_can( 'manage_woocommerce' ) ) {
@@ -64,7 +64,7 @@ class OBP_Ajax {
         }
 
         $p = get_post( $id );
-        if ( ! $p || $p->post_type !== 'obp_order_bump' ) {
+        if ( ! $p || $p->post_type !== 'naxoorbu_order_bump' ) {
             wp_send_json_error( [ 'message' => __( 'Invalid order bump.', 'naxolabs-order-bump' ) ] );
         }
 
@@ -78,7 +78,7 @@ class OBP_Ajax {
      * @since 1.0.0
      */
     public function search_products() {
-        check_ajax_referer( 'obp_admin_nonce', 'nonce' );
+        check_ajax_referer( 'naxoorbu_admin_nonce', 'nonce' );
 
         if ( ! current_user_can( 'manage_woocommerce' ) ) {
             wp_send_json_error( [ 'message' => __( 'Permission denied.', 'naxolabs-order-bump' ) ] );
@@ -119,7 +119,7 @@ class OBP_Ajax {
      * @since 1.0.0
      */
     public function add_to_cart() {
-        check_ajax_referer( 'obp_frontend_nonce', 'nonce' );
+        check_ajax_referer( 'naxoorbu_frontend_nonce', 'nonce' );
 
         $pid     = intval( $_POST['product_id'] ?? 0 );
         $qty     = max( 1, min( 99, intval( $_POST['qty'] ?? 1 ) ) );
@@ -144,14 +144,14 @@ class OBP_Ajax {
 
         $cart_item_data = [];
         if ( $bump_id ) {
-            $cart_item_data['obp_bump_id'] = $bump_id;
+            $cart_item_data['naxoorbu_bump_id'] = $bump_id;
             // Get discount info from bump settings
-            $bump_meta = get_post_meta( $bump_id, '_obp_settings', true );
+            $bump_meta = get_post_meta( $bump_id, '_naxoorbu_settings', true );
             if ( is_array( $bump_meta ) && ! empty( $bump_meta['products'] ) ) {
                 foreach ( $bump_meta['products'] as $bp ) {
                     if ( intval( $bp['id'] ) === $pid ) {
-                        $cart_item_data['obp_discount']      = floatval( $bp['discount'] ?? 0 );
-                        $cart_item_data['obp_discount_type']  = sanitize_text_field( $bp['discount_type'] ?? 'percentage' );
+                        $cart_item_data['naxoorbu_discount']      = floatval( $bp['discount'] ?? 0 );
+                        $cart_item_data['naxoorbu_discount_type']  = sanitize_text_field( $bp['discount_type'] ?? 'percentage' );
                         break;
                     }
                 }
@@ -166,7 +166,7 @@ class OBP_Ajax {
          * @param int   $pid           Product ID being added.
          * @param int   $bump_id       Bump post ID.
          */
-        $cart_item_data = apply_filters( 'obp_cart_item_data', $cart_item_data, $pid, $bump_id );
+        $cart_item_data = apply_filters( 'naxoorbu_cart_item_data', $cart_item_data, $pid, $bump_id );
 
         if ( WC()->cart->add_to_cart( $pid, $qty, 0, [], $cart_item_data ) ) {
             WC()->cart->calculate_totals();
@@ -182,7 +182,7 @@ class OBP_Ajax {
      * @since 1.0.0
      */
     public function remove_from_cart() {
-        check_ajax_referer( 'obp_frontend_nonce', 'nonce' );
+        check_ajax_referer( 'naxoorbu_frontend_nonce', 'nonce' );
 
         $pid = intval( $_POST['product_id'] ?? 0 );
         if ( ! $pid ) {

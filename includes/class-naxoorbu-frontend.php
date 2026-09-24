@@ -2,14 +2,14 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
- * OBP_Frontend — Renders order bumps on the WooCommerce checkout page.
+ * Naxoorbu_Frontend — Renders order bumps on the WooCommerce checkout page.
  *
  * Handles both classic shortcode-based checkout and Block checkout.
  *
  * @since   1.0.0
  * @package NaxolabsOrderBump
  */
-class OBP_Frontend {
+class Naxoorbu_Frontend {
 
     public function __construct() {
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
@@ -22,7 +22,7 @@ class OBP_Frontend {
         add_action( 'wp_footer', [ $this, 'render_block_checkout_fallback' ], 5 );
 
         // Invalidate bump cache when a bump is saved/updated/deleted
-        add_action( 'save_post_obp_order_bump',   [ $this, 'clear_bump_cache' ] );
+        add_action( 'save_post_naxoorbu_order_bump',   [ $this, 'clear_bump_cache' ] );
         add_action( 'delete_post',            [ $this, 'clear_bump_cache' ] );
     }
 
@@ -30,7 +30,7 @@ class OBP_Frontend {
      * Clear the cached bumps transient.
      */
     public function clear_bump_cache() {
-        delete_transient( 'obp_published_bumps' );
+        delete_transient( 'naxoorbu_published_bumps' );
     }
 
     /**
@@ -40,11 +40,11 @@ class OBP_Frontend {
      */
     public function enqueue_assets() {
         if ( ! is_checkout() ) return;
-        wp_enqueue_style(  'obp-frontend', OBP_URL . 'frontend/css/frontend.css', [], filemtime( plugin_dir_path( dirname( __FILE__ ) ) . 'frontend/css/frontend.css' ) );
-        wp_enqueue_script( 'obp-frontend', OBP_URL . 'frontend/js/frontend.js', ['jquery'], filemtime( plugin_dir_path( dirname( __FILE__ ) ) . 'frontend/js/frontend.js' ), true );
-        wp_localize_script( 'obp-frontend', 'obpFrontend', [
+        wp_enqueue_style(  'naxoorbu-frontend', NAXOORBU_URL . 'frontend/css/frontend.css', [], filemtime( plugin_dir_path( dirname( __FILE__ ) ) . 'frontend/css/frontend.css' ) );
+        wp_enqueue_script( 'naxoorbu-frontend', NAXOORBU_URL . 'frontend/js/frontend.js', ['jquery'], filemtime( plugin_dir_path( dirname( __FILE__ ) ) . 'frontend/js/frontend.js' ), true );
+        wp_localize_script( 'naxoorbu-frontend', 'naxoorbuFrontend', [
             'ajaxUrl'         => admin_url('admin-ajax.php'),
-            'nonce'           => wp_create_nonce('obp_frontend_nonce'),
+            'nonce'           => wp_create_nonce('naxoorbu_frontend_nonce'),
             'isBlockCheckout' => $this->is_block_checkout(),
         ]);
     }
@@ -72,7 +72,7 @@ class OBP_Frontend {
         $all_bumps = $this->get_all_bumps_cached();
         if ( empty( $all_bumps ) ) return;
 
-        echo '<div id="obp-block-checkout-bumps" style="display:none !important;">';
+        echo '<div id="naxoorbu-block-checkout-bumps" style="display:none !important;">';
         foreach ( $all_bumps as $bump_data ) {
             $this->render_single_bump( $bump_data['id'], $bump_data['meta'] );
         }
@@ -83,18 +83,18 @@ class OBP_Frontend {
      * Get all published bumps with their meta, using transient cache.
      */
     private function get_all_bumps_cached() {
-        $cached = get_transient( 'obp_published_bumps' );
+        $cached = get_transient( 'naxoorbu_published_bumps' );
         if ( false !== $cached ) return $cached;
 
-        $all  = get_posts(['post_type'=>'obp_order_bump','post_status'=>'publish','posts_per_page'=>-1]);
+        $all  = get_posts(['post_type'=>'naxoorbu_order_bump','post_status'=>'publish','posts_per_page'=>-1]);
         $data = [];
         foreach ( $all as $bump ) {
-            $meta = get_post_meta( $bump->ID, '_obp_settings', true );
+            $meta = get_post_meta( $bump->ID, '_naxoorbu_settings', true );
             if ( empty($meta) ) continue;
             $data[] = ['id' => $bump->ID, 'meta' => $meta];
         }
 
-        set_transient( 'obp_published_bumps', $data, 5 * MINUTE_IN_SECONDS );
+        set_transient( 'naxoorbu_published_bumps', $data, 5 * MINUTE_IN_SECONDS );
         return $data;
     }
 
@@ -108,12 +108,12 @@ class OBP_Frontend {
             if ( ! $this->check_trigger( $meta ) ) continue;
 
             // Extendable via filters — allows scheduling checks.
-            if ( ! apply_filters( 'obp_is_bump_scheduled', true, $bump_data ) ) {
+            if ( ! apply_filters( 'naxoorbu_is_bump_scheduled', true, $bump_data ) ) {
                 continue;
             }
 
             // Extendable via filters — allows advanced conditional logic.
-            if ( ! apply_filters( 'obp_passes_conditions', true, $bump_data ) ) {
+            if ( ! apply_filters( 'naxoorbu_passes_conditions', true, $bump_data ) ) {
                 continue;
             }
 
@@ -126,7 +126,7 @@ class OBP_Frontend {
          * @param array  $out      List of bump data arrays.
          * @param string $position Checkout position.
          */
-        do_action( 'obp_bumps_displayed', $out, $position );
+        do_action( 'naxoorbu_bumps_displayed', $out, $position );
 
         return $out;
     }
@@ -164,7 +164,7 @@ class OBP_Frontend {
 
     private function render_bumps( $position ) {
         $bumps     = $this->get_bumps( $position );
-        $max_bumps = apply_filters( 'obp_max_bumps', 2 );
+        $max_bumps = apply_filters( 'naxoorbu_max_bumps', 2 );
         $bumps     = array_slice( $bumps, 0, $max_bumps );
 
         /**
@@ -173,7 +173,7 @@ class OBP_Frontend {
          * @param array  $bumps    List of bump data arrays.
          * @param string $position Checkout position (before_payment|after_payment).
          */
-        do_action( 'obp_before_checkout', $bumps, $position );
+        do_action( 'naxoorbu_before_checkout', $bumps, $position );
 
         foreach ( $bumps as $b ) {
             ob_start();
@@ -188,7 +188,7 @@ class OBP_Frontend {
              * @param array  $meta    The bump settings.
              */
             // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML is built safely above, filter allows customization
-            echo apply_filters( 'obp_bump_html', $html, $b['id'], $b['meta'] );
+            echo apply_filters( 'naxoorbu_bump_html', $html, $b['id'], $b['meta'] );
         }
     }
 
@@ -202,15 +202,15 @@ class OBP_Frontend {
          * @param int   $bump_id The bump post ID.
          * @param array $meta    The bump settings.
          */
-        do_action( 'obp_before_bump_render', $bump_id, $meta );
+        do_action( 'naxoorbu_before_bump_render', $bump_id, $meta );
 
         $headline        = $meta['headline']  ?? 'Yes! Add {{product_name}} to my order';
         $show_badge      = !empty( $meta['show_badge'] );
         $badge_text      = $meta['badge_text'] ?? 'Special Offer';
         $show_orig       = !empty( $meta['show_original_price'] );
         $skin            = $meta['skin'] ?? 'skin1';
-        $bump_types      = apply_filters( 'obp_bump_types', array( 'checkbox' ) );
-        $design_options  = apply_filters( 'obp_bump_design_options', array( 'skin1', 'skin2' ) );
+        $bump_types      = apply_filters( 'naxoorbu_bump_types', array( 'checkbox' ) );
+        $design_options  = apply_filters( 'naxoorbu_bump_design_options', array( 'skin1', 'skin2' ) );
         $header_color      = $skin === 'skin2' ? ($meta['skin2_bg_color'] ?? '#e8f7f9') : ($meta['skin1_bg_color'] ?? '#FFFDE7');
         $header_text_color = $skin === 'skin2' ? ($meta['skin2_text_color'] ?? '#155724') : ($meta['skin1_text_color'] ?? '#155724');
         $show_img        = !empty( $meta['show_product_image'] );
@@ -255,21 +255,21 @@ class OBP_Frontend {
                 }
             }
 
-            $wrap_id     = 'obp-bump-' . $bump_id . '-' . $idx;
-            $check_id    = 'obp-check-' . $bump_id . '-' . $idx;
-            $added_class = $in_cart ? 'obp-bump-is-added' : '';
+            $wrap_id     = 'naxoorbu-bump-' . $bump_id . '-' . $idx;
+            $check_id    = 'naxoorbu-check-' . $bump_id . '-' . $idx;
+            $added_class = $in_cart ? 'naxoorbu-bump-is-added' : '';
 
             // Price HTML (wc_price already returns safe HTML)
             ob_start(); ?>
-            <div class="obp-bump-prices">
+            <div class="naxoorbu-bump-prices">
                 <?php if ( $show_orig && $regular > $offer_price ): ?>
-                    <del class="obp-price-orig"><?php echo wp_kses_post( wc_price( $regular ) ); ?></del>
+                    <del class="naxoorbu-price-orig"><?php echo wp_kses_post( wc_price( $regular ) ); ?></del>
                 <?php endif; ?>
-                <span class="obp-price-final"><?php echo wp_kses_post( wc_price( $offer_price ) ); ?></span>
+                <span class="naxoorbu-price-final"><?php echo wp_kses_post( wc_price( $offer_price ) ); ?></span>
             </div>
             <?php $price_html = ob_get_clean(); ?>
 
-            <div class="obp-bump-wrap obp-skin-<?php echo esc_attr( $skin ); ?> <?php echo esc_attr( $added_class ); ?> <?php echo ( $show_badge && $badge_text ) ? 'obp-has-badge' : ''; ?>"
+            <div class="naxoorbu-bump-wrap naxoorbu-skin-<?php echo esc_attr( $skin ); ?> <?php echo esc_attr( $added_class ); ?> <?php echo ( $show_badge && $badge_text ) ? 'naxoorbu-has-badge' : ''; ?>"
                  id="<?php echo esc_attr( $wrap_id ); ?>"
                  data-product-id="<?php echo intval( $product->get_id() ); ?>"
                  data-bump-id="<?php echo intval( $bump_id ); ?>"
@@ -279,7 +279,7 @@ class OBP_Frontend {
                     <!-- ═══ SKIN 2: Teal border, badge above, image+text row, CTA bottom ═══ -->
 
                     <?php if ( $show_badge && $badge_text ): ?>
-                        <div class="obp-bump-badge"><?php echo esc_html( $badge_text ); ?></div>
+                        <div class="naxoorbu-bump-badge"><?php echo esc_html( $badge_text ); ?></div>
                     <?php endif; ?>
 
                     <div style="display:flex;gap:14px;align-items:flex-start;padding:12px 16px 10px;">
@@ -288,20 +288,20 @@ class OBP_Frontend {
                         <?php endif; ?>
                         <?php if ( $description ): ?>
                             <div style="flex:1;min-width:0;">
-                                <div class="obp-bump-description"><?php echo wp_kses_post( wpautop( $description ) ); ?></div>
+                                <div class="naxoorbu-bump-description"><?php echo wp_kses_post( wpautop( $description ) ); ?></div>
                             </div>
                         <?php endif; ?>
                     </div>
 
                     <div style="border-top:1.5px dashed #2bbfbf;padding:10px 14px;display:flex;align-items:center;gap:8px;background:<?php echo esc_attr( $header_color ); ?>;">
-                        <div class="obp-bump-arrow" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;min-width:20px;flex-shrink:0;">
+                        <div class="naxoorbu-bump-arrow" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;min-width:20px;flex-shrink:0;">
                             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible;">
                                 <path d="M1 6H11M11 6L7 2M11 6L7 10" stroke="#E15334" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                         </div>
                         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;margin:0;" for="<?php echo esc_attr( $check_id ); ?>">
-                            <input type="checkbox" class="obp-bump-checkbox" id="<?php echo esc_attr( $check_id ); ?>" <?php checked( $in_cart ); ?>>
-                            <span class="obp-bump-checkmark"></span>
+                            <input type="checkbox" class="naxoorbu-bump-checkbox" id="<?php echo esc_attr( $check_id ); ?>" <?php checked( $in_cart ); ?>>
+                            <span class="naxoorbu-bump-checkmark"></span>
                             <span style="font-size:14px;font-weight:800;color:<?php echo esc_attr( $header_text_color ); ?>;"><?php echo wp_kses_post( $headline_html ); ?></span>
                         </label>
                         <?php echo wp_kses_post( $price_html ); ?>
@@ -310,35 +310,35 @@ class OBP_Frontend {
                 <?php else: ?>
                     <!-- ═══ SKIN 1: Classic yellow header ═══ -->
                     <?php if ( $show_badge && $badge_text ): ?>
-                        <div class="obp-bump-badge"><?php echo esc_html( $badge_text ); ?></div>
+                        <div class="naxoorbu-bump-badge"><?php echo esc_html( $badge_text ); ?></div>
                     <?php endif; ?>
-                    <div class="obp-bump-headline-row" style="display:flex !important; align-items:center !important; flex-wrap:nowrap !important; gap:8px; padding:<?php echo esc_attr( ( $show_badge && $badge_text ) ? '28px' : '11px' ); ?> 12px 11px 12px; background:<?php echo esc_attr( $header_color ); ?> !important; color:<?php echo esc_attr( $header_text_color ); ?> !important;">
-                        <div class="obp-bump-arrow" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;min-width:20px;flex-shrink:0;align-self:center;">
+                    <div class="naxoorbu-bump-headline-row" style="display:flex !important; align-items:center !important; flex-wrap:nowrap !important; gap:8px; padding:<?php echo esc_attr( ( $show_badge && $badge_text ) ? '28px' : '11px' ); ?> 12px 11px 12px; background:<?php echo esc_attr( $header_color ); ?> !important; color:<?php echo esc_attr( $header_text_color ); ?> !important;">
+                        <div class="naxoorbu-bump-arrow" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;min-width:20px;flex-shrink:0;align-self:center;">
                             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible;">
                                 <path d="M1 6H11M11 6L7 2M11 6L7 10" stroke="#E15334" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                         </div>
-                        <label class="obp-bump-check-label" for="<?php echo esc_attr( $check_id ); ?>" style="display:inline-flex !important;align-items:center !important;gap:8px;flex:1;min-width:0;cursor:pointer;margin:0;padding:0;font-weight:normal;">
-                            <input type="checkbox" class="obp-bump-checkbox" id="<?php echo esc_attr( $check_id ); ?>" <?php checked( $in_cart ); ?>>
-                            <span class="obp-bump-checkmark"></span>
-                            <span class="obp-bump-headline-text"><?php echo wp_kses_post( $headline_html ); ?></span>
+                        <label class="naxoorbu-bump-check-label" for="<?php echo esc_attr( $check_id ); ?>" style="display:inline-flex !important;align-items:center !important;gap:8px;flex:1;min-width:0;cursor:pointer;margin:0;padding:0;font-weight:normal;">
+                            <input type="checkbox" class="naxoorbu-bump-checkbox" id="<?php echo esc_attr( $check_id ); ?>" <?php checked( $in_cart ); ?>>
+                            <span class="naxoorbu-bump-checkmark"></span>
+                            <span class="naxoorbu-bump-headline-text"><?php echo wp_kses_post( $headline_html ); ?></span>
                         </label>
                         <?php echo wp_kses_post( $price_html ); ?>
                     </div>
                     <?php if ( $description || $img_html ): ?>
-                        <div class="obp-bump-body">
+                        <div class="naxoorbu-bump-body">
                             <?php if ( $img_html && $img_position === 'left' ): ?>
-                                <div class="obp-bump-body-inner obp-img-left obp-bump-description">
-                                    <div class="obp-bump-body-img obp-float-left"><?php echo wp_kses_post( $img_html ); ?></div>
+                                <div class="naxoorbu-bump-body-inner naxoorbu-img-left naxoorbu-bump-description">
+                                    <div class="naxoorbu-bump-body-img naxoorbu-float-left"><?php echo wp_kses_post( $img_html ); ?></div>
                                     <?php if ( $description ): echo wp_kses_post( wpautop( $description ) ); endif; ?>
                                 </div>
                             <?php elseif ( $img_html && $img_position === 'right' ): ?>
-                                <div class="obp-bump-body-inner obp-img-right obp-bump-description">
-                                    <div class="obp-bump-body-img obp-float-right"><?php echo wp_kses_post( $img_html ); ?></div>
+                                <div class="naxoorbu-bump-body-inner naxoorbu-img-right naxoorbu-bump-description">
+                                    <div class="naxoorbu-bump-body-img naxoorbu-float-right"><?php echo wp_kses_post( $img_html ); ?></div>
                                     <?php if ( $description ): echo wp_kses_post( wpautop( $description ) ); endif; ?>
                                 </div>
                             <?php else: ?>
-                                <?php if ( $description ): ?><div class="obp-bump-description"><?php echo wp_kses_post( wpautop( $description ) ); ?></div><?php endif; ?>
+                                <?php if ( $description ): ?><div class="naxoorbu-bump-description"><?php echo wp_kses_post( wpautop( $description ) ); ?></div><?php endif; ?>
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>

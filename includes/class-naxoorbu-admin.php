@@ -2,19 +2,19 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
- * OBP_Admin — Admin controller for Naxolabs Order Bump.
+ * Naxoorbu_Admin — Admin controller for Naxolabs Order Bump.
  *
  * Handles menu registration, asset enqueueing, rendering (via templates),
  * and form save processing. HTML templates are in admin/views/.
  *
  * @package NaxolabsOrderBump
  */
-class OBP_Admin {
+class Naxoorbu_Admin {
 
     public function __construct() {
         add_action( 'admin_menu',               [ $this, 'add_menu' ] );
         add_action( 'admin_enqueue_scripts',    [ $this, 'enqueue_assets' ] );
-        add_action( 'admin_post_obp_save_bump', [ $this, 'handle_save' ] );
+        add_action( 'admin_post_naxoorbu_save_bump', [ $this, 'handle_save' ] );
     }
 
     /**
@@ -35,7 +35,7 @@ class OBP_Admin {
             __( 'Edit Order Bump', 'naxolabs-order-bump' ),
             '',
             'manage_woocommerce',
-            'obp-edit',
+            'naxoorbu-edit',
             [ $this, 'render_edit_page' ]
         );
     }
@@ -44,21 +44,21 @@ class OBP_Admin {
      * Enqueue admin CSS/JS assets.
      */
     public function enqueue_assets( $hook ) {
-        if ( false === strpos( $hook, 'order-bump' ) && false === strpos( $hook, 'obp-' ) ) return;
+        if ( false === strpos( $hook, 'naxoorbu' ) && false === strpos( $hook, 'naxoorbu-' ) ) return;
 
         $css_path = plugin_dir_path( dirname( __FILE__ ) ) . 'admin/css/admin.css';
         $js_path  = plugin_dir_path( dirname( __FILE__ ) ) . 'admin/js/admin.js';
-        wp_enqueue_style( 'obp-admin', OBP_URL . 'admin/css/admin.css', [], filemtime( $css_path ) );
-        wp_enqueue_script( 'obp-admin', OBP_URL . 'admin/js/admin.js', [ 'jquery', 'jquery-ui-sortable' ], filemtime( $js_path ), true );
+        wp_enqueue_style( 'naxoorbu-admin', NAXOORBU_URL . 'admin/css/admin.css', [], filemtime( $css_path ) );
+        wp_enqueue_script( 'naxoorbu-admin', NAXOORBU_URL . 'admin/js/admin.js', [ 'jquery', 'jquery-ui-sortable' ], filemtime( $js_path ), true );
         // Only load TinyMCE and media on edit page (not dashboard)
-        if ( strpos( $hook, 'obp-' ) !== false ) {
+        if ( strpos( $hook, 'naxoorbu-' ) !== false ) {
             wp_enqueue_editor();
             wp_enqueue_media();
         }
 
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only page routing
         $edit_id   = isset( $_GET['edit'] ) ? intval( $_GET['edit'] ) : 0;
-        $edit_meta = $edit_id ? ( get_post_meta( $edit_id, '_obp_settings', true ) ?: [] ) : [];
+        $edit_meta = $edit_id ? ( get_post_meta( $edit_id, '_naxoorbu_settings', true ) ?: [] ) : [];
 
         // Get first product image for preview (with strong fallback chain)
         $first_prod_img = '';
@@ -89,9 +89,19 @@ class OBP_Admin {
         $custom_img_url = $edit_meta['image_custom_url'] ?? '';
         $image_type     = $edit_meta['image_type'] ?? 'product';
 
-        wp_localize_script( 'obp-admin', 'obpAdmin', [
+        // Pass product descriptions data to JS (instead of inline <script>)
+        if ( $edit_id && ! empty( $edit_meta['products'] ) ) {
+            $desc_json = [];
+            foreach ( $edit_meta['products'] as $p ) {
+                $pid = intval( $p['id'] ?? 0 );
+                $desc_json[ $pid ] = $p['description'] ?? '';
+            }
+            wp_add_inline_script( 'naxoorbu-admin', 'var naxoorbuProdDescs = ' . wp_json_encode( $desc_json ) . ';', 'before' );
+        }
+
+        wp_localize_script( 'naxoorbu-admin', 'naxoorbuAdmin', [
             'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
-            'nonce'          => wp_create_nonce( 'obp_admin_nonce' ),
+            'nonce'          => wp_create_nonce( 'naxoorbu_admin_nonce' ),
             'currentSkin'    => $edit_meta['skin'] ?? 'skin1',
             'skin1BgColor'   => $edit_meta['skin1_bg_color'] ?? '#FFFDE7',
             'skin1TextColor' => $edit_meta['skin1_text_color'] ?? '#155724',
@@ -100,7 +110,7 @@ class OBP_Admin {
             'firstProductImg'=> $first_prod_img,
             'customImageUrl' => $custom_img_url,
             'imageType'      => $image_type,
-            'maxProducts'    => apply_filters( 'obp_max_products_per_bump', OBP_MAX_PRODUCTS_PER_BUMP ),
+            'maxProducts'    => apply_filters( 'naxoorbu_max_products_per_bump', NAXOORBU_MAX_PRODUCTS_PER_BUMP ),
             'i18n'           => [
                 'deleteConfirm'  => __( 'Delete this Order Bump?', 'naxolabs-order-bump' ),
                 'productAdded'   => __( 'Product added! Go to Design tab to set its description.', 'naxolabs-order-bump' ),
@@ -115,7 +125,7 @@ class OBP_Admin {
                 'maxProductsMsg' => sprintf(
                     /* translators: %d: maximum products per bump */
                     __( 'Maximum %d products per bump allowed.', 'naxolabs-order-bump' ),
-                    apply_filters( 'obp_max_products_per_bump', OBP_MAX_PRODUCTS_PER_BUMP )
+                    apply_filters( 'naxoorbu_max_products_per_bump', NAXOORBU_MAX_PRODUCTS_PER_BUMP )
                 ),
             ],
         ] );
@@ -126,14 +136,14 @@ class OBP_Admin {
      */
     public function render_dashboard() {
         $bumps  = get_posts( [
-            'post_type'      => 'obp_order_bump',
+            'post_type'      => 'naxoorbu_order_bump',
             'posts_per_page' => -1,
             'post_status'    => [ 'publish', 'draft' ],
         ] );
         $active = count( array_filter( $bumps, fn( $b ) => $b->post_status === 'publish' ) );
         $bump_revenue = $this->get_bump_revenue();
 
-        include OBP_PATH . 'admin/views/dashboard.php';
+        include NAXOORBU_PATH . 'admin/views/dashboard.php';
     }
 
     /**
@@ -169,7 +179,7 @@ class OBP_Admin {
                          AND o.status IN ( 'wc-completed', 'wc-processing' )
                      WHERE oim_bump.meta_key = %s",
                     '_line_total',
-                    '_obp_bump_id'
+                    '_naxoorbu_bump_id'
                 )
             );
         } else {
@@ -189,7 +199,7 @@ class OBP_Admin {
                          AND p.post_status IN ( 'wc-completed', 'wc-processing' )
                      WHERE oim_bump.meta_key = %s",
                     '_line_total',
-                    '_obp_bump_id'
+                    '_naxoorbu_bump_id'
                 )
             );
         }
@@ -206,8 +216,8 @@ class OBP_Admin {
 
         // Check bump limit for NEW bumps (editing existing is always allowed)
         if ( ! $edit_id ) {
-            $max_bumps = apply_filters( 'obp_max_bumps', OBP_MAX_BUMPS );
-            $current_count = wp_count_posts( 'obp_order_bump' );
+            $max_bumps = apply_filters( 'naxoorbu_max_bumps', NAXOORBU_MAX_BUMPS );
+            $current_count = wp_count_posts( 'naxoorbu_order_bump' );
             $total = intval( $current_count->publish ?? 0 ) + intval( $current_count->draft ?? 0 );
             if ( $total >= $max_bumps ) {
                 wp_die(
@@ -222,7 +232,7 @@ class OBP_Admin {
             }
         }
         $bump    = $edit_id ? get_post( $edit_id ) : null;
-        $raw     = $edit_id ? ( get_post_meta( $edit_id, '_obp_settings', true ) ?: [] ) : [];
+        $raw     = $edit_id ? ( get_post_meta( $edit_id, '_naxoorbu_settings', true ) ?: [] ) : [];
 
         $defaults = [
             'products'             => [],
@@ -272,14 +282,14 @@ class OBP_Admin {
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only tab routing
         $tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'design';
 
-        include OBP_PATH . 'admin/views/edit-bump.php';
+        include NAXOORBU_PATH . 'admin/views/edit-bump.php';
     }
 
     /**
      * Handle form save (admin-post.php).
      */
     public function handle_save() {
-        if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['obp_nonce'] ?? '' ) ), 'obp_save_bump' ) ) {
+        if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['naxoorbu_nonce'] ?? '' ) ), 'naxoorbu_save_bump' ) ) {
             wp_die( esc_html__( 'Security check failed.', 'naxolabs-order-bump' ) );
         }
         if ( ! current_user_can( 'manage_woocommerce' ) ) {
@@ -289,7 +299,7 @@ class OBP_Admin {
         $bump_id  = intval( $_POST['bump_id'] ?? 0 );
         $title    = sanitize_text_field( wp_unslash( $_POST['bump_title'] ?? 'Order Bump' ) );
         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- deeply sanitized below
-        $settings = wp_unslash( $_POST['obp_settings'] ?? [] );
+        $settings = wp_unslash( $_POST['naxoorbu_settings'] ?? [] );
 
         // Validate title
         if ( empty( trim( $title ) ) ) {
@@ -333,7 +343,7 @@ class OBP_Admin {
 
         // Products — max 10, each with validated fields
         $clean['products'] = [];
-        $max_products = apply_filters( 'obp_max_products_per_bump', OBP_MAX_PRODUCTS_PER_BUMP );
+        $max_products = apply_filters( 'naxoorbu_max_products_per_bump', NAXOORBU_MAX_PRODUCTS_PER_BUMP );
         $raw_products = array_slice( (array) ( $settings['products'] ?? [] ), 0, $max_products );
         foreach ( $raw_products as $p ) {
             if ( empty( $p['id'] ) ) continue;
@@ -359,7 +369,7 @@ class OBP_Admin {
         // Save post
         $post_data = [
             'post_title'  => $title,
-            'post_type'   => 'obp_order_bump',
+            'post_type'   => 'naxoorbu_order_bump',
             'post_status' => $clean['bump_status'],
         ];
         if ( $bump_id ) {
@@ -369,7 +379,7 @@ class OBP_Admin {
             $bump_id = wp_insert_post( $post_data );
         }
 
-        update_post_meta( $bump_id, '_obp_settings', $clean );
+        update_post_meta( $bump_id, '_naxoorbu_settings', $clean );
 
         /**
          * Fires after an order bump is saved.
@@ -377,12 +387,12 @@ class OBP_Admin {
          * @param int   $bump_id The bump post ID.
          * @param array $clean   The sanitized bump settings.
          */
-        do_action( 'obp_after_bump_saved', $bump_id, $clean );
+        do_action( 'naxoorbu_after_bump_saved', $bump_id, $clean );
 
         // Redirect with status
         $active_tab = sanitize_key( $_POST['active_tab'] ?? 'design' );
         $status     = empty( $clean['products'] ) ? 'saved_no_products' : 'saved';
-        wp_safe_redirect( admin_url( 'admin.php?page=obp-edit&edit=' . $bump_id . '&obp_status=' . $status . '&tab=' . $active_tab ) );
+        wp_safe_redirect( admin_url( 'admin.php?page=naxoorbu-edit&edit=' . $bump_id . '&naxoorbu_status=' . $status . '&tab=' . $active_tab ) );
         exit;
     }
 }
