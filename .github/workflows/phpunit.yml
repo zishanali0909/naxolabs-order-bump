@@ -1,0 +1,75 @@
+name: PHPUnit Tests
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  phpunit:
+    name: "PHPUnit (PHP ${{ matrix.php }}, WP ${{ matrix.wp }})"
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.4', '8.0', '8.1', '8.2']
+        wp: ['latest']
+        include:
+          - php: '8.2'
+            wp: '6.4'
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mysqli, mbstring, intl
+          tools: composer
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --no-progress --prefer-dist
+
+      - name: Install WooCommerce
+        run: |
+          mkdir -p /tmp/wordpress/wp-content/plugins
+          cd /tmp/wordpress/wp-content/plugins
+          # Download latest WooCommerce
+          curl -sL https://downloads.wordpress.org/plugin/woocommerce.latest-stable.zip -o woocommerce.zip
+          unzip -q woocommerce.zip
+          echo "WooCommerce installed!"
+
+      - name: Install WordPress test suite
+        run: bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1 ${{ matrix.wp }}
+        env:
+          WP_TESTS_DIR: /tmp/wordpress-tests-lib
+          WP_CORE_DIR: /tmp/wordpress
+
+      - name: Symlink plugin into WordPress
+        run: |
+          ln -s $GITHUB_WORKSPACE /tmp/wordpress/wp-content/plugins/naxolabs-order-bump
+          ls -la /tmp/wordpress/wp-content/plugins/
+
+      - name: Run PHPUnit
+        run: vendor/bin/phpunit --verbose
+        env:
+          WP_TESTS_DIR: /tmp/wordpress-tests-lib
+          WP_CORE_DIR: /tmp/wordpress
