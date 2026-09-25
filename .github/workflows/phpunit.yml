@@ -45,28 +45,44 @@ jobs:
           tools: composer
           coverage: none
 
-      - name: Install Composer dependencies
-        run: composer install --no-progress --prefer-dist
-
-      - name: Install WooCommerce
+      - name: Install system dependencies (svn, unzip)
         run: |
-          mkdir -p /tmp/wordpress/wp-content/plugins
-          cd /tmp/wordpress/wp-content/plugins
-          # Download latest WooCommerce
-          curl -sL https://downloads.wordpress.org/plugin/woocommerce.latest-stable.zip -o woocommerce.zip
-          unzip -q woocommerce.zip
-          echo "WooCommerce installed!"
+          sudo apt-get update -qq
+          sudo apt-get install -y subversion unzip
+          echo "svn version: $(svn --version --quiet)"
+          echo "unzip: $(which unzip)"
+
+      - name: Install Composer dependencies
+        run: |
+          composer install --no-progress --prefer-dist
+          echo "PHPUnit version: $(vendor/bin/phpunit --version)"
 
       - name: Install WordPress test suite
-        run: bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1 ${{ matrix.wp }}
+        run: |
+          bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1 ${{ matrix.wp }}
+          echo "WP test suite installed at: $WP_TESTS_DIR"
+          echo "WP core installed at: $WP_CORE_DIR"
+          ls -la $WP_CORE_DIR/wp-settings.php || echo "wp-settings.php not found!"
+          ls -la $WP_TESTS_DIR/includes/functions.php || echo "test functions.php not found!"
         env:
           WP_TESTS_DIR: /tmp/wordpress-tests-lib
           WP_CORE_DIR: /tmp/wordpress
 
+      - name: Install WooCommerce into WP plugins
+        run: |
+          mkdir -p /tmp/wordpress/wp-content/plugins
+          cd /tmp/wordpress/wp-content/plugins
+          curl -sL https://downloads.wordpress.org/plugin/woocommerce.latest-stable.zip -o woocommerce.zip
+          unzip -q woocommerce.zip
+          rm woocommerce.zip
+          echo "WooCommerce installed!"
+          ls -la /tmp/wordpress/wp-content/plugins/woocommerce/woocommerce.php
+
       - name: Symlink plugin into WordPress
         run: |
-          ln -s $GITHUB_WORKSPACE /tmp/wordpress/wp-content/plugins/naxolabs-order-bump
-          ls -la /tmp/wordpress/wp-content/plugins/
+          ln -sf $GITHUB_WORKSPACE /tmp/wordpress/wp-content/plugins/naxolabs-order-bump
+          echo "Plugin symlinked!"
+          ls -la /tmp/wordpress/wp-content/plugins/naxolabs-order-bump/order-bump.php
 
       - name: Run PHPUnit
         run: vendor/bin/phpunit --verbose
