@@ -1,0 +1,132 @@
+name: Plugin Quality Checks
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  # 1. PHP Syntax Check (PHP 7.4, 8.0, 8.1, 8.2)
+  php-lint:
+    name: "PHP Syntax (PHP ${{ matrix.php }})"
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['7.4', '8.0', '8.1', '8.2']
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "${{ matrix.php }}"
+
+      - name: Check PHP syntax
+        run: |
+          echo "Checking PHP syntax on PHP ${{ matrix.php }}..."
+          errors=0
+          while IFS= read -r file; do
+            result=$(php -l "$file" 2>&1)
+            if ! echo "$result" | grep -q "No syntax errors"; then
+              echo "FAIL: $file"
+              echo "  $result"
+              errors=$((errors + 1))
+            fi
+          done < <(find . -name "*.php" -not -path "./vendor/*" -not -path "./node_modules/*")
+          if [ $errors -gt 0 ]; then
+            echo "$errors file(s) have syntax errors!"
+            exit 1
+          else
+            echo "All PHP files pass syntax check!"
+          fi
+
+  # 2. Old "obp" Prefix Check
+  prefix-check:
+    name: Old Prefix Check (obp)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scan for old obp prefix
+        run: |
+          echo "Scanning for old obp prefix..."
+          found=0
+          while IFS= read -r file; do
+            matches=$(grep -n -E '\bobp[_-]|\bOBP_|\bobpAdmin|\bobpFrontend|\bobpProd|\bobpSync|\bobpUpdate' "$file" \
+              | grep -v 'phpcs:ignore\|phpcs:disable\|inline .script.' || true)
+            if [ -n "$matches" ]; then
+              echo ""
+              echo "FAIL: $file"
+              echo "$matches" | head -20
+              found=$((found + $(echo "$matches" | wc -l)))
+            fi
+          done < <(find . \( -name "*.php" -o -name "*.js" -o -name "*.css" \) \
+            -not -path "./.git/*" -not -path "./vendor/*" -not -path "./node_modules/*")
+          echo ""
+          if [ $found -gt 0 ]; then
+            echo "Found $found old obp prefix reference(s)! All prefixes must use naxoorbu_"
+            exit 1
+          else
+            echo "ZERO old obp prefix references found!"
+          fi
+
+  # 3. WordPress Coding Standards (WPCS)
+  wpcs:
+    name: WordPress Coding Standards
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: cs2pr, composer
+
+      - name: Install WPCS
+        run: |
+          composer global config allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
+          composer global require --dev wp-coding-standards/wpcs:"^3.0" \
+            dealerdirect/phpcodesniffer-composer-installer:"^1.0"
+
+      - name: Run PHPCS
+        run: |
+          echo "Running WordPress Coding Standards check..."
+          ~/.composer/vendor/bin/phpcs \
+            --standard=WordPress \
+            --extensions=php \
+            --ignore=vendor/,node_modules/ \
+            --exclude=WordPress.Files.FileName \
+            --warning-severity=0 \
+            -s \
+            . || true
+          echo "WPCS check completed (non-blocking)"
+
+  # 4. Inline <script> Tag Check
+  inline-script-check:
+    name: Inline Script Tag Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scan for inline script tags
+        run: |
+          echo "Scanning for inline script tags in PHP files..."
+          found=0
+          while IFS= read -r file; do
+            matches=$(grep -n '<script' "$file" | grep -v '//.*<script\|/\*.*<script\|\* .*<script' || true)
+            if [ -n "$matches" ]; then
+              echo ""
+              echo "FAIL: $file"
+              echo "$matches"
+              found=$((found + $(echo "$matches" | wc -l)))
+            fi
+          done < <(find . -name "*.php" -not -path "./vendor/*" -not -path "./node_modules/*")
+          echo ""
+          if [ $found -gt 0 ]; then
+            echo "Found $found inline script tag(s)! Use wp_add_inline_script() instead."
+            exit 1
+          else
+            echo "ZERO inline script tags found!"
+          fi
