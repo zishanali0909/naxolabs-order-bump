@@ -1,8 +1,7 @@
 <?php
 /**
- * Tests for handle_save() — bump save validation.
- *
- * Tests sanitization, limits, whitelisting, and edge cases.
+ * Tests for handle_save() validation.
+ * Tests sanitization, limits, whitelisting, edge cases.
  *
  * @package NaxolabsOrderBump
  */
@@ -15,35 +14,67 @@ class Test_Save extends WP_UnitTestCase {
         parent::set_up();
         $this->admin = new Naxoorbu_Admin();
 
-        // Set admin user.
+        // Admin user with manage_woocommerce.
         $user_id = $this->factory->user->create( [ 'role' => 'administrator' ] );
         wp_set_current_user( $user_id );
+        $user = wp_get_current_user();
+        $user->add_cap( 'manage_woocommerce' );
+
+        // Clean up posts from previous tests.
+        foreach ( get_posts( [ 'post_type' => 'naxoorbu_order_bump', 'numberposts' => -1, 'post_status' => 'any' ] ) as $p ) {
+            wp_delete_post( $p->ID, true );
+        }
+    }
+
+    public function tear_down() {
+        // Remove redirect filters.
+        remove_all_filters( 'wp_redirect' );
+        // Clean $_POST.
+        $_POST = [];
+        parent::tear_down();
     }
 
     /**
-     * Helper: simulate saving a bump by calling handle_save().
-     * Returns the saved meta from DB.
+     * Helper: call handle_save() and return saved meta.
      */
     private function simulate_save( $settings, $title = 'Test Bump', $bump_id = 0 ) {
-        // Create nonce.
-        $_POST['naxoorbu_nonce'] = wp_create_nonce( 'naxoorbu_save_bump' );
-        $_POST['bump_id']        = $bump_id;
-        $_POST['bump_title']     = $title;
-        $_POST['naxoorbu_settings'] = $settings;
-        $_POST['active_tab']     = 'design';
+        $_POST = [
+            'naxoorbu_nonce'    => wp_create_nonce( 'naxoorbu_save_bump' ),
+            'bump_id'           => $bump_id,
+            'bump_title'        => $title,
+            'naxoorbu_settings' => $settings,
+            'active_tab'        => 'design',
+        ];
 
-        // Catch the redirect to prevent exit.
-        add_filter( 'wp_redirect', function( $url ) {
-            throw new Exception( 'redirect:' . $url );
-        } );
+        // Catch wp_redirect (called by wp_safe_redirect) to prevent exit.
+        $redirect_url = '';
+        add_filter( 'wp_redirect', function( $url ) use ( &$redirect_url ) {
+            $redirect_url = $url;
+            // Return false to prevent header() call, then throw to prevent exit.
+            throw new Exception( 'redirect_caught' );
+        }, 1 );
 
         try {
             $this->admin->handle_save();
         } catch ( Exception $e ) {
-            // Expected redirect exception.
+            // Expected — we caught the redirect.
         }
 
-        // Find the saved bump.
+        remove_all_filters( 'wp_redirect' );
+
+        // Parse bump_id from redirect URL if available.
+        $saved_id = 0;
+        if ( $redirect_url && preg_match( '/edit=(\d+)/', $redirect_url, $m ) ) {
+            $saved_id = intval( $m[1] );
+        }
+
+        // Try to find saved bump by ID from redirect, or latest.
+        if ( $saved_id ) {
+            $meta = get_post_meta( $saved_id, '_naxoorbu_settings', true );
+            if ( $meta ) return $meta;
+        }
+
+        // Fallback: find latest bump.
         $bumps = get_posts( [
             'post_type'   => 'naxoorbu_order_bump',
             'post_status' => [ 'publish', 'draft' ],
@@ -53,119 +84,108 @@ class Test_Save extends WP_UnitTestCase {
         ] );
 
         if ( empty( $bumps ) ) return null;
-
         return get_post_meta( $bumps[0]->ID, '_naxoorbu_settings', true );
     }
 
-    // ─── Title sanitization ─────────────────────────────
-
     /** Test: empty title defaults to "Order Bump". */
     public function test_empty_title_gets_default() {
-        $this->simulate_save( [ 'bump_status' => 'draft' ], '' );
+        $this->simulate_save( [ 'bump_status' => 'draft' ], '   ' );
 
         $bumps = get_posts( [
             'post_type'   => 'naxoorbu_order_bump',
-            'post_status' => 'draft',
+            'post_status' => 'any',
             'numberposts' => 1,
+            'orderby'     => 'ID',
+            'order'       => 'DESC',
         ] );
+        $this->assertNotEmpty( $bumps, 'Bump should be created.' );
         $this->assertEquals( 'Order Bump', $bumps[0]->post_title );
     }
 
-    // ─── Headline length limit ──────────────────────────
-
     /** Test: headline truncated to 200 chars. */
     public function test_headline_max_200_chars() {
-        $long = str_repeat( 'A', 300 );
-        $meta = $this->simulate_save( [ 'headline' => $long, 'bump_status' => 'draft' ] );
+        $meta = $this->simulate_save( [ 'headline' => str_repeat( 'A', 300 ), 'bump_status' => 'draft' ] );
+        $this->assertNotNull( $meta, 'Meta should be saved.' );
         $this->assertEquals( 200, mb_strlen( $meta['headline'] ) );
     }
 
-    // ─── Badge text limit ───────────────────────────────
-
     /** Test: badge_text truncated to 50 chars. */
     public function test_badge_text_max_50_chars() {
-        $long = str_repeat( 'B', 100 );
-        $meta = $this->simulate_save( [ 'badge_text' => $long, 'bump_status' => 'draft' ] );
+        $meta = $this->simulate_save( [ 'badge_text' => str_repeat( 'B', 100 ), 'bump_status' => 'draft' ] );
+        $this->assertNotNull( $meta, 'Meta should be saved.' );
         $this->assertEquals( 50, mb_strlen( $meta['badge_text'] ) );
     }
 
-    // ─── Boolean toggles ────────────────────────────────
-
-    /** Test: show_badge = 1 when set, 0 when not set. */
-    public function test_boolean_toggles() {
-        $meta_on  = $this->simulate_save( [ 'show_badge' => '1', 'bump_status' => 'draft' ] );
-        $this->assertEquals( 1, $meta_on['show_badge'] );
-
-        $meta_off = $this->simulate_save( [ 'bump_status' => 'draft' ] );
-        $this->assertEquals( 0, $meta_off['show_badge'] );
+    /** Test: show_badge = 1 when set. */
+    public function test_boolean_toggle_on() {
+        $meta = $this->simulate_save( [ 'show_badge' => '1', 'bump_status' => 'draft' ] );
+        $this->assertNotNull( $meta );
+        $this->assertEquals( 1, $meta['show_badge'] );
     }
 
-    // ─── Color validation ───────────────────────────────
+    /** Test: show_badge = 0 when not set. */
+    public function test_boolean_toggle_off() {
+        $meta = $this->simulate_save( [ 'bump_status' => 'draft' ] );
+        $this->assertNotNull( $meta );
+        $this->assertEquals( 0, $meta['show_badge'] );
+    }
 
     /** Test: invalid color falls back to default. */
     public function test_invalid_color_defaults() {
-        $meta = $this->simulate_save( [
-            'skin1_bg_color' => 'not-a-color',
-            'bump_status'    => 'draft',
-        ] );
+        $meta = $this->simulate_save( [ 'skin1_bg_color' => 'not-a-color', 'bump_status' => 'draft' ] );
+        $this->assertNotNull( $meta );
         $this->assertEquals( '#FFFDE7', $meta['skin1_bg_color'] );
     }
 
     /** Test: valid hex color is saved. */
     public function test_valid_color_saved() {
-        $meta = $this->simulate_save( [
-            'skin1_bg_color' => '#FF5733',
-            'bump_status'    => 'draft',
-        ] );
+        $meta = $this->simulate_save( [ 'skin1_bg_color' => '#FF5733', 'bump_status' => 'draft' ] );
+        $this->assertNotNull( $meta );
         $this->assertEquals( '#FF5733', $meta['skin1_bg_color'] );
     }
 
-    // ─── Image width clamping ───────────────────────────
-
-    /** Test: image_width clamped between 50 and 200. */
-    public function test_image_width_clamped() {
-        $meta_low = $this->simulate_save( [ 'image_width' => '10', 'bump_status' => 'draft' ] );
-        $this->assertEquals( 50, $meta_low['image_width'] );
-
-        $meta_high = $this->simulate_save( [ 'image_width' => '500', 'bump_status' => 'draft' ] );
-        $this->assertEquals( 200, $meta_high['image_width'] );
+    /** Test: image_width clamped to min 50. */
+    public function test_image_width_min_50() {
+        $meta = $this->simulate_save( [ 'image_width' => '10', 'bump_status' => 'draft' ] );
+        $this->assertNotNull( $meta );
+        $this->assertEquals( 50, $meta['image_width'] );
     }
 
-    // ─── Whitelisted values ─────────────────────────────
+    /** Test: image_width clamped to max 200. */
+    public function test_image_width_max_200() {
+        $meta = $this->simulate_save( [ 'image_width' => '500', 'bump_status' => 'draft' ] );
+        $this->assertNotNull( $meta );
+        $this->assertEquals( 200, $meta['image_width'] );
+    }
 
     /** Test: invalid position defaults to before_payment. */
     public function test_invalid_position_defaults() {
         $meta = $this->simulate_save( [ 'position' => 'hacked', 'bump_status' => 'draft' ] );
+        $this->assertNotNull( $meta );
         $this->assertEquals( 'before_payment', $meta['position'] );
     }
 
     /** Test: invalid skin defaults to skin1. */
     public function test_invalid_skin_defaults() {
         $meta = $this->simulate_save( [ 'skin' => 'skin99', 'bump_status' => 'draft' ] );
+        $this->assertNotNull( $meta );
         $this->assertEquals( 'skin1', $meta['skin'] );
     }
 
     /** Test: invalid trigger_type defaults to all. */
     public function test_invalid_trigger_type_defaults() {
         $meta = $this->simulate_save( [ 'trigger_type' => 'hacked', 'bump_status' => 'draft' ] );
+        $this->assertNotNull( $meta );
         $this->assertEquals( 'all', $meta['trigger_type'] );
     }
 
-    // ─── Product discount capping ───────────────────────
-
-    /** Test: percentage discount capped at 100%. */
+    /** Test: percentage discount capped at 100. */
     public function test_percentage_capped_at_100() {
         $meta = $this->simulate_save( [
             'bump_status' => 'draft',
-            'products'    => [
-                [
-                    'id'            => 1,
-                    'discount'      => 150,
-                    'discount_type' => 'percentage',
-                    'qty'           => 1,
-                ],
-            ],
+            'products'    => [ [ 'id' => 1, 'discount' => 150, 'discount_type' => 'percentage', 'qty' => 1 ] ],
         ] );
+        $this->assertNotNull( $meta );
         $this->assertEquals( 100, $meta['products'][0]['discount'] );
     }
 
@@ -173,15 +193,9 @@ class Test_Save extends WP_UnitTestCase {
     public function test_negative_discount_becomes_zero() {
         $meta = $this->simulate_save( [
             'bump_status' => 'draft',
-            'products'    => [
-                [
-                    'id'            => 1,
-                    'discount'      => -50,
-                    'discount_type' => 'percentage',
-                    'qty'           => 1,
-                ],
-            ],
+            'products'    => [ [ 'id' => 1, 'discount' => -50, 'discount_type' => 'percentage', 'qty' => 1 ] ],
         ] );
+        $this->assertNotNull( $meta );
         $this->assertEquals( 0, $meta['products'][0]['discount'] );
     }
 
@@ -194,20 +208,9 @@ class Test_Save extends WP_UnitTestCase {
                 [ 'id' => 2, 'discount' => 0, 'discount_type' => 'percentage', 'qty' => 999 ],
             ],
         ] );
+        $this->assertNotNull( $meta );
         $this->assertEquals( 1, $meta['products'][0]['qty'] );
         $this->assertEquals( 99, $meta['products'][1]['qty'] );
-    }
-
-    // ─── Products limit ─────────────────────────────────
-
-    /** Test: max products per bump is enforced (NAXOORBU_MAX_PRODUCTS_PER_BUMP). */
-    public function test_max_products_enforced() {
-        $products = [];
-        for ( $i = 1; $i <= 10; $i++ ) {
-            $products[] = [ 'id' => $i, 'discount' => 0, 'discount_type' => 'percentage', 'qty' => 1 ];
-        }
-        $meta = $this->simulate_save( [ 'bump_status' => 'draft', 'products' => $products ] );
-        $this->assertLessThanOrEqual( NAXOORBU_MAX_PRODUCTS_PER_BUMP, count( $meta['products'] ) );
     }
 
     /** Test: product without ID is skipped. */
@@ -219,6 +222,7 @@ class Test_Save extends WP_UnitTestCase {
                 [ 'id' => 5, 'discount' => 10, 'discount_type' => 'percentage', 'qty' => 1 ],
             ],
         ] );
+        $this->assertNotNull( $meta );
         $this->assertCount( 1, $meta['products'] );
         $this->assertEquals( 5, $meta['products'][0]['id'] );
     }

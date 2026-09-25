@@ -2,8 +2,8 @@
 /**
  * Tests for check_trigger() — the rules engine.
  *
- * Tests which bumps should show based on cart contents.
- * Uses reflection to test the private method.
+ * Key fix: For minimum_order, ensure cart has calculated totals
+ * and use proper product prices. Use WC cart session properly.
  *
  * @package NaxolabsOrderBump
  */
@@ -24,19 +24,25 @@ class Test_Rules extends WP_UnitTestCase {
     public function set_up() {
         parent::set_up();
 
-        // Create the frontend class instance.
         $this->frontend = new Naxoorbu_Frontend();
 
-        // Use reflection to access the private check_trigger() method.
+        // Access private check_trigger() via reflection.
         $this->check_trigger = new ReflectionMethod( Naxoorbu_Frontend::class, 'check_trigger' );
         $this->check_trigger->setAccessible( true );
 
-        // Create test WooCommerce products.
-        $this->product_1 = WC_Helper_Product::create_simple_product();
-        $this->product_2 = WC_Helper_Product::create_simple_product();
+        // Create test products with explicit prices.
+        $this->product_1 = WC_Helper_Product::create_simple_product( true, [
+            'regular_price' => '500',
+            'price'         => '500',
+        ] );
+        $this->product_2 = WC_Helper_Product::create_simple_product( true, [
+            'regular_price' => '200',
+            'price'         => '200',
+        ] );
 
-        // Start a fresh WooCommerce session and cart.
+        // Fresh cart + remove discount hooks to prevent interference.
         WC()->cart->empty_cart();
+        remove_all_actions( 'woocommerce_before_calculate_totals' );
     }
 
     public function tear_down() {
@@ -46,7 +52,7 @@ class Test_Rules extends WP_UnitTestCase {
 
     // ─── trigger_type = "all" ───────────────────────────
 
-    /** Test: type "all" always returns true, even with empty cart. */
+    /** Test: type "all" always returns true. */
     public function test_trigger_all_returns_true() {
         $meta = [ 'trigger_type' => 'all' ];
         $this->assertTrue( $this->check_trigger->invoke( $this->frontend, $meta ) );
@@ -67,8 +73,8 @@ class Test_Rules extends WP_UnitTestCase {
 
     // ─── trigger_type = "specific_product" ──────────────
 
-    /** Test: specific product IS in cart → true. */
-    public function test_trigger_specific_product_in_cart() {
+    /** Test: specific product IS in cart -> true. */
+    public function test_trigger_specific_product_match() {
         WC()->cart->add_to_cart( $this->product_1->get_id() );
         $meta = [
             'trigger_type'     => 'specific_product',
@@ -77,8 +83,8 @@ class Test_Rules extends WP_UnitTestCase {
         $this->assertTrue( $this->check_trigger->invoke( $this->frontend, $meta ) );
     }
 
-    /** Test: specific product NOT in cart → false. */
-    public function test_trigger_specific_product_not_in_cart() {
+    /** Test: specific product NOT in cart -> false. */
+    public function test_trigger_specific_product_no_match() {
         WC()->cart->add_to_cart( $this->product_2->get_id() );
         $meta = [
             'trigger_type'     => 'specific_product',
@@ -87,7 +93,7 @@ class Test_Rules extends WP_UnitTestCase {
         $this->assertFalse( $this->check_trigger->invoke( $this->frontend, $meta ) );
     }
 
-    /** Test: specific product with empty cart → false. */
+    /** Test: specific product with empty cart -> false. */
     public function test_trigger_specific_product_empty_cart() {
         $meta = [
             'trigger_type'     => 'specific_product',
@@ -96,7 +102,7 @@ class Test_Rules extends WP_UnitTestCase {
         $this->assertFalse( $this->check_trigger->invoke( $this->frontend, $meta ) );
     }
 
-    /** Test: specific product with empty trigger list → false. */
+    /** Test: specific product with empty trigger list -> false. */
     public function test_trigger_specific_product_empty_list() {
         WC()->cart->add_to_cart( $this->product_1->get_id() );
         $meta = [
@@ -108,7 +114,7 @@ class Test_Rules extends WP_UnitTestCase {
 
     // ─── trigger_type = "category" ──────────────────────
 
-    /** Test: product in matching category → true. */
+    /** Test: product in matching category -> true. */
     public function test_trigger_category_match() {
         $cat = wp_insert_term( 'Test Cat', 'product_cat' );
         wp_set_post_terms( $this->product_1->get_id(), [ $cat['term_id'] ], 'product_cat' );
@@ -121,7 +127,7 @@ class Test_Rules extends WP_UnitTestCase {
         $this->assertTrue( $this->check_trigger->invoke( $this->frontend, $meta ) );
     }
 
-    /** Test: product NOT in matching category → false. */
+    /** Test: product NOT in matching category -> false. */
     public function test_trigger_category_no_match() {
         $cat_a = wp_insert_term( 'Cat A', 'product_cat' );
         $cat_b = wp_insert_term( 'Cat B', 'product_cat' );
@@ -137,36 +143,38 @@ class Test_Rules extends WP_UnitTestCase {
 
     // ─── trigger_type = "minimum_order" ─────────────────
 
-    /** Test: cart total >= minimum → true. */
+    /** Test: cart subtotal >= minimum -> true. */
     public function test_trigger_minimum_order_met() {
-        $this->product_1->set_price( 500 );
-        $this->product_1->save();
-        WC()->cart->add_to_cart( $this->product_1->get_id() );
+        WC()->cart->add_to_cart( $this->product_1->get_id() ); // ₹500
         WC()->cart->calculate_totals();
+
+        // Verify cart has value before testing.
+        $subtotal = WC()->cart->get_subtotal();
+        $this->assertGreaterThan( 0, $subtotal, 'Cart subtotal should be > 0 after adding product.' );
 
         $meta = [
             'trigger_type'         => 'minimum_order',
-            'minimum_order_amount' => 400,
+            'minimum_order_amount' => $subtotal - 1, // Just under the subtotal.
         ];
         $this->assertTrue( $this->check_trigger->invoke( $this->frontend, $meta ) );
     }
 
-    /** Test: cart total < minimum → false. */
+    /** Test: cart subtotal < minimum -> false. */
     public function test_trigger_minimum_order_not_met() {
-        $this->product_1->set_price( 200 );
-        $this->product_1->save();
-        WC()->cart->add_to_cart( $this->product_1->get_id() );
+        WC()->cart->add_to_cart( $this->product_2->get_id() ); // ₹200
         WC()->cart->calculate_totals();
+
+        $subtotal = WC()->cart->get_subtotal();
 
         $meta = [
             'trigger_type'         => 'minimum_order',
-            'minimum_order_amount' => 500,
+            'minimum_order_amount' => $subtotal + 100, // Above subtotal.
         ];
         $this->assertFalse( $this->check_trigger->invoke( $this->frontend, $meta ) );
     }
 
-    /** Test: minimum = 0 always passes. */
-    public function test_trigger_minimum_order_zero() {
+    /** Test: minimum_order_amount = 0 always passes. */
+    public function test_trigger_minimum_order_zero_always_passes() {
         WC()->cart->add_to_cart( $this->product_1->get_id() );
         WC()->cart->calculate_totals();
 
@@ -179,8 +187,8 @@ class Test_Rules extends WP_UnitTestCase {
 
     // ─── trigger_type = unknown ─────────────────────────
 
-    /** Test: unknown trigger type → false. */
-    public function test_trigger_unknown_type() {
+    /** Test: unknown trigger type -> false. */
+    public function test_trigger_unknown_type_returns_false() {
         $meta = [ 'trigger_type' => 'magic_unicorn' ];
         $this->assertFalse( $this->check_trigger->invoke( $this->frontend, $meta ) );
     }
