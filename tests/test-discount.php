@@ -18,6 +18,13 @@ class Test_Discount extends WP_UnitTestCase {
     public function set_up() {
         parent::set_up();
 
+        // Simulate AJAX context so apply_bump_discounts() doesn't exit early.
+        // In real site: checkout is frontend (is_admin=false) or AJAX (DOING_AJAX=true).
+        // In PHPUnit: is_admin()=true and DOING_AJAX undefined, so function returns early.
+        if ( ! defined( 'DOING_AJAX' ) ) {
+            define( 'DOING_AJAX', true );
+        }
+
         // Create discount instance but REMOVE the hook to prevent
         // double-application when WC->cart->calculate_totals() runs.
         $this->discount = new Naxoorbu_Discount();
