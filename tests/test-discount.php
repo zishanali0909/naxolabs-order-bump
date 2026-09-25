@@ -55,10 +55,15 @@ class Test_Discount extends WP_UnitTestCase {
             'naxoorbu_discount_type' => $type,
         ] );
 
-        // Call once manually (hook is removed so no double-call).
+        // Reset the did_action counter for woocommerce_before_calculate_totals.
+        // WC fires this during add_to_cart() → calculate_totals().
+        // Plugin checks did_action >= 2 to prevent infinite loops on live site.
+        // In tests, we call apply_bump_discounts() manually, so we reset the counter.
+        global $wp_actions;
+        $wp_actions['woocommerce_before_calculate_totals'] = 0;
+
         $this->discount->apply_bump_discounts( WC()->cart );
 
-        // Return the first cart item.
         $items = WC()->cart->get_cart();
         return reset( $items );
     }
@@ -131,6 +136,11 @@ class Test_Discount extends WP_UnitTestCase {
             'naxoorbu_discount'      => 20,
             'naxoorbu_discount_type' => 'percentage',
         ] );
+
+        // Reset did_action counter (WC fires woocommerce_before_calculate_totals
+        // during each add_to_cart, so counter = 2 after 2 items → plugin returns early).
+        global $wp_actions;
+        $wp_actions['woocommerce_before_calculate_totals'] = 0;
 
         $this->discount->apply_bump_discounts( WC()->cart );
 
