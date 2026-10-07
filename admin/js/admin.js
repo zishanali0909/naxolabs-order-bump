@@ -166,15 +166,16 @@ jQuery(function($) {
        SKIN PREVIEW UPDATE
     ═══════════════════════════════════════ */
     function obpGetColors(skin) {
-        if (skin === 'skin2') {
-            return {
-                bg:   $('#naxoorbu-skin2-bg').val()   || naxoorbuAdmin.skin2BgColor   || '#e8f7f9',
-                text: $('#naxoorbu-skin2-text').val()  || naxoorbuAdmin.skin2TextColor  || '#155724'
-            };
-        }
+        var map = {
+            skin1: { bgId: '#naxoorbu-skin1-bg', textId: '#naxoorbu-skin1-text', bgDef: naxoorbuAdmin.skin1BgColor || '#FFFDE7', textDef: naxoorbuAdmin.skin1TextColor || '#155724' },
+            skin2: { bgId: '#naxoorbu-skin2-bg', textId: '#naxoorbu-skin2-text', bgDef: naxoorbuAdmin.skin2BgColor || '#e8f7f9', textDef: naxoorbuAdmin.skin2TextColor || '#155724' },
+            skin3: { bgId: '#naxoorbu-skin3-bg', textId: '#naxoorbu-skin3-text', bgDef: naxoorbuAdmin.skin3BgColor || '#FFFFFF', textDef: naxoorbuAdmin.skin3TextColor || '#374151' },
+            skin4: { bgId: '#naxoorbu-skin4-bg', textId: '#naxoorbu-skin4-text', bgDef: naxoorbuAdmin.skin4BgColor || '#FFFFFF', textDef: naxoorbuAdmin.skin4TextColor || '#111827' }
+        };
+        var s = map[skin] || map.skin1;
         return {
-            bg:   $('#naxoorbu-skin1-bg').val()   || naxoorbuAdmin.skin1BgColor   || '#FFFDE7',
-            text: $('#naxoorbu-skin1-text').val()  || naxoorbuAdmin.skin1TextColor  || '#155724'
+            bg:   $(s.bgId).val()   || s.bgDef,
+            text: $(s.textId).val() || s.textDef
         };
     }
 
@@ -203,7 +204,8 @@ jQuery(function($) {
     }
 
     function naxoorbuUpdatePreviewSkin(skin) {
-        $('#naxoorbu-preview-bump').removeClass('naxoorbu-preview-skin1 naxoorbu-preview-skin2').addClass('naxoorbu-preview-' + skin);
+        $('#naxoorbu-preview-bump')[0].className = $('#naxoorbu-preview-bump')[0].className.replace(/naxoorbu-preview-skin\w+/g, '').trim();
+        $('#naxoorbu-preview-bump').addClass('naxoorbu-preview-' + skin);
         if (skin === 'skin2') {
             $('#naxoorbu-colors-skin1').hide();
             $('#naxoorbu-colors-skin2').show();
@@ -242,7 +244,9 @@ jQuery(function($) {
 
     // Skin dropdown change
     $('select[name="naxoorbu_settings[skin]"]').on('change', function() {
-        naxoorbuUpdatePreviewSkin($(this).val());
+        var newSkin = $(this).val();
+        naxoorbuUpdatePreviewSkin(newSkin);
+        $(document).trigger('naxoorbu:skin-changed', [newSkin]);
     });
 
     // Live color change
@@ -303,10 +307,52 @@ jQuery(function($) {
     ═══════════════════════════════════════ */
     var searchTimer;
 
+    // Show recent products on focus (click-to-browse).
+    $('#naxoorbu-product-search').on('focus', function() {
+        var q = $(this).val().trim();
+        if (q.length < 2 && !$('#naxoorbu-product-results').hasClass('open')) {
+            $.post(naxoorbuAdmin.ajaxUrl, { action: 'naxoorbu_search_products', q: '', nonce: naxoorbuAdmin.nonce }, function(res) {
+                if (!res.success || !res.data.length) return;
+                var html = '';
+                res.data.forEach(function(p) {
+                    var img = p.thumb
+                        ? '<img src="'+p.thumb+'">'
+                        : '<div class="naxoorbu-product-item-noimg">📦</div>';
+                    html += '<div class="naxoorbu-product-item" data-product=\''+JSON.stringify(p)+'\'>'+img
+                        +'<div><div class="naxoorbu-product-item-name">'+p.name+'</div>'
+                        +'<div class="naxoorbu-product-item-price">'+p.regular_html+' → '+p.price_html+'</div></div>'
+                        +($('#naxoorbu-trigger-tags .naxoorbu-tag[data-id="'+p.id+'"]').length ? '<span style="background:#fff3cd;color:#856404;font-size:11px;padding:2px 6px;border-radius:3px;white-space:nowrap;margin-left:auto;">Already in Rules</span>' : '')
+                        +'</div>';
+                });
+                $('#naxoorbu-product-results').html(html).addClass('open');
+            });
+        }
+    }).on('keydown', function(e) {
+        if (e.key === 'Escape') { $('#naxoorbu-product-results').removeClass('open').html(''); $(this).blur(); }
+    });
+
     $('#naxoorbu-product-search').on('input', function() {
         clearTimeout(searchTimer);
         var q = $(this).val().trim();
-        if (q.length < 2) { $('#naxoorbu-product-results').removeClass('open').html(''); return; }
+        if (q.length < 2) {
+            // Show recent products instead of empty
+            $.post(naxoorbuAdmin.ajaxUrl, { action: 'naxoorbu_search_products', q: '', nonce: naxoorbuAdmin.nonce }, function(res) {
+                if (!res.success || !res.data.length) { $('#naxoorbu-product-results').removeClass('open').html(''); return; }
+                var html = '';
+                res.data.forEach(function(p) {
+                    var img = p.thumb
+                        ? '<img src="'+p.thumb+'">'
+                        : '<div class="naxoorbu-product-item-noimg">📦</div>';
+                    html += '<div class="naxoorbu-product-item" data-product=\''+JSON.stringify(p)+'\'>'+img
+                        +'<div><div class="naxoorbu-product-item-name">'+p.name+'</div>'
+                        +'<div class="naxoorbu-product-item-price">'+p.regular_html+' → '+p.price_html+'</div></div>'
+                        +($('#naxoorbu-trigger-tags .naxoorbu-tag[data-id="'+p.id+'"]').length ? '<span style="background:#fff3cd;color:#856404;font-size:11px;padding:2px 6px;border-radius:3px;white-space:nowrap;margin-left:auto;">Already in Rules</span>' : '')
+                        +'</div>';
+                });
+                $('#naxoorbu-product-results').html(html).addClass('open');
+            });
+            return;
+        }
         searchTimer = setTimeout(function() {
             $.post(naxoorbuAdmin.ajaxUrl, { action: 'naxoorbu_search_products', q: q, nonce: naxoorbuAdmin.nonce }, function(res) {
                 if (!res.success || !res.data.length) {
@@ -320,7 +366,9 @@ jQuery(function($) {
                         : '<div class="naxoorbu-product-item-noimg">📦</div>';
                     html += '<div class="naxoorbu-product-item" data-product=\''+JSON.stringify(p)+'\'>'+img
                         +'<div><div class="naxoorbu-product-item-name">'+p.name+'</div>'
-                        +'<div class="naxoorbu-product-item-price">'+p.regular_html+' → '+p.price_html+'</div></div></div>';
+                        +'<div class="naxoorbu-product-item-price">'+p.regular_html+' → '+p.price_html+'</div></div>'
+                        +($('#naxoorbu-trigger-tags .naxoorbu-tag[data-id="'+p.id+'"]').length ? '<span style="background:#fff3cd;color:#856404;font-size:11px;padding:2px 6px;border-radius:3px;white-space:nowrap;margin-left:auto;">Already in Rules</span>' : '')
+                        +'</div>';
                 });
                 $('#naxoorbu-product-results').html(html).addClass('open');
             }).fail(function() { $('#naxoorbu-product-results').html('<div style="padding:10px;color:#EF4444;font-size:13px;">Search failed. Try again.</div>').addClass('open'); });
@@ -389,12 +437,14 @@ jQuery(function($) {
         $('#naxoorbu-no-products-msg').hide();
         reindexProducts();
         syncDesignTabProducts();
+        naxoorbuUpdateOverlapBadges();
         showNotice(naxoorbuAdmin.i18n.productAdded || 'Product added!', 'info');
     }
 
     /* ── REMOVE PRODUCT ── */
     $(document).on('click', '.naxoorbu-remove-product', function() {
         $(this).closest('.naxoorbu-product-row').remove();
+        naxoorbuUpdateOverlapBadges();
         reindexProducts();
         syncDesignTabProducts();
         if ($('#naxoorbu-products-list .naxoorbu-product-row').length === 0)
@@ -429,17 +479,58 @@ jQuery(function($) {
        TRIGGER PRODUCT SEARCH
     ═══════════════════════════════════════ */
     var tTimer;
+    // Show recent products on focus for trigger search too.
+    $('#naxoorbu-trigger-search').on('focus', function() {
+        var q = $(this).val().trim();
+        if (q.length < 2 && !$('#naxoorbu-trigger-results').hasClass('open')) {
+            $.post(naxoorbuAdmin.ajaxUrl, { action: 'naxoorbu_search_products', q: '', nonce: naxoorbuAdmin.nonce }, function(res) {
+                if (!res.success || !res.data.length) return;
+                var html = '';
+                res.data.forEach(function(p) {
+                    var tImg = p.thumb ? '<img src="'+p.thumb+'">' : '<div class="naxoorbu-product-item-noimg">📦</div>';
+                    html += '<div class="naxoorbu-product-item" data-id="'+p.id+'" data-name="'+p.name+'">'+tImg
+                        +'<div><div class="naxoorbu-product-item-name">'+p.name+'</div>'
+                        +'<div class="naxoorbu-product-item-price">'+p.regular_html+' → '+p.price_html+'</div></div>'
+                        +($('#naxoorbu-products-list .naxoorbu-product-row[data-product-id="'+p.id+'"]').length ? '<span style="background:#fff3cd;color:#856404;font-size:11px;padding:2px 6px;border-radius:3px;white-space:nowrap;margin-left:auto;">Already in Products</span>' : '')
+                        +'</div>';
+                });
+                $('#naxoorbu-trigger-results').html(html).addClass('open');
+            });
+        }
+    }).on('keydown', function(e) {
+        if (e.key === 'Escape') { $('#naxoorbu-trigger-results').removeClass('open').html(''); $(this).blur(); }
+    });
+
     $('#naxoorbu-trigger-search').on('input', function() {
         clearTimeout(tTimer);
         var q = $(this).val().trim();
-        if (q.length < 2) { $('#naxoorbu-trigger-results').removeClass('open').html(''); return; }
+        if (q.length < 2) {
+            $.post(naxoorbuAdmin.ajaxUrl, { action: 'naxoorbu_search_products', q: '', nonce: naxoorbuAdmin.nonce }, function(res) {
+                if (!res.success || !res.data.length) { $('#naxoorbu-trigger-results').removeClass('open').html(''); return; }
+                var html = '';
+                res.data.forEach(function(p) {
+                    var tImg = p.thumb ? '<img src="'+p.thumb+'">' : '<div class="naxoorbu-product-item-noimg">📦</div>';
+                    html += '<div class="naxoorbu-product-item" data-id="'+p.id+'" data-name="'+p.name+'">'+tImg
+                        +'<div><div class="naxoorbu-product-item-name">'+p.name+'</div>'
+                        +'<div class="naxoorbu-product-item-price">'+p.regular_html+' → '+p.price_html+'</div></div>'
+                        +($('#naxoorbu-products-list .naxoorbu-product-row[data-product-id="'+p.id+'"]').length ? '<span style="background:#fff3cd;color:#856404;font-size:11px;padding:2px 6px;border-radius:3px;white-space:nowrap;margin-left:auto;">Already in Products</span>' : '')
+                        +'</div>';
+                });
+                $('#naxoorbu-trigger-results').html(html).addClass('open');
+            });
+            return;
+        }
         tTimer = setTimeout(function() {
             $.post(naxoorbuAdmin.ajaxUrl, { action: 'naxoorbu_search_products', q: q, nonce: naxoorbuAdmin.nonce }, function(res) {
                 if (!res.success || !res.data.length) { $('#naxoorbu-trigger-results').removeClass('open'); return; }
                 var html = '';
                 res.data.forEach(function(p) {
-                    html += '<div class="naxoorbu-product-item" data-id="'+p.id+'" data-name="'+p.name+'">'
-                        +'<div class="naxoorbu-product-item-name">'+p.name+'</div></div>';
+                    var tImg = p.thumb ? '<img src="'+p.thumb+'">' : '<div class="naxoorbu-product-item-noimg">📦</div>';
+                    html += '<div class="naxoorbu-product-item" data-id="'+p.id+'" data-name="'+p.name+'">'+tImg
+                        +'<div><div class="naxoorbu-product-item-name">'+p.name+'</div>'
+                        +'<div class="naxoorbu-product-item-price">'+p.regular_html+' → '+p.price_html+'</div></div>'
+                        +($('#naxoorbu-products-list .naxoorbu-product-row[data-product-id="'+p.id+'"]').length ? '<span style="background:#fff3cd;color:#856404;font-size:11px;padding:2px 6px;border-radius:3px;white-space:nowrap;margin-left:auto;">Already in Products</span>' : '')
+                        +'</div>';
                 });
                 $('#naxoorbu-trigger-results').html(html).addClass('open');
             });
@@ -449,6 +540,7 @@ jQuery(function($) {
     $(document).on('click', '#naxoorbu-trigger-results .naxoorbu-product-item', function() {
         var id = $(this).data('id'), name = $(this).data('name');
         if ($('#naxoorbu-trigger-tags .naxoorbu-tag[data-id="'+id+'"]').length) {
+            alert(name + ' ' + (naxoorbuAdmin.i18n.alreadyAdded || 'is already added.'));
             $('#naxoorbu-trigger-results').removeClass('open');
             $('#naxoorbu-trigger-search').val('');
             return;
@@ -460,9 +552,10 @@ jQuery(function($) {
         );
         $('#naxoorbu-trigger-results').removeClass('open');
         $('#naxoorbu-trigger-search').val('');
+        naxoorbuUpdateOverlapBadges();
     });
 
-    $(document).on('click', '.naxoorbu-tag-remove', function() { $(this).closest('.naxoorbu-tag').remove(); });
+    $(document).on('click', '.naxoorbu-tag-remove', function() { $(this).closest('.naxoorbu-tag').remove(); naxoorbuUpdateOverlapBadges(); });
 
     // Close dropdowns on outside click
     $(document).on('click', function(e) {
@@ -483,6 +576,8 @@ jQuery(function($) {
             alert(naxoorbuAdmin.i18n.error || 'Error. Please try again.');
         }).always(function() {
             $t.prop('disabled', false);
+            // Toggle is an AJAX action, not a form edit — clear dirty flags.
+            obpClearDirtyFlags();
         });
     });
 
@@ -691,7 +786,68 @@ jQuery(function($) {
 
     obpBindTinyMCELive();
 
-    // Prevent false "unsaved changes" popup
+    // ─── Cross-tab overlap badges + notice bar (unified) ───
+    function naxoorbuUpdateOverlapBadges() {
+        // Get IDs from Products tab
+        var productIds = [];
+        $('#naxoorbu-products-list .naxoorbu-product-row').each(function() {
+            productIds.push(String($(this).data('product-id')));
+        });
+        // Get IDs from Rules tab
+        var triggerIds = [];
+        $('#naxoorbu-trigger-tags .naxoorbu-tag').each(function() {
+            triggerIds.push(String($(this).data('id')));
+        });
+
+        // Products tab: add/remove overlap warning
+        $('#naxoorbu-products-list .naxoorbu-product-row').each(function() {
+            var pid = String($(this).data('product-id'));
+            $(this).find('.naxoorbu-overlap-warn').remove();
+            if (triggerIds.indexOf(pid) !== -1) {
+                $(this).append(
+                    '<div class="naxoorbu-overlap-warn">' +
+                    '<span class="naxoorbu-warn-icon">⚠️</span> ' +
+                    'Also in Rules — this product is both a bump offer and a trigger condition.' +
+                    '</div>'
+                );
+            }
+        });
+
+        // Rules tab: add/remove overlap on trigger tags
+        $('#naxoorbu-trigger-tags .naxoorbu-tag').each(function() {
+            var tid = String($(this).data('id'));
+            $(this).removeClass('naxoorbu-tag-warn');
+            $(this).find('.naxoorbu-overlap-badge').remove();
+            if (productIds.indexOf(tid) !== -1) {
+                $(this).addClass('naxoorbu-tag-warn');
+                $(this).find('.naxoorbu-tag-remove').before(
+                    '<span class="naxoorbu-overlap-badge" style="background:#fff3cd;color:#856404;font-size:11px;padding:2px 6px;border-radius:3px;white-space:nowrap; margin-left:4px;">Also in Products</span>'
+                );
+            }
+        });
+
+        // Page-level notice bar
+        var overlap = productIds.filter(function(id) { return triggerIds.indexOf(id) > -1; });
+        $('.naxoorbu-overlap-page-warn').remove();
+        if (overlap.length > 0) {
+            var msg = '<div class="naxoorbu-overlap-page-warn">' +
+                      '<span class="naxoorbu-warn-icon">⚠️</span> <strong>Overlap detected:</strong> ' +
+                      'Some products are added in both Products and Rules sections. ' +
+                      'This may cause the bump to show a product the customer already has in cart.' +
+                      '<button type="button" class="naxoorbu-overlap-dismiss" style="float:right;background:none;border:none;cursor:pointer;font-size:16px;color:#856404;">✕</button>' +
+                      '</div>';
+            $('.naxoorbu-name-bar').after(msg);
+            $(document).on('click', '.naxoorbu-overlap-dismiss', function() {
+                $('.naxoorbu-overlap-page-warn').slideUp(200, function() { $(this).remove(); });
+            });
+        }
+    }
+
+    // Run on page load
+    naxoorbuUpdateOverlapBadges();
+
+
+        // Prevent false "unsaved changes" popup
     function obpClearDirtyFlags() {
         if (typeof tinyMCE !== 'undefined' && tinyMCE.editors) {
             tinyMCE.editors.forEach(function(editor) {
@@ -701,7 +857,7 @@ jQuery(function($) {
         $(window).off('beforeunload');
         window.onbeforeunload = null;
     }
-    // Clear on page load
+    // Clear on page load (TinyMCE init can set dirty flags).
     setTimeout(obpClearDirtyFlags, 500);
     setTimeout(obpClearDirtyFlags, 1500);
     // Clear on form submit
@@ -803,77 +959,5 @@ jQuery(function($) {
 
 
     /* ===== Overlap Warning: Bump Products vs Trigger Products ===== */
-    function obpCheckProductOverlap() {
-        // Get bump product IDs
-        var bumpIds = [];
-        $('#naxoorbu-products-list .naxoorbu-product-row').each(function() {
-            bumpIds.push(String($(this).data('product-id')));
-        });
-
-        // Get trigger product IDs (Cart Items rule)
-        var triggerIds = [];
-        $('#naxoorbu-trigger-tags .naxoorbu-tag').each(function() {
-            triggerIds.push(String($(this).data('id')));
-        });
-
-        // Find overlapping IDs
-        var overlap = bumpIds.filter(function(id) {
-            return triggerIds.indexOf(id) > -1;
-        });
-
-        // Remove old warnings
-        $('.naxoorbu-overlap-warn').remove();
-
-        if (overlap.length === 0) return;
-
-        // Show inline warning on each overlapping product row
-        overlap.forEach(function(id) {
-            var $row = $('#naxoorbu-products-list .naxoorbu-product-row[data-product-id="' + id + '"]');
-            if ($row.length && !$row.find('.naxoorbu-overlap-warn').length) {
-                $row.append(
-                    '<div class="naxoorbu-overlap-warn">' +
-                    '<span class="naxoorbu-warn-icon">⚠️</span> ' +
-                    'This product is also in your trigger rules. Customer already has it in cart when bump shows.' +
-                    '</div>'
-                );
-            }
-
-            // Also mark the trigger tag
-            var $tag = $('#naxoorbu-trigger-tags .naxoorbu-tag[data-id="' + id + '"]');
-            if ($tag.length && !$tag.hasClass('naxoorbu-tag-warn')) {
-                $tag.addClass('naxoorbu-tag-warn');
-            }
-        });
-
-        // Show page-level notice (only once)
-        if (!$('.naxoorbu-overlap-page-warn').length) {
-            var names = [];
-            overlap.forEach(function(id) {
-                var $row = $('#naxoorbu-products-list .naxoorbu-product-row[data-product-id="' + id + '"]');
-                var name = $row.find('.naxoorbu-product-name').text().trim() || 'Product #' + id;
-                names.push(name);
-            });
-            var msg = '<div class="naxoorbu-overlap-page-warn">' +
-                      '<span class="naxoorbu-warn-icon">⚠️</span> <strong>Overlap detected:</strong> ' +
-                      names.join(', ') +
-                      ' — same product is both a bump offer and a trigger condition. ' +
-                      'Customer will see this product offered when they already have it in cart.' +
-                      '</div>';
-            $('.naxoorbu-name-bar').after(msg);
-        }
-    }
-
-    // Run on page load
-    setTimeout(obpCheckProductOverlap, 500);
-
-    // Run when products added/removed
-    $(document).on('DOMNodeInserted DOMNodeRemoved', '#naxoorbu-products-list, #naxoorbu-trigger-tags', function() {
-        setTimeout(obpCheckProductOverlap, 100);
-    });
-
-    // Run when trigger type changes
-    $(document).on('change', '#naxoorbu-trigger-type', function() {
-        setTimeout(obpCheckProductOverlap, 200);
-    });
 
 });

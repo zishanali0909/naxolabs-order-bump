@@ -14,8 +14,8 @@ class Naxoorbu_Discount {
         // Apply discount prices during cart calculation
         add_action( 'woocommerce_before_calculate_totals', [ $this, 'apply_bump_discounts' ], 20, 1 );
 
-        // Store bump meta when product is added to cart via order bump
-        add_filter( 'woocommerce_add_cart_item_data', [ $this, 'add_bump_meta_to_cart' ], 10, 3 );
+        // Removed: add_bump_meta_to_cart filter — AJAX handler already passes discount
+        // data via cart_item_data. Having both caused duplicate cart item keys.
 
         // Save bump meta to order line items for revenue tracking
         add_action( 'woocommerce_checkout_create_order_line_item', [ $this, 'save_bump_meta_to_order_item' ], 10, 4 );

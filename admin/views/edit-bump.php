@@ -226,6 +226,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                         <input type="color" name="naxoorbu_settings[skin2_text_color]" id="naxoorbu-skin2-text" value="<?php echo esc_attr( $meta['skin2_text_color'] ?? '#155724' ); ?>" style="width:40px;height:32px;border:1px solid #E5E2FF;border-radius:6px;cursor:pointer;padding:2px;">
                                     </div>
                                 </div>
+                                <?php do_action( 'naxoorbu_admin_after_color_pickers', $edit_id, $meta ); ?>
                             </div>
                             <div class="naxoorbu-field">
                                 <label class="naxoorbu-label"><?php esc_html_e( 'Options', 'naxolabs-order-bump' ); ?></label>

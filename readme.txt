@@ -4,7 +4,7 @@ Tags: woocommerce, order bump, checkout upsell, one click upsell, sales boost
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -130,6 +130,13 @@ When deactivated, bumps simply stop showing on checkout. Your bump configuration
 
 == Changelog ==
 
+= 1.0.1 =
+* Improved: Rules tab search now shows product image and price
+* New: Live "Already in Products/Rules" indicator in search results
+* Improved: Search shows top 10 recent products on focus (click to browse)
+* Improved: Escape key closes search dropdowns
+* Fixed: Dashboard "unsaved changes" popup on status toggle
+
 = 1.0.0 =
 * Initial public release
 * 2 design skins (Classic and Modern) with color customization
@@ -149,6 +156,13 @@ When deactivated, bumps simply stop showing on checkout. Your bump configuration
 * Developer hooks and filters for extensibility
 
 == Upgrade Notice ==
+
+= 1.0.1 =
+* Improved: Rules tab search now shows product image and price
+* New: Live "Already in Products/Rules" indicator in search results
+* Improved: Search shows top 10 recent products on focus (click to browse)
+* Improved: Escape key closes search dropdowns
+* Fixed: Dashboard "unsaved changes" popup on status toggle
 
 = 1.0.0 =
 Initial release. Install and start boosting your checkout revenue!

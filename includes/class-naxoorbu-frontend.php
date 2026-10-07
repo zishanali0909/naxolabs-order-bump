@@ -74,6 +74,7 @@ class Naxoorbu_Frontend {
 
         echo '<div id="naxoorbu-block-checkout-bumps" style="display:none !important;">';
         foreach ( $all_bumps as $bump_data ) {
+            if ( ! $this->check_trigger( $bump_data['meta'] ) ) continue;
             $this->render_single_bump( $bump_data['id'], $bump_data['meta'] );
         }
         echo '</div>';
@@ -159,8 +160,14 @@ class Naxoorbu_Frontend {
         return false;
     }
 
-    public function render_before_payment() { $this->render_bumps('before_payment'); }
-    public function render_after_payment()  { $this->render_bumps('after_payment'); }
+    public function render_before_payment() {
+        if ( $this->is_block_checkout() ) return; // Block fallback handles rendering.
+        $this->render_bumps('before_payment');
+    }
+    public function render_after_payment() {
+        if ( $this->is_block_checkout() ) return; // Block fallback handles rendering.
+        $this->render_bumps('after_payment');
+    }
 
     private function render_bumps( $position ) {
         $bumps     = $this->get_bumps( $position );
@@ -211,8 +218,15 @@ class Naxoorbu_Frontend {
         $skin            = $meta['skin'] ?? 'skin1';
         $bump_types      = apply_filters( 'naxoorbu_bump_types', array( 'checkbox' ) );
         $design_options  = apply_filters( 'naxoorbu_bump_design_options', array( 'skin1', 'skin2' ) );
-        $header_color      = $skin === 'skin2' ? ($meta['skin2_bg_color'] ?? '#e8f7f9') : ($meta['skin1_bg_color'] ?? '#FFFDE7');
-        $header_text_color = $skin === 'skin2' ? ($meta['skin2_text_color'] ?? '#155724') : ($meta['skin1_text_color'] ?? '#155724');
+        // Resolve header colors per skin (extensible for Pro skins).
+        $skin_color_map = apply_filters( 'naxoorbu_skin_color_defaults', array(
+            'skin1' => array( 'bg' => '#FFFDE7', 'text' => '#155724' ),
+            'skin2' => array( 'bg' => '#e8f7f9', 'text' => '#155724' ),
+        ) );
+        $skin_key           = isset( $skin_color_map[ $skin ] ) ? $skin : 'skin1';
+        $color_defaults     = $skin_color_map[ $skin_key ];
+        $header_color       = $meta[ $skin_key . '_bg_color' ] ?? $color_defaults['bg'];
+        $header_text_color  = $meta[ $skin_key . '_text_color' ] ?? $color_defaults['text'];
         $show_img        = !empty( $meta['show_product_image'] );
         $img_type        = $meta['image_type'] ?? 'product';
         $img_width       = intval( $meta['image_width'] ?? 96 );

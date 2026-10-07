@@ -84,17 +84,23 @@ class Naxoorbu_Ajax {
             wp_send_json_error( [ 'message' => __( 'Permission denied.', 'naxolabs-order-bump' ) ] );
         }
 
-        $q = ( isset( $_POST['q'] ) ? sanitize_text_field( wp_unslash( $_POST['q'] ) ) : ''  ?? '' );
-        if ( mb_strlen( $q ) < 2 ) {
-            wp_send_json_success( [] );
-        }
+        $q = ( isset( $_POST['q'] ) ? sanitize_text_field( wp_unslash( $_POST['q'] ) ) : '' );
 
-        $query = new WP_Query( [
+        $args = [
             'post_type'      => 'product',
             'post_status'    => 'publish',
             'posts_per_page' => 10,
-            's'              => $q,
-        ] );
+        ];
+
+        // Empty/short query = browse recent products; 2+ chars = search.
+        if ( mb_strlen( $q ) >= 2 ) {
+            $args['s'] = $q;
+        } else {
+            $args['orderby'] = 'date';
+            $args['order']   = 'DESC';
+        }
+
+        $query = new WP_Query( $args );
 
         $data = [];
         foreach ( $query->posts as $post ) {

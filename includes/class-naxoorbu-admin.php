@@ -107,6 +107,10 @@ class Naxoorbu_Admin {
             'skin1TextColor' => $edit_meta['skin1_text_color'] ?? '#155724',
             'skin2BgColor'   => $edit_meta['skin2_bg_color'] ?? '#e8f7f9',
             'skin2TextColor' => $edit_meta['skin2_text_color'] ?? '#155724',
+            'skin3BgColor'   => $edit_meta['skin3_bg_color'] ?? '#FFFFFF',
+            'skin3TextColor' => $edit_meta['skin3_text_color'] ?? '#374151',
+            'skin4BgColor'   => $edit_meta['skin4_bg_color'] ?? '#FFFFFF',
+            'skin4TextColor' => $edit_meta['skin4_text_color'] ?? '#111827',
             'firstProductImg'=> $first_prod_img,
             'customImageUrl' => $custom_img_url,
             'imageType'      => $image_type,
@@ -249,6 +253,10 @@ class Naxoorbu_Admin {
             'skin1_text_color'     => '#155724',
             'skin2_bg_color'       => '#e8f7f9',
             'skin2_text_color'     => '#155724',
+            'skin3_bg_color'       => '#FFFFFF',
+            'skin3_text_color'     => '#374151',
+            'skin4_bg_color'       => '#FFFFFF',
+            'skin4_text_color'     => '#111827',
             'show_product_image'   => 0,
             'image_type'           => 'product',
             'image_width'          => 96,
@@ -322,6 +330,10 @@ class Naxoorbu_Admin {
         $clean['skin1_text_color'] = sanitize_hex_color( $settings['skin1_text_color'] ?? '#155724' ) ?: '#155724';
         $clean['skin2_bg_color']   = sanitize_hex_color( $settings['skin2_bg_color'] ?? '#e8f7f9' ) ?: '#e8f7f9';
         $clean['skin2_text_color'] = sanitize_hex_color( $settings['skin2_text_color'] ?? '#155724' ) ?: '#155724';
+        $clean['skin3_bg_color']   = sanitize_hex_color( $settings['skin3_bg_color'] ?? '#FFFFFF' ) ?: '#FFFFFF';
+        $clean['skin3_text_color'] = sanitize_hex_color( $settings['skin3_text_color'] ?? '#374151' ) ?: '#374151';
+        $clean['skin4_bg_color']   = sanitize_hex_color( $settings['skin4_bg_color'] ?? '#FFFFFF' ) ?: '#FFFFFF';
+        $clean['skin4_text_color'] = sanitize_hex_color( $settings['skin4_text_color'] ?? '#111827' ) ?: '#111827';
 
         // Image settings — clamped values
         $clean['image_type']       = in_array( $settings['image_type'] ?? '', [ 'product', 'custom' ], true ) ? $settings['image_type'] : 'product';
@@ -331,7 +343,8 @@ class Naxoorbu_Admin {
 
         // Layout & skin — whitelist values
         $clean['position']    = in_array( $settings['position'] ?? '', [ 'before_payment', 'after_payment' ], true ) ? $settings['position'] : 'before_payment';
-        $clean['skin']        = in_array( $settings['skin'] ?? '', [ 'skin1', 'skin2' ], true ) ? $settings['skin'] : 'skin1';
+        $allowed_skins = apply_filters( 'naxoorbu_allowed_skins', array( 'skin1', 'skin2' ) );
+		$clean['skin']        = in_array( $settings['skin'] ?? '', $allowed_skins, true ) ? $settings['skin'] : 'skin1';
         $clean['bump_status'] = in_array( $settings['bump_status'] ?? '', [ 'publish', 'draft' ], true ) ? $settings['bump_status'] : 'publish';
 
         // Trigger rules
