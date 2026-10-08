@@ -347,10 +347,10 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                             <div class="naxoorbu-preview-wrap" id="naxoorbu-preview-wrap-box">
                                 <?php
                                 $cur_skin  = $meta['skin'] ?? 'skin1';
-                                $prev_bg   = $cur_skin === 'skin2' ? ( $meta['skin2_bg_color'] ?? '#e8f7f9' ) : ( $meta['skin1_bg_color'] ?? '#FFFDE7' );
-                                $prev_text = $cur_skin === 'skin2' ? ( $meta['skin2_text_color'] ?? '#155724' ) : ( $meta['skin1_text_color'] ?? '#155724' );
+                                $prev_bg   = ( $cur_skin === 'skin2' || $cur_skin === 'skin3' ) ? ( $meta[ $cur_skin . '_bg_color' ] ?? ( $cur_skin === 'skin3' ? '#eef4fe' : '#e8f7f9' ) ) : ( $meta['skin1_bg_color'] ?? '#FFFDE7' );
+                                $prev_text = ( $cur_skin === 'skin2' || $cur_skin === 'skin3' ) ? ( $meta[ $cur_skin . '_text_color' ] ?? '#155724' ) : ( $meta['skin1_text_color'] ?? '#155724' );
                                 ?>
-                                <div class="naxoorbu-preview-bump naxoorbu-preview-<?php echo esc_attr( $cur_skin ); ?>" id="naxoorbu-preview-bump" data-skin="<?php echo esc_attr( $cur_skin ); ?>" style="position:relative;overflow:visible;">
+                                <div class="naxoorbu-preview-bump naxoorbu-preview-<?php echo esc_attr( $cur_skin ); ?>" id="naxoorbu-preview-bump" data-skin="<?php echo esc_attr( $cur_skin ); ?>" style="position:relative;overflow:visible;--naxoorbu-header-color:<?php echo esc_attr( $prev_bg ); ?>;--naxoorbu-header-text:<?php echo esc_attr( $prev_text ); ?>;">
                                     <!-- Preview Badge -->
                                     <div id="naxoorbu-preview-badge" class="naxoorbu-preview-badge" style="<?php echo ! empty( $meta['show_badge'] ) ? '' : 'display:none;'; ?>position:absolute;top:-8px;left:12px;background:#E15334;color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:4px;z-index:2;text-transform:uppercase;letter-spacing:0.5px;">
                                         <?php echo esc_html( $meta['badge_text'] ?? 'Special Offer' ); ?>

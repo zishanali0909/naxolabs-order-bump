@@ -284,12 +284,13 @@ class Naxoorbu_Frontend {
             <?php $price_html = ob_get_clean(); ?>
 
             <div class="naxoorbu-bump-wrap naxoorbu-skin-<?php echo esc_attr( $skin ); ?> <?php echo esc_attr( $added_class ); ?> <?php echo ( $show_badge && $badge_text ) ? 'naxoorbu-has-badge' : ''; ?>"
+                 style="--naxoorbu-header-color:<?php echo esc_attr( $header_color ); ?>;--naxoorbu-header-text:<?php echo esc_attr( $header_text_color ); ?>;"
                  id="<?php echo esc_attr( $wrap_id ); ?>"
                  data-product-id="<?php echo intval( $product->get_id() ); ?>"
                  data-bump-id="<?php echo intval( $bump_id ); ?>"
                  data-qty="<?php echo intval( $pm['qty'] ?? 1 ); ?>">
 
-                <?php if ( $skin === 'skin2' ): ?>
+                <?php if ( $skin === 'skin2' || $skin === 'skin3' ): ?>
                     <!-- ═══ SKIN 2: Teal border, badge above, image+text row, CTA bottom ═══ -->
 
                     <?php if ( $show_badge && $badge_text ): ?>

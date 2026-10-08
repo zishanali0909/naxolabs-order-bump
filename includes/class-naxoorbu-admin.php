@@ -253,8 +253,8 @@ class Naxoorbu_Admin {
             'skin1_text_color'     => '#155724',
             'skin2_bg_color'       => '#e8f7f9',
             'skin2_text_color'     => '#155724',
-            'skin3_bg_color'       => '#FFFFFF',
-            'skin3_text_color'     => '#374151',
+            'skin3_bg_color'       => '#eef4fe',
+            'skin3_text_color'     => '#155724',
             'skin4_bg_color'       => '#FFFFFF',
             'skin4_text_color'     => '#111827',
             'show_product_image'   => 0,
@@ -330,8 +330,8 @@ class Naxoorbu_Admin {
         $clean['skin1_text_color'] = sanitize_hex_color( $settings['skin1_text_color'] ?? '#155724' ) ?: '#155724';
         $clean['skin2_bg_color']   = sanitize_hex_color( $settings['skin2_bg_color'] ?? '#e8f7f9' ) ?: '#e8f7f9';
         $clean['skin2_text_color'] = sanitize_hex_color( $settings['skin2_text_color'] ?? '#155724' ) ?: '#155724';
-        $clean['skin3_bg_color']   = sanitize_hex_color( $settings['skin3_bg_color'] ?? '#FFFFFF' ) ?: '#FFFFFF';
-        $clean['skin3_text_color'] = sanitize_hex_color( $settings['skin3_text_color'] ?? '#374151' ) ?: '#374151';
+        $clean['skin3_bg_color']   = sanitize_hex_color( $settings['skin3_bg_color'] ?? '#eef4fe' ) ?: '#eef4fe';
+        $clean['skin3_text_color'] = sanitize_hex_color( $settings['skin3_text_color'] ?? '#155724' ) ?: '#155724';
         $clean['skin4_bg_color']   = sanitize_hex_color( $settings['skin4_bg_color'] ?? '#FFFFFF' ) ?: '#FFFFFF';
         $clean['skin4_text_color'] = sanitize_hex_color( $settings['skin4_text_color'] ?? '#111827' ) ?: '#111827';
 
