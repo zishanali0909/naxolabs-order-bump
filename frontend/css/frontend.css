@@ -135,8 +135,8 @@
     box-shadow: 0 0 0 3px rgba(39,174,96,.1);
 }
 
-/* Badge — top right corner, small */
-.naxoorbu-skin-skin1 .naxoorbu-bump-badge {
+/* Badge — top right corner, small (Applies to all skins) */
+.naxoorbu-bump-wrap .naxoorbu-bump-badge {
     position: absolute; top: 0; right: 0;
     background: #E15334; color: #fff;
     font-size: 10px; font-weight: 800;
@@ -150,7 +150,7 @@
 
 /* When badge present: push headline row down so badge doesn't overlap */
 .naxoorbu-skin-skin1.naxoorbu-has-badge .naxoorbu-bump-headline-row {
-    padding-top: 30px;
+    padding-top: 28px;
 }
 
 /* Yellow headline row */
@@ -223,18 +223,7 @@
     box-shadow: 0 0 0 3px rgba(23,162,184,.12);
 }
 
-/* Badge — sits above body, auto width, does NOT stretch full width */
-.naxoorbu-skin-skin2 .naxoorbu-bump-badge {
-    display: inline-block;
-    background: #E15334; color: #fff;
-    font-size: 10px; font-weight: 800;
-    padding: 4px 14px;
-    border-radius: 0 20px 20px 0;
-    letter-spacing: .04em;
-    white-space: nowrap;
-    margin: 10px 0 0 0;
-    max-width: 80%;
-}
+/* Badge styling has been unified globally above */
 
 /* Body below badge — image + text side by side */
 .naxoorbu-skin-skin2 .naxoorbu-bump-body {
@@ -424,22 +413,7 @@
     position: relative;
 }
 
-/* Skin2: Badge — left-edge pill, above body, normal flow */
-.naxoorbu-skin-skin2 .naxoorbu-bump-badge {
-    display: block;
-    background: #E15334;
-    color: #fff;
-    font-size: 10px;
-    font-weight: 800;
-    padding: 4px 14px;
-    border-radius: 0 20px 20px 0;
-    letter-spacing: .04em;
-    text-transform: uppercase;
-    width: fit-content;
-    white-space: nowrap;
-    margin: 10px 0 0 0;
-    position: static;
-}
+
 
 /* Skin2: Product image — left side */
 .naxoorbu-skin-skin2 .naxoorbu-bump-body-img {

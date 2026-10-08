@@ -297,7 +297,8 @@ class Naxoorbu_Frontend {
                         <div class="naxoorbu-bump-badge"><?php echo esc_html( $badge_text ); ?></div>
                     <?php endif; ?>
 
-                    <div style="display:flex;gap:14px;align-items:flex-start;padding:12px 16px 10px;">
+                    <?php $body_pt = ( $show_badge && $badge_text ) ? 28 : 12; ?>
+                    <div style="display:flex;gap:14px;align-items:flex-start;padding:<?php echo $body_pt; ?>px 16px 10px;">
                         <?php if ( $img_html ): ?>
                             <div style="flex-shrink:0;"><?php echo wp_kses_post( $img_html ); ?></div>
                         <?php endif; ?>

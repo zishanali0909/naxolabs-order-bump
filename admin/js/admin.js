@@ -208,9 +208,9 @@ jQuery(function($) {
         $('#naxoorbu-preview-bump').addClass('naxoorbu-preview-' + skin);
         if (skin === 'skin2') {
             $('#naxoorbu-colors-skin1').hide();
-            $('#naxoorbu-colors-skin2').show();
+            $('#naxoorbu-colors-skin2').css('display', 'flex');
         } else {
-            $('#naxoorbu-colors-skin1').show();
+            $('#naxoorbu-colors-skin1').css('display', 'flex');
             $('#naxoorbu-colors-skin2').hide();
         }
         naxoorbuUpdatePreviewColors(skin);

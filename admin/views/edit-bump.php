@@ -349,6 +349,33 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                 $cur_skin  = $meta['skin'] ?? 'skin1';
                                 $prev_bg   = ( $cur_skin === 'skin2' || $cur_skin === 'skin3' ) ? ( $meta[ $cur_skin . '_bg_color' ] ?? ( $cur_skin === 'skin3' ? '#eef4fe' : '#e8f7f9' ) ) : ( $meta['skin1_bg_color'] ?? '#FFFDE7' );
                                 $prev_text = ( $cur_skin === 'skin2' || $cur_skin === 'skin3' ) ? ( $meta[ $cur_skin . '_text_color' ] ?? '#155724' ) : ( $meta['skin1_text_color'] ?? '#155724' );
+                                
+                                $prev_price_html = '';
+                                if ( ! empty( $saved_products ) ) {
+                                    $first_prod = wc_get_product( $saved_products[0]['id'] ?? 0 );
+                                    if ( $first_prod ) {
+                                        $regular     = floatval( $first_prod->get_regular_price() );
+                                        $sale        = floatval( $first_prod->get_price() );
+                                        $discount    = floatval( $saved_products[0]['discount'] ?? 0 );
+                                        $dtype       = $saved_products[0]['discount_type'] ?? 'percentage';
+                                        $offer_price = $discount > 0
+                                            ? ( $dtype === 'percentage' ? $sale * (1 - $discount/100) : $sale - $discount )
+                                            : $sale;
+                                        $offer_price = max( 0, $offer_price );
+                                        $show_orig   = !empty( $meta['show_original_price'] );
+
+                                        ob_start();
+                                        ?>
+                                        <div class="naxoorbu-bump-prices" style="display:flex;flex-direction:column;align-items:flex-end;gap:1px;margin-left:auto;flex-shrink:0;">
+                                            <?php if ( $show_orig && $regular > $offer_price ): ?>
+                                                <del class="naxoorbu-price-orig" style="color:var(--muted);font-size:10px;text-decoration:line-through;margin-right:4px;"><?php echo wp_kses_post( wc_price( $regular ) ); ?></del>
+                                            <?php endif; ?>
+                                            <span class="naxoorbu-price-final" style="font-size:14px;font-weight:800;color:#5460dc;"><?php echo wp_kses_post( wc_price( $offer_price ) ); ?></span>
+                                        </div>
+                                        <?php
+                                        $prev_price_html = ob_get_clean();
+                                    }
+                                }
                                 ?>
                                 <div class="naxoorbu-preview-bump naxoorbu-preview-<?php echo esc_attr( $cur_skin ); ?>" id="naxoorbu-preview-bump" data-skin="<?php echo esc_attr( $cur_skin ); ?>" style="position:relative;overflow:visible;--naxoorbu-header-color:<?php echo esc_attr( $prev_bg ); ?>;--naxoorbu-header-text:<?php echo esc_attr( $prev_text ); ?>;">
                                     <!-- Preview Badge -->
@@ -359,6 +386,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                         <span class="naxoorbu-preview-arrow">➡</span>
                                         <span class="naxoorbu-preview-check">☐</span>
                                         <span id="naxoorbu-preview-headline-text"><?php echo wp_kses_post( $meta['headline'] ); ?></span>
+                                        <?php echo $prev_price_html; ?>
                                     </div>
                                     <div id="naxoorbu-preview-desc-area" class="naxoorbu-preview-desc" style="<?php echo $cur_skin === 'skin2' ? 'background:' . esc_attr( $prev_bg ) . ';color:' . esc_attr( $prev_text ) . ';' : ''; ?>">
                                         <?php
@@ -422,6 +450,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                         <span style="color:#E15334;">➡</span>
                                         <span>☐</span>
                                         <span><?php echo wp_kses_post( $meta['headline'] ); ?></span>
+                                        <?php echo $prev_price_html; ?>
                                     </div>
                                 </div>
                             </div>
