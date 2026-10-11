@@ -22,6 +22,8 @@ class Naxoorbu_Ajax {
         add_action( 'wp_ajax_nopriv_naxoorbu_add_to_cart',    [ $this, 'add_to_cart' ] );
         add_action( 'wp_ajax_naxoorbu_remove_from_cart',      [ $this, 'remove_from_cart' ] );
         add_action( 'wp_ajax_nopriv_naxoorbu_remove_from_cart', [ $this, 'remove_from_cart' ] );
+        add_action( 'wp_ajax_naxoorbu_track_impression',      [ $this, 'track_impression' ] );
+        add_action( 'wp_ajax_nopriv_naxoorbu_track_impression', [ $this, 'track_impression' ] );
     }
 
     /**
@@ -174,7 +176,9 @@ class Naxoorbu_Ajax {
          */
         $cart_item_data = apply_filters( 'naxoorbu_cart_item_data', $cart_item_data, $pid, $bump_id );
 
-        if ( WC()->cart->add_to_cart( $pid, $qty, 0, [], $cart_item_data ) ) {
+        $cart_item_key = WC()->cart->add_to_cart( $pid, $qty, 0, [], $cart_item_data );
+        if ( $cart_item_key ) {
+            do_action( 'naxoorbu_bump_added_to_cart', $bump_id, $pid, $cart_item_key );
             WC()->cart->calculate_totals();
             wp_send_json_success( [ 'added' => true, 'total' => WC()->cart->get_total() ] );
         }
@@ -206,5 +210,20 @@ class Naxoorbu_Ajax {
 
         WC()->cart->calculate_totals();
         wp_send_json_success( [ 'removed' => $removed, 'total' => WC()->cart->get_total() ] );
+    }
+
+    /**
+     * Track bump impression from frontend (e.g. Block Checkout).
+     *
+     * @since 1.0.0
+     */
+    public function track_impression() {
+        check_ajax_referer( 'naxoorbu_frontend_nonce', 'nonce' );
+        $bump_id = intval( $_POST['bump_id'] ?? 0 );
+        $pid     = intval( $_POST['product_id'] ?? 0 );
+        if ( $bump_id && $pid ) {
+            do_action( 'naxoorbu_bump_rendered', $bump_id, $pid );
+        }
+        wp_send_json_success();
     }
 }

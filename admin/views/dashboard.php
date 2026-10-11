@@ -60,10 +60,14 @@ if ( ! defined( 'ABSPATH' ) ) exit;
             <span class="naxoorbu-stat-number"><?php echo intval( count( $bumps ) - $active ); ?></span>
             <span class="naxoorbu-stat-label"><?php esc_html_e( 'Inactive', 'naxolabs-order-bump' ); ?></span>
         </div>
-        <div class="naxoorbu-stat-card naxoorbu-stat-revenue">
-            <span class="naxoorbu-stat-number"><?php echo wp_kses_post( wc_price( $bump_revenue ) ); ?></span>
-            <span class="naxoorbu-stat-label"><?php esc_html_e( 'Bump Revenue', 'naxolabs-order-bump' ); ?></span>
-        </div>
+        <?php
+        $revenue_html = '<div class="naxoorbu-stat-card naxoorbu-stat-revenue">';
+        $revenue_html .= '<span class="naxoorbu-stat-number">' . wp_kses_post( wc_price( $bump_revenue ) ) . '</span>';
+        $revenue_html .= '<span class="naxoorbu-stat-label">' . esc_html__( 'Bump Revenue', 'naxolabs-order-bump' ) . '</span>';
+        $revenue_html .= '</div>';
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML built safely, filter allows wrapping in link
+        echo apply_filters( 'naxoorbu_dashboard_revenue_box', $revenue_html, $bump_revenue );
+        ?>
     </div>
 
     <?php if ( empty( $bumps ) ) : ?>

@@ -237,6 +237,14 @@ class Naxoorbu_Frontend {
             $product = wc_get_product( $pm['id'] ?? 0 );
             if ( !$product ) continue;
 
+            /**
+             * Triggered when a bump product is rendered on checkout.
+             * 
+             * @param int $bump_id    Bump ID.
+             * @param int $product_id Product ID.
+             */
+            do_action( 'naxoorbu_bump_rendered', $bump_id, $product->get_id() );
+
             $regular     = floatval( $product->get_regular_price() );
             $sale        = floatval( $product->get_price() );
             $discount    = floatval( $pm['discount'] ?? 0 );

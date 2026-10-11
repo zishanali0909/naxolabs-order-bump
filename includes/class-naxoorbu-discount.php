@@ -19,6 +19,12 @@ class Naxoorbu_Discount {
 
         // Save bump meta to order line items for revenue tracking
         add_action( 'woocommerce_checkout_create_order_line_item', [ $this, 'save_bump_meta_to_order_item' ], 10, 4 );
+        
+        // Fire action when order is placed to track conversions (Pro analytics)
+        // Legacy checkout
+        add_action( 'woocommerce_checkout_order_processed', [ $this, 'fire_order_completed_action' ], 10, 1 );
+        // Block checkout
+        add_action( 'woocommerce_store_api_checkout_order_processed', [ $this, 'fire_order_completed_action_blocks' ], 10, 1 );
     }
 
     /**
@@ -123,6 +129,51 @@ class Naxoorbu_Discount {
         if ( ! empty( $values['naxoorbu_discount'] ) ) {
             $item->add_meta_data( '_naxoorbu_discount', floatval( $values['naxoorbu_discount'] ), true );
             $item->add_meta_data( '_naxoorbu_discount_type', sanitize_text_field( $values['naxoorbu_discount_type'] ?? 'percentage' ), true );
+        }
+    }
+
+    /**
+     * Fire action when an order is processed, so Pro can track it as a conversion.
+     *
+     * @since 1.0.1
+     * @param int $order_id The order ID.
+     */
+    public function fire_order_completed_action( $order_id ) {
+        $order = wc_get_order( $order_id );
+        $this->process_order_for_bumps( $order );
+    }
+
+    /**
+     * Fire action for block checkout.
+     *
+     * @param \WC_Order $order The order object.
+     */
+    public function fire_order_completed_action_blocks( $order ) {
+        $this->process_order_for_bumps( $order );
+    }
+
+    /**
+     * Helper to process order and fire conversion action.
+     */
+    private function process_order_for_bumps( $order ) {
+        if ( ! $order ) return;
+
+        foreach ( $order->get_items() as $item ) {
+            $bump_id = $item->get_meta( '_naxoorbu_bump_id' );
+            if ( $bump_id ) {
+                $product_id = $item->get_product_id();
+                $revenue    = floatval( $item->get_total() );
+
+                /**
+                 * Triggered when an order containing a bump is placed.
+                 *
+                 * @param int   $bump_id    Bump ID.
+                 * @param int   $product_id Product ID.
+                 * @param int   $order_id   Order ID.
+                 * @param float $revenue    Revenue from the bump product.
+                 */
+                do_action( 'naxoorbu_bump_order_completed', intval( $bump_id ), $product_id, $order->get_id(), $revenue );
+            }
         }
     }
 }

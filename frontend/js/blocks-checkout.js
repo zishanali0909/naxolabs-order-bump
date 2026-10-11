@@ -117,6 +117,16 @@
 
         var headline = replaceProductName(bump.headline || '', product.name);
 
+        // Track impression on mount
+        useEffect(function () {
+            var formData = new FormData();
+            formData.append('action', 'naxoorbu_track_impression');
+            formData.append('bump_id', bump.id);
+            formData.append('product_id', product.id);
+            formData.append('nonce', nonce);
+            fetch(ajaxUrl, { method: 'POST', body: formData }).catch(function(){});
+        }, []);
+
         // Toggle handler
         function handleToggle() {
             if (loading) return;
