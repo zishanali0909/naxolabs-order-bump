@@ -54,6 +54,7 @@ define( 'NAXOORBU_MAX_PRODUCTS_PER_BUMP', 2 );
 require_once NAXOORBU_PATH . 'includes/class-naxoorbu-post-type.php';
 require_once NAXOORBU_PATH . 'includes/class-naxoorbu-admin.php';
 require_once NAXOORBU_PATH . 'includes/class-naxoorbu-frontend.php';
+require_once NAXOORBU_PATH . 'includes/class-naxoorbu-cart.php';
 require_once NAXOORBU_PATH . 'includes/class-naxoorbu-ajax.php';
 require_once NAXOORBU_PATH . 'includes/class-naxoorbu-discount.php';
 
@@ -125,11 +126,14 @@ function naxoorbu_deactivate() {
  * @since 2.0.0
  */
 add_action( 'woocommerce_blocks_loaded', function() {
-    if ( ! class_exists( 'Automattic\WooCommerce\Blocks\Integrations\IntegrationInterface' ) ) {
+    if ( ! interface_exists( 'Automattic\WooCommerce\Blocks\Integrations\IntegrationInterface' ) ) {
         return;
     }
 
     require_once NAXOORBU_PATH . 'includes/class-naxoorbu-blocks-integration.php';
+
+    // Store API extensions (cart update callback + cart item data) for blocks-checkout.js
+    Naxoorbu_Cart::register_store_api();
 
     add_action(
         'woocommerce_blocks_checkout_block_registration',

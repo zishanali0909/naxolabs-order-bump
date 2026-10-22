@@ -27,7 +27,7 @@ class Naxoorbu_Blocks_Integration implements IntegrationInterface {
         wp_register_script(
             'naxoorbu-blocks-checkout',
             NAXOORBU_URL . 'frontend/js/blocks-checkout.js',
-            [ 'wp-element', 'wp-plugins', 'wc-blocks-checkout', 'jquery' ],
+            [ 'wp-element', 'wp-plugins', 'wp-data', 'wp-hooks', 'wc-blocks-checkout', 'wc-blocks-data-store', 'jquery' ],
             filemtime( plugin_dir_path( dirname( __FILE__ ) ) . 'frontend/js/blocks-checkout.js' ),
             true
         );
@@ -116,9 +116,9 @@ class Naxoorbu_Blocks_Integration implements IntegrationInterface {
                     'price'            => $price,
                     'regular_price'    => $regular,
                     'final_price'      => round( $final, 2 ),
-                    'price_html'       => wp_strip_all_tags( wc_price( $price ) ),
-                    'regular_html'     => wp_strip_all_tags( wc_price( $regular ) ),
-                    'final_price_html' => wp_strip_all_tags( wc_price( $final ) ),
+                    'price_html'       => html_entity_decode( wp_strip_all_tags( wc_price( $price ) ), ENT_QUOTES, 'UTF-8' ),
+                    'regular_html'     => html_entity_decode( wp_strip_all_tags( wc_price( $regular ) ), ENT_QUOTES, 'UTF-8' ),
+                    'final_price_html' => html_entity_decode( wp_strip_all_tags( wc_price( $final ) ), ENT_QUOTES, 'UTF-8' ),
                     'discount'         => $discount,
                     'discount_type'    => $discount_type,
                     'qty'              => intval( $pm['qty'] ?? 1 ),
@@ -137,7 +137,7 @@ class Naxoorbu_Blocks_Integration implements IntegrationInterface {
                 ? ( $meta['skin2_text_color'] ?? '#155724' )
                 : ( $meta['skin1_text_color'] ?? '#155724' );
 
-            $bumps[] = [
+            $bump_data = [
                 'id'                  => $bump->ID,
                 'headline'            => wp_kses_post( $meta['headline'] ?? '' ),
                 'skin'                => $skin,
@@ -156,12 +156,26 @@ class Naxoorbu_Blocks_Integration implements IntegrationInterface {
                 'minimum_order_amount'=> floatval( $meta['minimum_order_amount'] ?? 0 ),
                 'products'            => $products,
             ];
+
+            /**
+             * Filter a single bump's data before it is passed to the block checkout.
+             *
+             * Products may carry per-product overrides (headline, badge_text, show_badge)
+             * which blocks-checkout.js prefers over the bump-level values.
+             *
+             * @since 1.0.1
+             * @param array $bump_data Bump data for blocks-checkout.js.
+             * @param int   $bump_id   Bump post ID.
+             * @param array $meta      Bump settings (_naxoorbu_settings).
+             */
+            $bumps[] = apply_filters( 'naxoorbu_blocks_bump_data', $bump_data, $bump->ID, $meta );
         }
 
         return [
-            'bumps'   => $bumps,
-            'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-            'nonce'   => wp_create_nonce( 'naxoorbu_frontend_nonce' ),
+            'bumps'             => $bumps,
+            'ajaxUrl'           => admin_url( 'admin-ajax.php' ),
+            'nonce'             => wp_create_nonce( 'naxoorbu_frontend_nonce' ),
+            'storeApiNamespace' => Naxoorbu_Cart::STORE_API_NAMESPACE,
         ];
     }
 }

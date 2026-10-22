@@ -13,12 +13,14 @@
     var el        = wp.element.createElement;
     var useState  = wp.element.useState;
     var useEffect = wp.element.useEffect;
-    var useRef    = wp.element.useRef;
     var registerPlugin = wp.plugins.registerPlugin;
+    var useSelect = wp.data.useSelect;
+    var CART_STORE = (wc.wcBlocksData && wc.wcBlocksData.CART_STORE_KEY) || 'wc/store/cart';
 
     // Get slot fill component — try multiple names for WC version compat
     var blocksCheckout = wc.blocksCheckout || {};
     var OrderMetaSlot  = blocksCheckout.ExperimentalOrderMeta || blocksCheckout.OrderMeta || null;
+    var extensionCartUpdate = blocksCheckout.extensionCartUpdate || null;
 
     // Get bump data passed from PHP via IntegrationInterface::get_script_data()
     var settingsData = {};
@@ -31,6 +33,20 @@
     var bumps   = settingsData.bumps || [];
     var ajaxUrl = settingsData.ajaxUrl || '';
     var nonce   = settingsData.nonce || '';
+    var storeApiNamespace = settingsData.storeApiNamespace || '';
+
+    // The bump checkbox already shows the item was removed, so skip WooCommerce's
+    // '"X" was removed from your cart.' snackbar for bump items (incl. BOGO bonus items).
+    if (storeApiNamespace && wp.hooks) {
+        wp.hooks.addFilter(
+            'woocommerce_show_cart_item_removed_notice',
+            'naxolabs-order-bump/hide-bump-removed-notice',
+            function (show, cartItem) {
+                var ext = cartItem && cartItem.extensions ? cartItem.extensions[storeApiNamespace] : null;
+                return (ext && ext.bump_id) ? false : show;
+            }
+        );
+    }
 
     if (!bumps.length || !OrderMetaSlot) {
         // No bumps or no slot available — exit silently
@@ -42,6 +58,45 @@
     ═══════════════════════════════════════════════ */
     function replaceProductName(headline, name) {
         return headline.replace(/\{\{product_name\}\}/g, name);
+    }
+
+    /* ═══════════════════════════════════════════════
+       Helper: Add/remove a bump product.
+       Uses the Store API cart/extensions endpoint via
+       extensionCartUpdate(), which also updates the
+       checkout's cart store (items + totals) itself.
+       Older WooCommerce without extensionCartUpdate falls
+       back to admin-ajax + store invalidation.
+    ═══════════════════════════════════════════════ */
+    function updateBumpInCart(adding, bump, product) {
+        if (extensionCartUpdate && storeApiNamespace) {
+            return extensionCartUpdate({
+                namespace: storeApiNamespace,
+                data: {
+                    action: adding ? 'add' : 'remove',
+                    product_id: product.id,
+                    bump_id: bump.id,
+                    qty: product.qty || 1
+                }
+            });
+        }
+
+        var formData = new FormData();
+        formData.append('action', adding ? 'naxoorbu_add_to_cart' : 'naxoorbu_remove_from_cart');
+        formData.append('product_id', product.id);
+        formData.append('bump_id', bump.id);
+        formData.append('qty', product.qty || 1);
+        formData.append('nonce', nonce);
+
+        return fetch(ajaxUrl, { method: 'POST', body: formData })
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                if (!res.success) throw new Error(res.data && res.data.message ? res.data.message : 'Request failed');
+                var dispatch = wp.data.dispatch(CART_STORE);
+                if (dispatch && dispatch.invalidateResolutionForStore) {
+                    dispatch.invalidateResolutionForStore();
+                }
+            });
     }
 
     /* ═══════════════════════════════════════════════
@@ -104,18 +159,28 @@
         var loading = loadArr[0];
         var setLoading = loadArr[1];
 
-        var abortRef = useRef(null);
+        // Keep the checkbox in sync with the live cart (e.g. item already added on an earlier visit)
+        var inCart = useSelect(function (select) {
+            var data = select(CART_STORE).getCartData();
+            return !!(data && data.items && data.items.some(function (item) { return item.id === product.id; }));
+        }, [product.id]);
+
+        useEffect(function () {
+            if (!loading) setChecked(inCart);
+        }, [inCart]);
 
         var skin     = bump.skin || 'skin1';
         var bgColor  = bump.bg_color || '#FFFDE7';
         var txtColor = bump.text_color || '#155724';
-        var showBadge = bump.show_badge && bump.badge_text;
+        var badgeText = product.badge_text || bump.badge_text;
+        var showBadge = (product.show_badge || bump.show_badge) && badgeText;
         var showOrig  = bump.show_original_price;
         var showImg   = bump.show_product_image;
         var imgPos    = bump.image_position || 'left';
         var imgWidth  = bump.image_width || 96;
 
-        var headline = replaceProductName(bump.headline || '', product.name);
+        // Product-level headline (e.g. A/B Variant B) wins over the bump-level one
+        var headline = replaceProductName(product.headline || bump.headline || '', product.name);
 
         // Track impression on mount
         useEffect(function () {
@@ -127,7 +192,7 @@
             fetch(ajaxUrl, { method: 'POST', body: formData }).catch(function(){});
         }, []);
 
-        // Toggle handler
+        // Toggle handler (loading flag blocks double-clicks while a request is in flight)
         function handleToggle() {
             if (loading) return;
             setLoading(true);
@@ -135,49 +200,15 @@
             var newChecked = !checked;
             setChecked(newChecked); // Optimistic UI
 
-            // Abort previous request
-            if (abortRef.current) {
-                abortRef.current.abort();
-            }
-
-            var controller = new AbortController();
-            abortRef.current = controller;
-
-            var formData = new FormData();
-            formData.append('action', newChecked ? 'naxoorbu_add_to_cart' : 'naxoorbu_remove_from_cart');
-            formData.append('product_id', product.id);
-            formData.append('qty', product.qty || 1);
-            formData.append('nonce', nonce);
-
-            fetch(ajaxUrl, {
-                method: 'POST',
-                body: formData,
-                signal: controller.signal,
-            })
-            .then(function (r) { return r.json(); })
-            .then(function (res) {
-                setLoading(false);
-                if (res.success) {
-                    // Refresh the WooCommerce Blocks cart store
-                    try {
-                        var dispatch = wp.data.dispatch('wc/store/cart');
-                        if (dispatch && dispatch.invalidateResolutionForStoreCart) {
-                            dispatch.invalidateResolutionForStoreCart();
-                        }
-                    } catch (e) {
-                        // Fallback: trigger jQuery event
-                        jQuery(document.body).trigger('wc_fragment_refresh');
-                    }
-                } else {
+            updateBumpInCart(newChecked, bump, product)
+                .then(function () {
+                    setLoading(false);
+                })
+                .catch(function () {
                     // Revert on failure
+                    setLoading(false);
                     setChecked(!newChecked);
-                }
-            })
-            .catch(function (err) {
-                if (err.name === 'AbortError') return;
-                setLoading(false);
-                setChecked(!newChecked);
-            });
+                });
         }
 
         // Price display
@@ -190,7 +221,7 @@
 
         // Badge
         var badgeEl = showBadge
-            ? el('div', { className: 'naxoorbu-bump-badge' }, bump.badge_text)
+            ? el('div', { className: 'naxoorbu-bump-badge' }, badgeText)
             : null;
 
         // Image

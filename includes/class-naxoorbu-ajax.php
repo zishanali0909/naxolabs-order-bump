@@ -129,61 +129,19 @@ class Naxoorbu_Ajax {
     public function add_to_cart() {
         check_ajax_referer( 'naxoorbu_frontend_nonce', 'nonce' );
 
-        $pid     = intval( $_POST['product_id'] ?? 0 );
-        $qty     = max( 1, min( 99, intval( $_POST['qty'] ?? 1 ) ) );
-        $bump_id = intval( $_POST['bump_id'] ?? 0 );
+        $result = Naxoorbu_Cart::add_bump_product(
+            intval( $_POST['product_id'] ?? 0 ),
+            intval( $_POST['qty'] ?? 1 ),
+            intval( $_POST['bump_id'] ?? 0 )
+        );
 
-        if ( ! $pid ) {
-            wp_send_json_error( [ 'message' => __( 'Invalid product.', 'naxolabs-order-bump' ) ] );
+        if ( is_wp_error( $result ) ) {
+            wp_send_json_error( [ 'message' => $result->get_error_message() ] );
         }
 
-        $product = wc_get_product( $pid );
-        if ( ! $product || ! $product->is_purchasable() || ! $product->is_in_stock() ) {
-            wp_send_json_error( [ 'message' => __( 'This product is not available.', 'naxolabs-order-bump' ) ] );
-        }
-
-        // Already in cart?
-        foreach ( WC()->cart->get_cart() as $item ) {
-            if ( (int) $item['product_id'] === $pid ) {
-                WC()->cart->calculate_totals();
-                wp_send_json_success( [ 'already' => true, 'total' => WC()->cart->get_total() ] );
-            }
-        }
-
-        $cart_item_data = [];
-        if ( $bump_id ) {
-            $cart_item_data['naxoorbu_bump_id'] = $bump_id;
-            // Get discount info from bump settings
-            $bump_meta = get_post_meta( $bump_id, '_naxoorbu_settings', true );
-            if ( is_array( $bump_meta ) && ! empty( $bump_meta['products'] ) ) {
-                foreach ( $bump_meta['products'] as $bp ) {
-                    if ( intval( $bp['id'] ) === $pid ) {
-                        $cart_item_data['naxoorbu_discount']      = floatval( $bp['discount'] ?? 0 );
-                        $cart_item_data['naxoorbu_discount_type']  = sanitize_text_field( $bp['discount_type'] ?? 'percentage' );
-                        break;
-                    }
-                }
-            }
-        }
-
-        /**
-         * Filter cart item data before adding bump product to cart.
-         * Extendable via filters.
-         *
-         * @param array $cart_item_data Cart item data with bump info.
-         * @param int   $pid           Product ID being added.
-         * @param int   $bump_id       Bump post ID.
-         */
-        $cart_item_data = apply_filters( 'naxoorbu_cart_item_data', $cart_item_data, $pid, $bump_id );
-
-        $cart_item_key = WC()->cart->add_to_cart( $pid, $qty, 0, [], $cart_item_data );
-        if ( $cart_item_key ) {
-            do_action( 'naxoorbu_bump_added_to_cart', $bump_id, $pid, $cart_item_key );
-            WC()->cart->calculate_totals();
-            wp_send_json_success( [ 'added' => true, 'total' => WC()->cart->get_total() ] );
-        }
-
-        wp_send_json_error( [ 'message' => __( 'Could not add product to cart.', 'naxolabs-order-bump' ) ] );
+        WC()->cart->calculate_totals();
+        $key = $result['already'] ? 'already' : 'added';
+        wp_send_json_success( [ $key => true, 'total' => WC()->cart->get_total() ] );
     }
 
     /**
@@ -194,18 +152,9 @@ class Naxoorbu_Ajax {
     public function remove_from_cart() {
         check_ajax_referer( 'naxoorbu_frontend_nonce', 'nonce' );
 
-        $pid = intval( $_POST['product_id'] ?? 0 );
-        if ( ! $pid ) {
-            wp_send_json_error( [ 'message' => __( 'Invalid product.', 'naxolabs-order-bump' ) ] );
-        }
-
-        $removed = false;
-        foreach ( WC()->cart->get_cart() as $key => $item ) {
-            if ( (int) $item['product_id'] === $pid ) {
-                WC()->cart->remove_cart_item( $key );
-                $removed = true;
-                break;
-            }
+        $removed = Naxoorbu_Cart::remove_bump_product( intval( $_POST['product_id'] ?? 0 ) );
+        if ( is_wp_error( $removed ) ) {
+            wp_send_json_error( [ 'message' => $removed->get_error_message() ] );
         }
 
         WC()->cart->calculate_totals();

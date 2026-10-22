@@ -10,6 +10,13 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  */
 class Naxoorbu_Discount {
 
+    /**
+     * Original (pre-discount) price of each cart product object, for this request.
+     *
+     * @var SplObjectStorage|null
+     */
+    private static $base_prices = null;
+
     public function __construct() {
         // Apply discount prices during cart calculation
         add_action( 'woocommerce_before_calculate_totals', [ $this, 'apply_bump_discounts' ], 20, 1 );
@@ -82,13 +89,23 @@ class Naxoorbu_Discount {
      */
     public function apply_bump_discounts( $cart ) {
         if ( is_admin() && ! defined( 'DOING_AJAX' ) ) return;
-        if ( did_action( 'woocommerce_before_calculate_totals' ) >= 2 ) return;
+
+        if ( null === self::$base_prices ) {
+            self::$base_prices = new SplObjectStorage();
+        }
 
         foreach ( $cart->get_cart() as $cart_item ) {
             if ( empty( $cart_item['naxoorbu_discount'] ) ) continue;
 
-            $product       = $cart_item['data'];
-            $original_price = floatval( $product->get_price() );
+            $product = $cart_item['data'];
+
+            // Totals can be calculated several times per request (e.g. Store API add + response),
+            // and items can be added in between. Always discount from the original price so the
+            // result is the same on every run, instead of skipping later runs.
+            if ( ! self::$base_prices->contains( $product ) ) {
+                self::$base_prices[ $product ] = floatval( $product->get_price() );
+            }
+            $original_price = self::$base_prices[ $product ];
             $discount      = floatval( $cart_item['naxoorbu_discount'] );
             $discount_type = $cart_item['naxoorbu_discount_type'] ?? 'percentage';
 

@@ -119,4 +119,66 @@ class Test_Cart extends WP_UnitTestCase {
         }
         $this->assertTrue( $found, 'Product should be found in cart.' );
     }
+
+    /** Test: shared cart helper tags the item with bump data. */
+    public function test_cart_helper_adds_bump_product_with_meta() {
+        $result = Naxoorbu_Cart::add_bump_product( $this->product->get_id(), 1, $this->bump_id );
+
+        $this->assertTrue( $result['added'] );
+        $item = WC()->cart->get_cart_item( $result['cart_item_key'] );
+        $this->assertEquals( $this->bump_id, $item['naxoorbu_bump_id'] );
+        $this->assertEquals( 20, $item['naxoorbu_discount'] );
+    }
+
+    /** Test: missing bump ID is resolved from the product. */
+    public function test_cart_helper_resolves_missing_bump_id() {
+        $result = Naxoorbu_Cart::add_bump_product( $this->product->get_id(), 1, 0 );
+
+        $item = WC()->cart->get_cart_item( $result['cart_item_key'] );
+        $this->assertEquals( $this->bump_id, $item['naxoorbu_bump_id'] );
+    }
+
+    /** Test: adding twice reports "already" instead of a second line item. */
+    public function test_cart_helper_does_not_duplicate() {
+        Naxoorbu_Cart::add_bump_product( $this->product->get_id(), 1, $this->bump_id );
+        $result = Naxoorbu_Cart::add_bump_product( $this->product->get_id(), 1, $this->bump_id );
+
+        $this->assertTrue( $result['already'] );
+        $this->assertCount( 1, WC()->cart->get_cart() );
+    }
+
+    /** Test: invalid product returns WP_Error. */
+    public function test_cart_helper_rejects_invalid_product() {
+        $this->assertWPError( Naxoorbu_Cart::add_bump_product( 0 ) );
+        $this->assertWPError( Naxoorbu_Cart::remove_bump_product( 0 ) );
+    }
+
+    /** Test: Store API callback adds and removes the bump product. */
+    public function test_store_api_callback_add_and_remove() {
+        Naxoorbu_Cart::handle_store_api_update( [
+            'action'     => 'add',
+            'product_id' => $this->product->get_id(),
+            'bump_id'    => $this->bump_id,
+            'qty'        => 1,
+        ] );
+        $this->assertCount( 1, WC()->cart->get_cart() );
+
+        Naxoorbu_Cart::handle_store_api_update( [
+            'action'     => 'remove',
+            'product_id' => $this->product->get_id(),
+        ] );
+        $this->assertCount( 0, WC()->cart->get_cart() );
+    }
+
+    /** Test: Store API callback rejects unknown actions. */
+    public function test_store_api_callback_rejects_invalid_action() {
+        $this->expectException( \Automattic\WooCommerce\StoreApi\Exceptions\RouteException::class );
+        Naxoorbu_Cart::handle_store_api_update( [ 'action' => 'delete_everything', 'product_id' => $this->product->get_id() ] );
+    }
+
+    /** Test: Store API cart item data exposes the bump ID (0 for regular items). */
+    public function test_store_api_cart_item_data() {
+        $this->assertSame( [ 'bump_id' => $this->bump_id ], Naxoorbu_Cart::get_store_api_cart_item_data( [ 'naxoorbu_bump_id' => $this->bump_id ] ) );
+        $this->assertSame( [ 'bump_id' => 0 ], Naxoorbu_Cart::get_store_api_cart_item_data( [] ) );
+    }
 }
