@@ -50,6 +50,7 @@ class Test_Cart extends WP_UnitTestCase {
         wp_set_current_user( $user_id );
 
         WC()->cart->empty_cart();
+        delete_transient( Naxoorbu_Visibility::CACHE_KEY ); // Bump meta was saved after the post was created.
     }
 
     public function tear_down() {
@@ -170,6 +171,38 @@ class Test_Cart extends WP_UnitTestCase {
         $this->assertCount( 0, WC()->cart->get_cart() );
     }
 
+    /** Test: a product the shopper already added at its normal price is not added again from the bump. */
+    public function test_cannot_add_product_shopper_already_has() {
+        WC()->cart->add_to_cart( $this->product->get_id() );
+
+        $result = Naxoorbu_Cart::add_bump_product( $this->product->get_id(), 1, $this->bump_id );
+
+        $this->assertWPError( $result );
+        $this->assertSame( 'already_in_cart', $result->get_error_code() );
+        $this->assertCount( 1, WC()->cart->get_cart() );
+    }
+
+    /** Test: removing a bump product never removes the shopper's own item of that product. */
+    public function test_remove_keeps_shoppers_own_item() {
+        $own_key = WC()->cart->add_to_cart( $this->product->get_id() );
+
+        $this->assertFalse( Naxoorbu_Cart::remove_bump_product( $this->product->get_id(), $this->bump_id ) );
+        $this->assertNotEmpty( WC()->cart->get_cart_item( $own_key ) );
+    }
+
+    /** Test: removing only takes out the item added from the given bump. */
+    public function test_remove_only_bump_item() {
+        $own_key  = WC()->cart->add_to_cart( $this->product->get_id() );
+        $bump_key = WC()->cart->add_to_cart( $this->product->get_id(), 1, 0, [], [ 'naxoorbu_bump_id' => $this->bump_id ] );
+
+        $this->assertSame( $bump_key, Naxoorbu_Cart::find_bump_item_key( $this->product->get_id(), $this->bump_id ) );
+        $this->assertSame( '', Naxoorbu_Cart::find_bump_item_key( $this->product->get_id(), $this->bump_id + 1 ) );
+
+        $this->assertTrue( Naxoorbu_Cart::remove_bump_product( $this->product->get_id(), $this->bump_id ) );
+        $this->assertEmpty( WC()->cart->get_cart_item( $bump_key ) );
+        $this->assertNotEmpty( WC()->cart->get_cart_item( $own_key ) );
+    }
+
     /** Test: Store API callback rejects unknown actions. */
     public function test_store_api_callback_rejects_invalid_action() {
         $this->expectException( \Automattic\WooCommerce\StoreApi\Exceptions\RouteException::class );
@@ -180,5 +213,25 @@ class Test_Cart extends WP_UnitTestCase {
     public function test_store_api_cart_item_data() {
         $this->assertSame( [ 'bump_id' => $this->bump_id ], Naxoorbu_Cart::get_store_api_cart_item_data( [ 'naxoorbu_bump_id' => $this->bump_id ] ) );
         $this->assertSame( [ 'bump_id' => 0 ], Naxoorbu_Cart::get_store_api_cart_item_data( [] ) );
+    }
+
+    /** Test: an offer hidden by display rules or schedule cannot be added via a crafted request. */
+    public function test_cannot_add_unavailable_offer() {
+        add_filter( 'naxoorbu_passes_conditions', '__return_false' );
+        $result = Naxoorbu_Cart::add_bump_product( $this->product->get_id(), 1, $this->bump_id );
+        remove_filter( 'naxoorbu_passes_conditions', '__return_false' );
+
+        $this->assertWPError( $result );
+        $this->assertSame( 'offer_unavailable', $result->get_error_code() );
+        $this->assertCount( 0, WC()->cart->get_cart() );
+    }
+
+    /** Test: a product the bump does not offer cannot be added with the bump's discount. */
+    public function test_cannot_add_product_not_in_offer() {
+        $other = WC_Helper_Product::create_simple_product();
+
+        $this->assertFalse( Naxoorbu_Cart::is_offer_available( $this->bump_id, $other->get_id() ) );
+        $this->assertWPError( Naxoorbu_Cart::add_bump_product( $other->get_id(), 1, $this->bump_id ) );
+        $this->assertTrue( Naxoorbu_Cart::is_offer_available( $this->bump_id, $this->product->get_id() ) );
     }
 }

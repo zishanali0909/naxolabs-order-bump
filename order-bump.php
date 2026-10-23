@@ -54,6 +54,8 @@ define( 'NAXOORBU_MAX_PRODUCTS_PER_BUMP', 2 );
 require_once NAXOORBU_PATH . 'includes/class-naxoorbu-post-type.php';
 require_once NAXOORBU_PATH . 'includes/class-naxoorbu-admin.php';
 require_once NAXOORBU_PATH . 'includes/class-naxoorbu-frontend.php';
+require_once NAXOORBU_PATH . 'includes/class-naxoorbu-order-query.php';
+require_once NAXOORBU_PATH . 'includes/class-naxoorbu-visibility.php';
 require_once NAXOORBU_PATH . 'includes/class-naxoorbu-cart.php';
 require_once NAXOORBU_PATH . 'includes/class-naxoorbu-ajax.php';
 require_once NAXOORBU_PATH . 'includes/class-naxoorbu-discount.php';
@@ -81,6 +83,7 @@ function naxoorbu_init() {
     new Naxoorbu_Frontend();
     new Naxoorbu_Ajax();
     new Naxoorbu_Discount();
+    Naxoorbu_Cart::init();
 }
 add_action( 'plugins_loaded', 'naxoorbu_init' );
 

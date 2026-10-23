@@ -114,7 +114,7 @@ class Naxoorbu_Admin {
             'firstProductImg'=> $first_prod_img,
             'customImageUrl' => $custom_img_url,
             'imageType'      => $image_type,
-            'maxProducts'    => apply_filters( 'naxoorbu_max_products_per_bump', NAXOORBU_MAX_PRODUCTS_PER_BUMP ),
+            'maxProducts'    => self::get_max_products( $edit_id ),
             'i18n'           => [
                 'deleteConfirm'  => __( 'Delete this Order Bump?', 'naxolabs-order-bump' ),
                 'productAdded'   => __( 'Product added! Go to Design tab to set its description.', 'naxolabs-order-bump' ),
@@ -129,7 +129,7 @@ class Naxoorbu_Admin {
                 'maxProductsMsg' => sprintf(
                     /* translators: %d: maximum products per bump */
                     __( 'Maximum %d products per bump allowed.', 'naxolabs-order-bump' ),
-                    apply_filters( 'naxoorbu_max_products_per_bump', NAXOORBU_MAX_PRODUCTS_PER_BUMP )
+                    self::get_max_products( $edit_id )
                 ),
             ],
         ] );
@@ -151,64 +151,61 @@ class Naxoorbu_Admin {
     }
 
     /**
-     * Calculate total revenue generated from order bump items.
+     * Total revenue generated from order bump items.
      *
-     * Queries completed/processing orders that contain bump line items
-     * and sums up their totals.
+     * Net revenue from paid orders (refunds subtracted), the same figure the
+     * analytics report uses — see Naxoorbu_Order_Query.
      *
      * @since 1.0.0
      * @return float Total revenue from bump items.
      */
     private function get_bump_revenue() {
-        global $wpdb;
+        return Naxoorbu_Order_Query::get_totals()['revenue'];
+    }
 
-        // HPOS-compatible: use wc_orders table if available, fallback to posts
-        $orders_table = $wpdb->prefix . 'wc_orders';
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-        $use_hpos = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $orders_table ) ) === $orders_table;
+    /**
+     * Maximum products a bump may hold.
+     *
+     * Never lower than what the bump already has: if the limit goes down (e.g. Pro is
+     * deactivated), saving an existing bump keeps all its products; only adding more is blocked.
+     *
+     * @since 1.0.1
+     * @param int $bump_id Bump ID (0 for a new bump).
+     * @return int
+     */
+    public static function get_max_products( $bump_id ) {
+        $max = intval( apply_filters( 'naxoorbu_max_products_per_bump', NAXOORBU_MAX_PRODUCTS_PER_BUMP, $bump_id ) );
 
-        if ( $use_hpos ) {
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-            $result = $wpdb->get_var(
-                $wpdb->prepare(
-                    "SELECT COALESCE( SUM( oim_total.meta_value ), 0 )
-                     FROM {$wpdb->prefix}woocommerce_order_itemmeta AS oim_bump
-                     INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS oim_total
-                         ON oim_bump.order_item_id = oim_total.order_item_id
-                         AND oim_total.meta_key = %s
-                     INNER JOIN {$wpdb->prefix}woocommerce_order_items AS oi
-                         ON oi.order_item_id = oim_bump.order_item_id
-                     INNER JOIN {$wpdb->prefix}wc_orders AS o
-                         ON o.id = oi.order_id
-                         AND o.status IN ( 'wc-completed', 'wc-processing' )
-                     WHERE oim_bump.meta_key = %s",
-                    '_line_total',
-                    '_naxoorbu_bump_id'
-                )
-            );
-        } else {
-            // Legacy: orders in wp_posts
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-            $result = $wpdb->get_var(
-                $wpdb->prepare(
-                    "SELECT COALESCE( SUM( oim_total.meta_value ), 0 )
-                     FROM {$wpdb->prefix}woocommerce_order_itemmeta AS oim_bump
-                     INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS oim_total
-                         ON oim_bump.order_item_id = oim_total.order_item_id
-                         AND oim_total.meta_key = %s
-                     INNER JOIN {$wpdb->prefix}woocommerce_order_items AS oi
-                         ON oi.order_item_id = oim_bump.order_item_id
-                     INNER JOIN {$wpdb->posts} AS p
-                         ON p.ID = oi.order_id
-                         AND p.post_status IN ( 'wc-completed', 'wc-processing' )
-                     WHERE oim_bump.meta_key = %s",
-                    '_line_total',
-                    '_naxoorbu_bump_id'
-                )
-            );
+        $meta     = $bump_id ? get_post_meta( $bump_id, '_naxoorbu_settings', true ) : [];
+        $existing = is_array( $meta ) ? count( (array) ( $meta['products'] ?? [] ) ) : 0;
+
+        return max( $max, $existing );
+    }
+
+    /**
+     * Stop with a message when no more bumps can be created.
+     *
+     * Existing bumps beyond the limit (e.g. created with Pro) keep working and can be edited.
+     *
+     * @since 1.0.1
+     */
+    private function die_if_bump_limit_reached() {
+        $max_bumps     = apply_filters( 'naxoorbu_max_bumps', NAXOORBU_MAX_BUMPS );
+        $current_count = wp_count_posts( 'naxoorbu_order_bump' );
+        $total         = intval( $current_count->publish ?? 0 ) + intval( $current_count->draft ?? 0 );
+        if ( $total < $max_bumps ) {
+            return;
         }
 
-        return floatval( $result );
+        wp_die(
+            sprintf(
+                /* translators: %d: maximum bumps allowed */
+                esc_html__( 'Maximum %d order bumps allowed. Delete an existing bump to create a new one.', 'naxolabs-order-bump' ),
+                $max_bumps // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- integer, inside esc_html__
+            ),
+            esc_html__( 'Bump Limit Reached', 'naxolabs-order-bump' ),
+            [ 'back_link' => true ]
+        );
     }
 
     /**
@@ -220,20 +217,7 @@ class Naxoorbu_Admin {
 
         // Check bump limit for NEW bumps (editing existing is always allowed)
         if ( ! $edit_id ) {
-            $max_bumps = apply_filters( 'naxoorbu_max_bumps', NAXOORBU_MAX_BUMPS );
-            $current_count = wp_count_posts( 'naxoorbu_order_bump' );
-            $total = intval( $current_count->publish ?? 0 ) + intval( $current_count->draft ?? 0 );
-            if ( $total >= $max_bumps ) {
-                wp_die(
-                    sprintf(
-                        /* translators: %d: maximum bumps allowed */
-                        esc_html__( 'Maximum %d order bumps allowed. Delete an existing bump to create a new one.', 'naxolabs-order-bump' ),
-                        $max_bumps // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- integer, inside esc_html__
-                    ),
-                    esc_html__( 'Bump Limit Reached', 'naxolabs-order-bump' ),
-                    [ 'back_link' => true ]
-                );
-            }
+            $this->die_if_bump_limit_reached();
         }
         $bump    = $edit_id ? get_post( $edit_id ) : null;
         $raw     = $edit_id ? ( get_post_meta( $edit_id, '_naxoorbu_settings', true ) ?: [] ) : [];
@@ -305,6 +289,17 @@ class Naxoorbu_Admin {
         }
 
         $bump_id  = intval( $_POST['bump_id'] ?? 0 );
+
+        // Only order bumps can be updated here; any other post ID is rejected.
+        if ( $bump_id && 'naxoorbu_order_bump' !== get_post_type( $bump_id ) ) {
+            wp_die( esc_html__( 'Invalid order bump.', 'naxolabs-order-bump' ) );
+        }
+
+        // The bump limit also applies on save, not only on the "Add New" page.
+        if ( ! $bump_id ) {
+            $this->die_if_bump_limit_reached();
+        }
+
         $title    = sanitize_text_field( wp_unslash( $_POST['bump_title'] ?? 'Order Bump' ) );
         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- deeply sanitized below
         $settings = wp_unslash( $_POST['naxoorbu_settings'] ?? [] );
@@ -356,7 +351,7 @@ class Naxoorbu_Admin {
 
         // Products — max 10, each with validated fields
         $clean['products'] = [];
-        $max_products = apply_filters( 'naxoorbu_max_products_per_bump', NAXOORBU_MAX_PRODUCTS_PER_BUMP );
+        $max_products = self::get_max_products( $bump_id );
         $raw_products = array_slice( (array) ( $settings['products'] ?? [] ), 0, $max_products );
         foreach ( $raw_products as $p ) {
             if ( empty( $p['id'] ) ) continue;

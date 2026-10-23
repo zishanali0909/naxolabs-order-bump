@@ -129,20 +129,16 @@ class Naxoorbu_Blocks_Integration implements IntegrationInterface {
 
             if ( empty( $products ) ) continue;
 
-            $skin      = $meta['skin'] ?? 'skin1';
-            $bg_color  = $skin === 'skin2'
-                ? ( $meta['skin2_bg_color'] ?? '#e8f7f9' )
-                : ( $meta['skin1_bg_color'] ?? '#FFFDE7' );
-            $txt_color = $skin === 'skin2'
-                ? ( $meta['skin2_text_color'] ?? '#155724' )
-                : ( $meta['skin1_text_color'] ?? '#155724' );
+            // Same skin resolution as the classic checkout.
+            $skin_style = Naxoorbu_Frontend::get_skin_style( $meta );
 
             $bump_data = [
                 'id'                  => $bump->ID,
                 'headline'            => wp_kses_post( $meta['headline'] ?? '' ),
-                'skin'                => $skin,
-                'bg_color'            => $bg_color,
-                'text_color'          => $txt_color,
+                'skin'                => $skin_style['skin'],
+                'layout'              => $skin_style['layout'],
+                'bg_color'            => $skin_style['bg_color'],
+                'text_color'          => $skin_style['text_color'],
                 'show_badge'          => ! empty( $meta['show_badge'] ),
                 'badge_text'          => $meta['badge_text'] ?? '',
                 'show_original_price' => ! empty( $meta['show_original_price'] ),

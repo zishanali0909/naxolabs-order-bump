@@ -152,7 +152,10 @@ class Naxoorbu_Ajax {
     public function remove_from_cart() {
         check_ajax_referer( 'naxoorbu_frontend_nonce', 'nonce' );
 
-        $removed = Naxoorbu_Cart::remove_bump_product( intval( $_POST['product_id'] ?? 0 ) );
+        $removed = Naxoorbu_Cart::remove_bump_product(
+            intval( $_POST['product_id'] ?? 0 ),
+            intval( $_POST['bump_id'] ?? 0 )
+        );
         if ( is_wp_error( $removed ) ) {
             wp_send_json_error( [ 'message' => $removed->get_error_message() ] );
         }

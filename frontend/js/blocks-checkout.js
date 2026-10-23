@@ -100,33 +100,6 @@
     }
 
     /* ═══════════════════════════════════════════════
-       Helper: Check trigger rules against current cart
-       (Note: in block checkout, cart data is available
-        via the slot fill props. For simplicity, we show
-        all bumps with trigger_type='all' always, and
-        do server-side filtering for others.)
-    ═══════════════════════════════════════════════ */
-    function shouldShowBump(bump, cart) {
-        var type = bump.trigger_type || 'all';
-        if (type === 'all') return true;
-
-        if (!cart || !cart.cartItems) return true; // Can't filter, show anyway
-
-        var cartProductIds = cart.cartItems.map(function (item) { return item.id; });
-        var cartTotal      = parseFloat(cart.cartTotals && cart.cartTotals.total_price ? cart.cartTotals.total_price : 0) / 100;
-
-        if (type === 'specific_product') {
-            var triggerProds = bump.trigger_products || [];
-            return triggerProds.some(function (id) { return cartProductIds.indexOf(id) !== -1; });
-        }
-        if (type === 'minimum_order') {
-            return cartTotal >= (bump.minimum_order_amount || 0);
-        }
-        // For category triggers, we'd need category data — show bump and let server filter
-        return true;
-    }
-
-    /* ═══════════════════════════════════════════════
        SVG Arrow Icon Component
     ═══════════════════════════════════════════════ */
     function ArrowIcon() {
@@ -159,17 +132,23 @@
         var loading = loadArr[0];
         var setLoading = loadArr[1];
 
-        // Keep the checkbox in sync with the live cart (e.g. item already added on an earlier visit)
+        // Keep the checkbox in sync with the live cart (e.g. item already added on an earlier visit).
+        // Only items added from this bump count; the same product bought at its normal price does not.
         var inCart = useSelect(function (select) {
             var data = select(CART_STORE).getCartData();
-            return !!(data && data.items && data.items.some(function (item) { return item.id === product.id; }));
-        }, [product.id]);
+            return !!(data && data.items && data.items.some(function (item) {
+                var ext = item.extensions ? item.extensions[storeApiNamespace] : null;
+                return item.id === product.id && !!ext && ext.bump_id === bump.id;
+            }));
+        }, [product.id, bump.id]);
 
         useEffect(function () {
             if (!loading) setChecked(inCart);
         }, [inCart]);
 
         var skin     = bump.skin || 'skin1';
+        // Base layout the skin is built on (Pro skins add CSS on top), same as the classic checkout.
+        var layout   = bump.layout || (skin === 'skin2' ? 'skin2' : 'skin1');
         var bgColor  = bump.bg_color || '#FFFDE7';
         var txtColor = bump.text_color || '#155724';
         var badgeText = product.badge_text || bump.badge_text;
@@ -245,10 +224,14 @@
             el('span', null, 'Updating order...')
         );
 
+        // Skin colors as CSS variables on the wrapper, like the classic checkout (used by Pro skins).
+        var skinVars = { '--naxoorbu-header-color': bgColor, '--naxoorbu-header-text': txtColor };
+
         // ── SKIN 2 layout ──
-        if (skin === 'skin2') {
+        if (layout === 'skin2') {
             return el('div', {
-                className: 'naxoorbu-bump-wrap naxoorbu-skin-skin2' + (checked ? ' naxoorbu-bump-is-added' : '') + (showBadge ? ' naxoorbu-has-badge' : ''),
+                className: 'naxoorbu-bump-wrap naxoorbu-skin-' + skin + (checked ? ' naxoorbu-bump-is-added' : '') + (showBadge ? ' naxoorbu-has-badge' : ''),
+                style: skinVars,
                 'data-product-id': product.id,
                 'data-qty': product.qty
             },
@@ -286,7 +269,8 @@
 
         // ── SKIN 1 layout (default) ──
         return el('div', {
-            className: 'naxoorbu-bump-wrap naxoorbu-skin-skin1' + (checked ? ' naxoorbu-bump-is-added' : '') + (showBadge ? ' naxoorbu-has-badge' : ''),
+            className: 'naxoorbu-bump-wrap naxoorbu-skin-' + skin + (checked ? ' naxoorbu-bump-is-added' : '') + (showBadge ? ' naxoorbu-has-badge' : ''),
+            style: skinVars,
             'data-product-id': product.id,
             'data-qty': product.qty
         },
@@ -328,16 +312,34 @@
     /* ═══════════════════════════════════════════════
        Order Bump Container — renders all bumps
     ═══════════════════════════════════════════════ */
-    function OrderBumpBlockComponent(props) {
-        var cart = props.cart || {};
+    function OrderBumpBlockComponent() {
         var elements = [];
 
+        // Bumps and products the shopper should see, decided on the server (trigger, schedule,
+        // display rules, products already in the cart) and re-sent by the Store API with every
+        // cart/address update. Returned as a string so the selector result stays referentially stable.
+        var visibleKey = useSelect(function (select) {
+            var data = select(CART_STORE).getCartData();
+            var ext  = data && data.extensions ? data.extensions[storeApiNamespace] : null;
+            return ext && Array.isArray(ext.visible_products) ? JSON.stringify(ext.visible_products) : null;
+        }, []);
+
+        // bump ID => offered product IDs (null = no Store API data).
+        var visible = null;
+        if (visibleKey !== null) {
+            visible = {};
+            JSON.parse(visibleKey).forEach(function (entry) {
+                visible[entry.bump_id] = entry.product_ids || [];
+            });
+        }
+
         bumps.forEach(function (bump) {
-            if (!shouldShowBump(bump, cart)) return;
-            // Position filtering: default to before_payment
-            var bumpPosition = bump.position || 'before_payment';
+            // Without the Store API data (very old WooCommerce), fall back to showing all bumps.
+            if (visible !== null && !visible[bump.id]) return;
 
             bump.products.forEach(function (product, idx) {
+                if (visible !== null && visible[bump.id].indexOf(product.id) === -1) return;
+
                 elements.push(
                     el(SingleProductBump, {
                         key: bump.id + '-' + idx,
@@ -349,9 +351,12 @@
             });
         });
 
-        if (elements.length === 0) return null;
-
-        return el('div', { className: 'naxoorbu-blocks-checkout-wrap', style: { margin: '16px 0' } }, elements);
+        // Always render the wrapper, even when empty: frontend.js treats it as the signal
+        // that React owns the bumps and the DOM fallback must stay out.
+        return el('div', {
+            className: 'naxoorbu-blocks-checkout-wrap',
+            style: elements.length ? { margin: '16px 0' } : { display: 'none' }
+        }, elements);
     }
 
     /* ═══════════════════════════════════════════════

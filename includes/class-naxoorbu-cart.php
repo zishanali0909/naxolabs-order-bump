@@ -40,16 +40,26 @@ class Naxoorbu_Cart {
             $bump_id = self::find_bump_for_product( $pid );
         }
 
+        // Never trust the request: the offer must exist, include this product and be
+        // available to this shopper right now (trigger, schedule and display rules).
+        if ( $bump_id && ! self::is_offer_available( $bump_id, $pid ) ) {
+            return new WP_Error( 'offer_unavailable', __( 'This offer is no longer available.', 'naxolabs-order-bump' ) );
+        }
+
         $product = wc_get_product( $pid );
         if ( ! $product || ! $product->is_purchasable() || ! $product->is_in_stock() ) {
             return new WP_Error( 'product_unavailable', __( 'This product is not available.', 'naxolabs-order-bump' ) );
         }
 
-        // Already in cart?
-        foreach ( WC()->cart->get_cart() as $key => $item ) {
-            if ( (int) $item['product_id'] === $pid ) {
-                return [ 'added' => false, 'already' => true, 'cart_item_key' => $key ];
-            }
+        // Already added from a bump?
+        $existing_key = self::find_bump_item_key( $pid );
+        if ( $existing_key ) {
+            return [ 'added' => false, 'already' => true, 'cart_item_key' => $existing_key ];
+        }
+
+        // Already in the cart at its normal price? Offering it again would only add a second line.
+        if ( in_array( $pid, Naxoorbu_Visibility::get_cart_product_ids(), true ) ) {
+            return new WP_Error( 'already_in_cart', __( 'This product is already in your cart.', 'naxolabs-order-bump' ) );
         }
 
         $cart_item_data = [];
@@ -91,23 +101,156 @@ class Naxoorbu_Cart {
     /**
      * Remove a bump product from the cart.
      *
+     * Only the item added from a bump is removed; the same product added by the
+     * shopper at its normal price is never touched.
+     *
      * @since 1.0.1
-     * @param int $pid Product ID.
+     * @param int $pid     Product ID.
+     * @param int $bump_id Bump post ID (0 = any bump).
      * @return bool|WP_Error True if removed, false if it was not in the cart, or error.
      */
-    public static function remove_bump_product( $pid ) {
+    public static function remove_bump_product( $pid, $bump_id = 0 ) {
         $pid = absint( $pid );
         if ( ! $pid ) {
             return new WP_Error( 'invalid_product', __( 'Invalid product.', 'naxolabs-order-bump' ) );
         }
 
+        $key = self::find_bump_item_key( $pid, absint( $bump_id ) );
+        if ( ! $key ) {
+            return false;
+        }
+
+        WC()->cart->remove_cart_item( $key );
+        return true;
+    }
+
+    /**
+     * Cart item key of a product added from a bump.
+     *
+     * Returns the first matching item in cart order, i.e. the item the shopper ticked;
+     * items other modules add under the same bump afterwards (e.g. a BOGO bonus) follow it.
+     *
+     * @since 1.0.1
+     * @param int $pid     Product ID.
+     * @param int $bump_id Bump post ID (0 = any bump).
+     * @return string Cart item key, or '' if none.
+     */
+    public static function find_bump_item_key( $pid, $bump_id = 0 ) {
+        if ( ! function_exists( 'WC' ) || ! WC()->cart ) return '';
+
         foreach ( WC()->cart->get_cart() as $key => $item ) {
-            if ( (int) $item['product_id'] === $pid ) {
-                WC()->cart->remove_cart_item( $key );
-                return true;
+            $item_bump = (int) ( $item['naxoorbu_bump_id'] ?? 0 );
+            if ( ! $item_bump || (int) $item['product_id'] !== (int) $pid ) continue;
+            if ( $bump_id && $item_bump !== (int) $bump_id ) continue;
+            return $key;
+        }
+        return '';
+    }
+
+    /**
+     * Whether a published bump offers this product and is visible to the current shopper.
+     *
+     * @since 1.0.1
+     * @param int $bump_id Bump ID.
+     * @param int $pid     Product ID.
+     * @return bool
+     */
+    public static function is_offer_available( $bump_id, $pid ) {
+        foreach ( Naxoorbu_Visibility::get_published_bumps() as $bump_data ) {
+            if ( (int) $bump_data['id'] !== (int) $bump_id ) continue;
+
+            $offers_product = false;
+            foreach ( (array) ( $bump_data['meta']['products'] ?? [] ) as $bp ) {
+                if ( intval( $bp['id'] ?? 0 ) === (int) $pid ) {
+                    $offers_product = true;
+                    break;
+                }
             }
+
+            return $offers_product && Naxoorbu_Visibility::is_eligible( $bump_data );
         }
         return false;
+    }
+
+    /**
+     * Register cart hooks.
+     *
+     * @since 1.0.1
+     */
+    public static function init() {
+        // Runs on cart/checkout load and before an order is placed (classic and Store API),
+        // the same place WooCommerce re-validates coupons.
+        add_action( 'woocommerce_check_cart_items', [ __CLASS__, 'validate_cart_items' ] );
+    }
+
+    /**
+     * Remove bump items whose offer the shopper no longer qualifies for
+     * (offer ended, unpublished or deleted; schedule over; display rules or trigger no longer met).
+     *
+     * Mirrors WooCommerce's handling of invalid coupons: the discounted item is removed
+     * and an error notice stops the order, so the shopper sees the new total before paying.
+     * Items another module added under a bump (e.g. a BOGO bonus product) are left to that
+     * module; they follow their parent item.
+     *
+     * @since 1.0.1
+     */
+    public static function validate_cart_items() {
+        if ( ! function_exists( 'WC' ) || ! WC()->cart ) return;
+
+        // Decide first, then remove: eligibility must be judged on the cart as the shopper built it.
+        $invalid = [];
+        foreach ( WC()->cart->get_cart() as $key => $item ) {
+            $bump_id = (int) ( $item['naxoorbu_bump_id'] ?? 0 );
+            if ( ! $bump_id ) continue;
+
+            $pid = (int) $item['product_id'];
+            if ( ! self::bump_lists_product( $bump_id, $pid ) && self::is_bump_published( $bump_id ) ) {
+                continue; // Not one of the offer's products: owned by another module.
+            }
+
+            if ( ! self::is_offer_available( $bump_id, $pid ) ) {
+                $invalid[ $key ] = $item['data'] ? $item['data']->get_name() : '';
+            }
+        }
+
+        foreach ( $invalid as $key => $name ) {
+            if ( ! WC()->cart->get_cart_item( $key ) ) continue; // Already removed with its parent.
+
+            WC()->cart->remove_cart_item( $key );
+            wc_add_notice(
+                sprintf(
+                    /* translators: %s: product name. */
+                    __( 'The special offer for "%s" is no longer available, so it has been removed from your order. Please review your order total.', 'naxolabs-order-bump' ),
+                    $name
+                ),
+                'error'
+            );
+        }
+    }
+
+    /**
+     * Whether a bump's saved settings list a product (regardless of publish status).
+     *
+     * @param int $bump_id Bump ID.
+     * @param int $pid     Product ID.
+     * @return bool
+     */
+    private static function bump_lists_product( $bump_id, $pid ) {
+        $meta = get_post_meta( $bump_id, '_naxoorbu_settings', true );
+        foreach ( (array) ( $meta['products'] ?? [] ) as $bp ) {
+            if ( intval( $bp['id'] ?? 0 ) === (int) $pid ) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Whether a bump exists and is published.
+     *
+     * @param int $bump_id Bump ID.
+     * @return bool
+     */
+    private static function is_bump_published( $bump_id ) {
+        return 'publish' === get_post_status( $bump_id ) && 'naxoorbu_order_bump' === get_post_type( $bump_id );
     }
 
     /**
@@ -142,6 +285,9 @@ class Naxoorbu_Cart {
      * - cart/extensions callback for extensionCartUpdate()
      * - cart item data (`extensions['naxolabs-order-bump'].bump_id`) so the
      *   block checkout can tell which cart items are order bumps.
+     * - cart data (`extensions['naxolabs-order-bump'].visible_bumps` / `visible_products`): bumps
+     *   and products the shopper should see, re-evaluated on every cart/address update like the
+     *   classic checkout.
      *
      * @since 1.0.1
      */
@@ -164,6 +310,64 @@ class Naxoorbu_Cart {
                 'schema_type'     => ARRAY_A,
             ] );
         }
+
+        if ( function_exists( 'woocommerce_store_api_register_endpoint_data' )
+            && class_exists( '\Automattic\WooCommerce\StoreApi\Schemas\V1\CartSchema' )
+        ) {
+            woocommerce_store_api_register_endpoint_data( [
+                'endpoint'        => \Automattic\WooCommerce\StoreApi\Schemas\V1\CartSchema::IDENTIFIER,
+                'namespace'       => self::STORE_API_NAMESPACE,
+                'data_callback'   => [ __CLASS__, 'get_store_api_cart_data' ],
+                'schema_callback' => [ __CLASS__, 'get_store_api_cart_schema' ],
+                'schema_type'     => ARRAY_A,
+            ] );
+        }
+    }
+
+    /**
+     * Store API cart data: bumps the current shopper should see.
+     *
+     * @since 1.0.1
+     * @return array
+     */
+    public static function get_store_api_cart_data() {
+        $visible = Naxoorbu_Visibility::get_visible_products();
+
+        return [
+            'visible_bumps'    => array_column( $visible, 'bump_id' ),
+            'visible_products' => $visible,
+        ];
+    }
+
+    /**
+     * Store API cart schema for get_store_api_cart_data().
+     *
+     * @since 1.0.1
+     * @return array
+     */
+    public static function get_store_api_cart_schema() {
+        return [
+            'visible_bumps' => [
+                'description' => __( 'IDs of the order bumps the shopper should see.', 'naxolabs-order-bump' ),
+                'type'        => 'array',
+                'items'       => [ 'type' => 'integer' ],
+                'context'     => [ 'view', 'edit' ],
+                'readonly'    => true,
+            ],
+            'visible_products' => [
+                'description' => __( 'Products each visible order bump offers to the shopper.', 'naxolabs-order-bump' ),
+                'type'        => 'array',
+                'items'       => [
+                    'type'       => 'object',
+                    'properties' => [
+                        'bump_id'     => [ 'type' => 'integer' ],
+                        'product_ids' => [ 'type' => 'array', 'items' => [ 'type' => 'integer' ] ],
+                    ],
+                ],
+                'context'     => [ 'view', 'edit' ],
+                'readonly'    => true,
+            ],
+        ];
     }
 
     /**
@@ -211,7 +415,7 @@ class Naxoorbu_Cart {
         if ( 'add' === $action ) {
             $result = self::add_bump_product( $pid, $data['qty'] ?? 1, $data['bump_id'] ?? 0 );
         } elseif ( 'remove' === $action ) {
-            $result = self::remove_bump_product( $pid );
+            $result = self::remove_bump_product( $pid, $data['bump_id'] ?? 0 );
         } else {
             $result = new WP_Error( 'invalid_action', __( 'Invalid request.', 'naxolabs-order-bump' ) );
         }

@@ -226,4 +226,67 @@ class Test_Save extends WP_UnitTestCase {
         $this->assertCount( 1, $meta['products'] );
         $this->assertEquals( 5, $meta['products'][0]['id'] );
     }
+
+    // ─── Limits ────────────────────────────────────────
+
+    /**
+     * Helper: products array with N entries.
+     */
+    private function products( $count ) {
+        $out = [];
+        for ( $i = 1; $i <= $count; $i++ ) {
+            $out[] = [ 'id' => $i, 'discount' => 0, 'discount_type' => 'percentage', 'qty' => 1 ];
+        }
+        return $out;
+    }
+
+    /** Test: a new bump keeps only the allowed number of products. */
+    public function test_new_bump_limited_to_max_products() {
+        $meta = $this->simulate_save( [ 'bump_status' => 'draft', 'products' => $this->products( 4 ) ] );
+
+        $this->assertCount( NAXOORBU_MAX_PRODUCTS_PER_BUMP, $meta['products'] );
+    }
+
+    /** Test: saving a bump that already has more products than the limit (e.g. made with Pro) keeps them all. */
+    public function test_existing_products_kept_when_limit_is_lower() {
+        $bump_id = wp_insert_post( [ 'post_type' => 'naxoorbu_order_bump', 'post_title' => 'Pro bump', 'post_status' => 'publish' ] );
+        update_post_meta( $bump_id, '_naxoorbu_settings', [ 'products' => $this->products( 4 ) ] );
+
+        $this->assertSame( 4, Naxoorbu_Admin::get_max_products( $bump_id ) );
+
+        $meta = $this->simulate_save( [ 'bump_status' => 'publish', 'products' => $this->products( 5 ) ], 'Pro bump', $bump_id );
+        $this->assertCount( 4, $meta['products'], 'Existing products are kept, but no more can be added.' );
+    }
+
+    /** Test: no new bump can be saved once the limit is reached, even without the "Add New" page. */
+    public function test_new_bump_blocked_at_limit() {
+        for ( $i = 0; $i < NAXOORBU_MAX_BUMPS; $i++ ) {
+            wp_insert_post( [ 'post_type' => 'naxoorbu_order_bump', 'post_title' => 'Bump ' . $i, 'post_status' => 'publish' ] );
+        }
+
+        $this->simulate_save( [ 'bump_status' => 'publish' ], 'One too many' );
+
+        $this->assertSame( NAXOORBU_MAX_BUMPS, (int) wp_count_posts( 'naxoorbu_order_bump' )->publish );
+    }
+
+    /** Test: an existing bump can still be edited when there are more bumps than the limit. */
+    public function test_existing_bump_editable_over_limit() {
+        for ( $i = 0; $i < NAXOORBU_MAX_BUMPS + 1; $i++ ) {
+            $bump_id = wp_insert_post( [ 'post_type' => 'naxoorbu_order_bump', 'post_title' => 'Bump ' . $i, 'post_status' => 'publish' ] );
+        }
+
+        $this->simulate_save( [ 'bump_status' => 'publish' ], 'Renamed', $bump_id );
+
+        $this->assertSame( 'Renamed', get_the_title( $bump_id ) );
+    }
+
+    /** Test: a non-bump post ID is rejected and the post is left untouched. */
+    public function test_cannot_overwrite_other_post_types() {
+        $page_id = wp_insert_post( [ 'post_type' => 'page', 'post_title' => 'About', 'post_status' => 'publish' ] );
+
+        $this->simulate_save( [ 'bump_status' => 'publish' ], 'Hijacked', $page_id );
+
+        $this->assertSame( 'page', get_post_type( $page_id ) );
+        $this->assertSame( 'About', get_the_title( $page_id ) );
+    }
 }

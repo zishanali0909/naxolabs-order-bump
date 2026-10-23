@@ -30,7 +30,7 @@ class Naxoorbu_Frontend {
      * Clear the cached bumps transient.
      */
     public function clear_bump_cache() {
-        delete_transient( 'naxoorbu_published_bumps' );
+        delete_transient( Naxoorbu_Visibility::CACHE_KEY );
     }
 
     /**
@@ -69,54 +69,23 @@ class Naxoorbu_Frontend {
         if ( ! $this->is_block_checkout() ) return;
 
         // Get ALL published bumps (no position filter — JS will handle)
-        $all_bumps = $this->get_all_bumps_cached();
+        $all_bumps = Naxoorbu_Visibility::get_published_bumps();
         if ( empty( $all_bumps ) ) return;
 
         echo '<div id="naxoorbu-block-checkout-bumps" style="display:none !important;">';
         foreach ( $all_bumps as $bump_data ) {
-            if ( ! $this->check_trigger( $bump_data['meta'] ) ) continue;
+            if ( ! Naxoorbu_Visibility::is_visible( $bump_data ) ) continue;
             $this->render_single_bump( $bump_data['id'], $bump_data['meta'] );
         }
         echo '</div>';
     }
 
-    /**
-     * Get all published bumps with their meta, using transient cache.
-     */
-    private function get_all_bumps_cached() {
-        $cached = get_transient( 'naxoorbu_published_bumps' );
-        if ( false !== $cached ) return $cached;
-
-        $all  = get_posts(['post_type'=>'naxoorbu_order_bump','post_status'=>'publish','posts_per_page'=>-1]);
-        $data = [];
-        foreach ( $all as $bump ) {
-            $meta = get_post_meta( $bump->ID, '_naxoorbu_settings', true );
-            if ( empty($meta) ) continue;
-            $data[] = ['id' => $bump->ID, 'meta' => $meta];
-        }
-
-        set_transient( 'naxoorbu_published_bumps', $data, 5 * MINUTE_IN_SECONDS );
-        return $data;
-    }
-
     private function get_bumps( $position ) {
-        $all_bumps = $this->get_all_bumps_cached();
         $out = [];
 
-        foreach ( $all_bumps as $bump_data ) {
-            $meta = $bump_data['meta'];
-            if ( ($meta['position'] ?? 'before_payment') !== $position ) continue;
-            if ( ! $this->check_trigger( $meta ) ) continue;
-
-            // Extendable via filters — allows scheduling checks.
-            if ( ! apply_filters( 'naxoorbu_is_bump_scheduled', true, $bump_data ) ) {
-                continue;
-            }
-
-            // Extendable via filters — allows advanced conditional logic.
-            if ( ! apply_filters( 'naxoorbu_passes_conditions', true, $bump_data ) ) {
-                continue;
-            }
+        foreach ( Naxoorbu_Visibility::get_published_bumps() as $bump_data ) {
+            if ( ( $bump_data['meta']['position'] ?? 'before_payment' ) !== $position ) continue;
+            if ( ! Naxoorbu_Visibility::is_visible( $bump_data ) ) continue;
 
             $out[] = $bump_data;
         }
@@ -132,32 +101,60 @@ class Naxoorbu_Frontend {
         return $out;
     }
 
+    /**
+     * Free trigger rule check.
+     *
+     * @deprecated 1.0.1 Use Naxoorbu_Visibility::check_trigger().
+     * @param array $meta Bump settings.
+     * @return bool
+     */
     private function check_trigger( $meta ) {
-        $type = $meta['trigger_type'] ?? 'all';
-        if ( $type === 'all' ) return true;
-        $cart_pids  = array_map( fn($i) => $i['product_id'], WC()->cart->get_cart() );
-        $cart_total = WC()->cart->get_subtotal();
-        if ( $type === 'specific_product' ) {
-            return !empty( array_intersect( $cart_pids, (array)($meta['trigger_products'] ?? []) ) );
-        }
-        if ( $type === 'category' ) {
-            foreach ( $cart_pids as $pid ) {
-                $terms = wp_get_post_terms( $pid, 'product_cat', ['fields'=>'ids'] );
-                if ( !empty( array_intersect( $terms, (array)($meta['trigger_categories'] ?? []) ) ) ) return true;
-            }
-            return false;
-        }
-        if ( $type === 'minimum_order' ) {
-            return $cart_total >= floatval( $meta['minimum_order_amount'] ?? 0 );
-        }
-        return false;
+        return Naxoorbu_Visibility::check_trigger( $meta );
     }
 
-    private function is_in_cart( $product_id ) {
-        foreach ( WC()->cart->get_cart() as $item ) {
-            if ( (int) $item['product_id'] === (int) $product_id ) return true;
+
+    /**
+     * Skin, base layout and header colors for a bump — shared by the classic
+     * checkout and the block checkout so both look the same.
+     *
+     * A skin that is not available (e.g. a Pro skin while Pro or its module is
+     * off) falls back to Skin 1 with Skin 1 colors, instead of a half-styled mix.
+     *
+     * @since 1.0.1
+     * @param array $meta Bump settings.
+     * @return array { skin: string, layout: 'skin1'|'skin2', bg_color: string, text_color: string }
+     */
+    public static function get_skin_style( $meta ) {
+        $skin = $meta['skin'] ?? 'skin1';
+        if ( ! in_array( $skin, (array) apply_filters( 'naxoorbu_allowed_skins', array( 'skin1', 'skin2' ) ), true ) ) {
+            $skin = 'skin1';
         }
-        return false;
+
+        /**
+         * Filter the base layout a skin is built on: 'skin1' (header row) or 'skin2'
+         * (content first, call-to-action row at the bottom). Skins only add CSS on top.
+         *
+         * @since 1.0.1
+         * @param string $layout Base layout.
+         * @param string $skin   Skin slug.
+         */
+        $layout = apply_filters( 'naxoorbu_skin_layout', in_array( $skin, array( 'skin2', 'skin3' ), true ) ? 'skin2' : 'skin1', $skin );
+        $layout = 'skin2' === $layout ? 'skin2' : 'skin1';
+
+        // Resolve header colors per skin (extensible for Pro skins).
+        $skin_color_map = apply_filters( 'naxoorbu_skin_color_defaults', array(
+            'skin1' => array( 'bg' => '#FFFDE7', 'text' => '#155724' ),
+            'skin2' => array( 'bg' => '#e8f7f9', 'text' => '#155724' ),
+        ) );
+        $skin_key       = isset( $skin_color_map[ $skin ] ) ? $skin : 'skin1';
+        $color_defaults = $skin_color_map[ $skin_key ];
+
+        return array(
+            'skin'       => $skin,
+            'layout'     => $layout,
+            'bg_color'   => $meta[ $skin_key . '_bg_color' ] ?? $color_defaults['bg'],
+            'text_color' => $meta[ $skin_key . '_text_color' ] ?? $color_defaults['text'],
+        );
     }
 
     public function render_before_payment() {
@@ -170,9 +167,9 @@ class Naxoorbu_Frontend {
     }
 
     private function render_bumps( $position ) {
-        $bumps     = $this->get_bumps( $position );
-        $max_bumps = apply_filters( 'naxoorbu_max_bumps', 2 );
-        $bumps     = array_slice( $bumps, 0, $max_bumps );
+        // No cap here: the bump limit applies when creating bumps, so every published
+        // bump keeps showing (e.g. after Pro is deactivated), same as the block checkout.
+        $bumps = $this->get_bumps( $position );
 
         /**
          * Fires before bump rendering on checkout.
@@ -215,25 +212,23 @@ class Naxoorbu_Frontend {
         $show_badge      = !empty( $meta['show_badge'] );
         $badge_text      = $meta['badge_text'] ?? 'Special Offer';
         $show_orig       = !empty( $meta['show_original_price'] );
-        $skin            = $meta['skin'] ?? 'skin1';
         $bump_types      = apply_filters( 'naxoorbu_bump_types', array( 'checkbox' ) );
         $design_options  = apply_filters( 'naxoorbu_bump_design_options', array( 'skin1', 'skin2' ) );
-        // Resolve header colors per skin (extensible for Pro skins).
-        $skin_color_map = apply_filters( 'naxoorbu_skin_color_defaults', array(
-            'skin1' => array( 'bg' => '#FFFDE7', 'text' => '#155724' ),
-            'skin2' => array( 'bg' => '#e8f7f9', 'text' => '#155724' ),
-        ) );
-        $skin_key           = isset( $skin_color_map[ $skin ] ) ? $skin : 'skin1';
-        $color_defaults     = $skin_color_map[ $skin_key ];
-        $header_color       = $meta[ $skin_key . '_bg_color' ] ?? $color_defaults['bg'];
-        $header_text_color  = $meta[ $skin_key . '_text_color' ] ?? $color_defaults['text'];
+        $skin_style         = self::get_skin_style( $meta );
+        $skin               = $skin_style['skin'];
+        $header_color       = $skin_style['bg_color'];
+        $header_text_color  = $skin_style['text_color'];
         $show_img        = !empty( $meta['show_product_image'] );
         $img_type        = $meta['image_type'] ?? 'product';
         $img_width       = intval( $meta['image_width'] ?? 96 );
         $img_position    = $meta['image_position'] ?? 'left';
         $img_custom_url  = $meta['image_custom_url'] ?? '';
 
+        $offered_ids = Naxoorbu_Visibility::get_offered_product_ids( [ 'id' => $bump_id, 'meta' => $meta ] );
+
         foreach ( $products_meta as $idx => $pm ) {
+            if ( ! in_array( intval( $pm['id'] ?? 0 ), $offered_ids, true ) ) continue;
+
             $product = wc_get_product( $pm['id'] ?? 0 );
             if ( !$product ) continue;
 
@@ -256,7 +251,7 @@ class Naxoorbu_Frontend {
 
             $prod_name    = $product->get_name();
             $description  = mb_substr( $pm['description'] ?? '', 0, 2000 );
-            $in_cart      = $this->is_in_cart( $product->get_id() );
+            $in_cart      = Naxoorbu_Visibility::has_bump_item_in_cart( $bump_id, $product->get_id() );
             $headline_html = str_replace(
                 '{{product_name}}',
                 esc_html($prod_name),
@@ -298,7 +293,7 @@ class Naxoorbu_Frontend {
                  data-bump-id="<?php echo intval( $bump_id ); ?>"
                  data-qty="<?php echo intval( $pm['qty'] ?? 1 ); ?>">
 
-                <?php if ( $skin === 'skin2' || $skin === 'skin3' ): ?>
+                <?php if ( $skin_style['layout'] === 'skin2' ): ?>
                     <!-- ═══ SKIN 2: Teal border, badge above, image+text row, CTA bottom ═══ -->
 
                     <?php if ( $show_badge && $badge_text ): ?>

@@ -136,6 +136,13 @@ When deactivated, bumps simply stop showing on checkout. Your bump configuration
 * Improved: Search shows top 10 recent products on focus (click to browse)
 * Improved: Escape key closes search dropdowns
 * Fixed: Dashboard "unsaved changes" popup on status toggle
+* Fixed: Security — the save request could turn any post into an order bump
+* Fixed: Offers are re-checked at checkout; an offer that is no longer available is removed with a notice, like an expired coupon
+* Fixed: A bump's own price no longer counts towards its display rules
+* Fixed: Products the customer already has in the cart are not offered again, and unticking a bump never removes the customer's own item
+* Fixed: Bump revenue counts all paid order statuses, subtracts refunds and reads the right order storage (HPOS or posts)
+* Fixed: Saving a bump never drops products it already has; the bump limit is also checked on save
+* Improved: Classic and block checkout use the same skin and visibility rules
 
 = 1.0.0 =
 * Initial public release

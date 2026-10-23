@@ -12,6 +12,7 @@
 .naxoorbu-header h1{margin:0;font-size:17px;font-weight:800;color:#fff}
 .naxoorbu-header p{margin:2px 0 0;font-size:11px;opacity:.85}
 .naxoorbu-back-btn{color:#fff!important;text-decoration:none;font-size:12px;border:1px solid rgba(255,255,255,.35);padding:5px 10px;border-radius:6px;white-space:nowrap}
+.naxoorbu-header-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 
 /* NAME BAR */
 .naxoorbu-name-bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;box-shadow:var(--sh)}
@@ -47,6 +48,7 @@
 .naxoorbu-badge-blue{background:#DBEAFE;color:#1D4ED8}
 .naxoorbu-badge-green{background:#DCFCE7;color:#15803D}
 .naxoorbu-badge-red{background:#FEE2E2;color:#DC2626}
+.naxoorbu-badge-amber{background:#FEF3C7;color:#B45309}
 
 /* TOGGLE */
 .naxoorbu-toggle{position:relative;display:inline-block;width:44px;height:24px}

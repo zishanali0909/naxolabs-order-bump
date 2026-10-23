@@ -1,8 +1,8 @@
 <?php
 /**
- * Tests for render_bumps() — bump limit enforcement.
+ * Tests for the bump limit and checkout bump lists.
  *
- * Verifies that max 2 bumps are rendered on checkout.
+ * The limit applies when creating bumps (see Test_Save); checkout shows every published bump.
  *
  * @package NaxolabsOrderBump
  */

@@ -22,7 +22,16 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                 <p><?php esc_html_e( 'Boost revenue with smart checkout upsells', 'naxolabs-order-bump' ); ?></p>
             </div>
         </div>
+        <div class="naxoorbu-header-actions">
         <?php
+            /**
+             * Fires inside the dashboard header, before the "Add New" button.
+             * Use it to add header buttons (e.g. a settings link).
+             *
+             * @since 1.0.1
+             */
+            do_action( 'naxoorbu_dashboard_header_actions' );
+
             $max_bumps = apply_filters( 'naxoorbu_max_bumps', NAXOORBU_MAX_BUMPS );
             $current_count = wp_count_posts( 'naxoorbu_order_bump' );
             $total_bumps = intval( $current_count->publish ?? 0 ) + intval( $current_count->draft ?? 0 );
@@ -38,6 +47,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
             echo esc_html( sprintf( __( 'Limit: %1$d/%2$d Bumps', 'naxolabs-order-bump' ), $total_bumps, $max_bumps ) ); ?>
         </span>
         <?php endif; ?>
+        </div>
     </div>
 
     <?php if ( isset( $_GET['saved'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
@@ -118,6 +128,17 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                 <input type="checkbox" class="naxoorbu-status-toggle" data-id="<?php echo intval( $bump->ID ); ?>" <?php checked( $bump->post_status, 'publish' ); ?>>
                                 <span class="naxoorbu-toggle-slider"></span>
                             </label>
+                            <?php
+                            /**
+                             * Fires after a bump's status toggle in the dashboard list
+                             * (e.g. Pro outputs a "Scheduled" / "Expired" badge). Output must be escaped.
+                             *
+                             * @since 1.0.1
+                             * @param int     $bump_id Bump post ID.
+                             * @param WP_Post $bump    Bump post.
+                             */
+                            do_action( 'naxoorbu_dashboard_status_badges', $bump->ID, $bump );
+                            ?>
                         </td>
                         <td class="naxoorbu-actions">
                             <a href="<?php echo esc_url( admin_url( 'admin.php?page=naxoorbu-edit&edit=' . $bump->ID ) ); ?>" class="naxoorbu-action-btn naxoorbu-action-edit">
