@@ -1,7 +1,7 @@
 <?php
 /**
  * Tests for Naxoorbu_Visibility — which bumps the shopper sees
- * (classic checkout, block checkout fallback and Store API cart data).
+ * (classic checkout and Store API cart data).
  *
  * @package NaxolabsOrderBump
  */
@@ -47,7 +47,7 @@ class Test_Visibility extends WP_UnitTestCase {
     /** Test: a bump with no rules is visible. */
     public function test_visible_by_default() {
         $this->assertTrue( Naxoorbu_Visibility::is_visible( $this->bump_data() ) );
-        $this->assertContains( $this->bump_id, Naxoorbu_Visibility::get_visible_bump_ids() );
+        $this->assertContains( $this->bump_id, array_column( Naxoorbu_Visibility::get_visible_products(), 'bump_id' ) );
     }
 
     /** Test: display conditions (e.g. Pro rules) can hide a bump. */
@@ -55,7 +55,7 @@ class Test_Visibility extends WP_UnitTestCase {
         add_filter( 'naxoorbu_passes_conditions', '__return_false' );
 
         $this->assertFalse( Naxoorbu_Visibility::is_visible( $this->bump_data() ) );
-        $this->assertNotContains( $this->bump_id, Naxoorbu_Visibility::get_visible_bump_ids() );
+        $this->assertNotContains( $this->bump_id, array_column( Naxoorbu_Visibility::get_visible_products(), 'bump_id' ) );
     }
 
     /** Test: scheduling (e.g. Pro schedule) can hide a bump. */
@@ -109,7 +109,7 @@ class Test_Visibility extends WP_UnitTestCase {
 
         $this->assertSame( [], Naxoorbu_Visibility::get_offered_product_ids( $this->bump_data() ) );
         $this->assertFalse( Naxoorbu_Visibility::is_visible( $this->bump_data() ) );
-        $this->assertNotContains( $this->bump_id, Naxoorbu_Visibility::get_visible_bump_ids() );
+        $this->assertNotContains( $this->bump_id, array_column( Naxoorbu_Visibility::get_visible_products(), 'bump_id' ) );
     }
 
     /** Test: other products of the bump are still offered. */

@@ -152,7 +152,7 @@ class Naxoorbu_Discount {
     /**
      * Fire action when an order is processed, so Pro can track it as a conversion.
      *
-     * @since 1.0.1
+     * @since 1.1.0
      * @param int $order_id The order ID.
      */
     public function fire_order_completed_action( $order_id ) {

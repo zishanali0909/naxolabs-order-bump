@@ -26,12 +26,10 @@ $is_in_stock   = $stock_product && $stock_product->is_in_stock();
             <strong><?php echo esc_html( $p['name'] ); ?></strong>
             <span class="naxoorbu-muted">
                 <?php
-                /* translators: %s: regular price */
                 /* translators: %s: formatted price with HTML */
                 echo wp_kses_post( sprintf( __( 'Regular: %s', 'naxolabs-order-bump' ), wc_price( $p['regular_price'] ) ) );
                 ?> |
                 <?php
-                /* translators: %s: sale price */
                 /* translators: %s: formatted price with HTML */
                 echo wp_kses_post( sprintf( __( 'Sale: %s', 'naxolabs-order-bump' ), wc_price( $p['price'] ) ) );
                 ?>
@@ -40,7 +38,7 @@ $is_in_stock   = $stock_product && $stock_product->is_in_stock();
         <div class="naxoorbu-product-row-controls">
             <input type="number" name="<?php echo esc_attr( $field_prefix ); ?>[discount]"
                    value="<?php echo esc_attr( $p['discount'] ); ?>"
-                   class="naxoorbu-input naxoorbu-input-sm" min="0" max="100" step="0.01" style="width:70px" placeholder="0">
+                   class="naxoorbu-input naxoorbu-input-sm" min="0" step="0.01" style="width:70px" placeholder="0">
             <select name="<?php echo esc_attr( $field_prefix ); ?>[discount_type]" class="naxoorbu-select naxoorbu-select-sm">
                 <option value="percentage" <?php selected( $p['discount_type'] ?? 'percentage', 'percentage' ); ?>>
                     <?php esc_html_e( '% Sale', 'naxolabs-order-bump' ); ?>
@@ -48,8 +46,7 @@ $is_in_stock   = $stock_product && $stock_product->is_in_stock();
                 <option value="flat" <?php selected( $p['discount_type'] ?? '', 'flat' ); ?>>
                     <?php
                     /* translators: %s: currency symbol */
-                    /* translators: %s: currency symbol */
-                        printf( esc_html__( 'Flat %s', 'naxolabs-order-bump' ), esc_html( get_woocommerce_currency_symbol() ) );
+                    printf( esc_html__( 'Flat %s', 'naxolabs-order-bump' ), esc_html( get_woocommerce_currency_symbol() ) );
                     ?>
                 </option>
             </select>

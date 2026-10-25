@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * Cart-based rules ignore items added from bumps, so a bump can never qualify itself
  * (e.g. its own price pushing the cart over a minimum order amount).
  *
- * @since 1.0.1
+ * @since 1.1.0
  */
 class Naxoorbu_Visibility {
 
@@ -100,15 +100,6 @@ class Naxoorbu_Visibility {
 
         // Extendable via filters — allows advanced conditional logic.
         return (bool) apply_filters( 'naxoorbu_passes_conditions', true, $bump_data );
-    }
-
-    /**
-     * IDs of all bumps the current shopper should see.
-     *
-     * @return int[]
-     */
-    public static function get_visible_bump_ids() {
-        return array_column( self::get_visible_products(), 'bump_id' );
     }
 
     /**

@@ -4,7 +4,7 @@ Tags: woocommerce, order bump, checkout upsell, one click upsell, sales boost
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -31,6 +31,7 @@ Increase your average order value effortlessly by offering relevant products rig
 * **Fully Responsive** - Works perfectly on mobile, tablet, and desktop
 * **Block and Classic Checkout** - Compatible with both WooCommerce checkout types
 * **HPOS Compatible** - Works with WooCommerce High-Performance Order Storage
+* **Lightweight** - Styles and scripts load only on the checkout page; no external requests
 * **Developer Friendly** - Extendable via filters and action hooks
 
 = Free Version Includes =
@@ -110,15 +111,28 @@ Yes, the plugin fully declares HPOS compatibility and works seamlessly with WooC
 
 = Will it conflict with my theme or other plugins? =
 
-Naxolabs Order Bump is designed with full isolation. All CSS classes use the obp- prefix, all JavaScript is namespaced, and all PHP functions use the obp_ prefix to prevent any conflicts.
+Naxolabs Order Bump is designed with full isolation. All CSS classes use the `naxoorbu-` prefix, all JavaScript is namespaced, and all PHP functions, classes, options and hooks use the `naxoorbu_` prefix to prevent conflicts. Its styles and scripts load only on the checkout page.
 
 = Does it track revenue from order bumps? =
 
-Yes! The admin dashboard shows total bump revenue from completed and processing orders.
+Yes! The admin dashboard shows the net revenue of bump products from paid orders (processing and completed by default), excluding tax and with refunds subtracted.
+
+= Does the plugin collect data or contact external services? =
+
+No. The plugin does not send any data to external services and does not track visitors. It only stores, in the order item meta, which bump an item came from and the discount it got, so bump revenue can be reported.
 
 = What happens when I deactivate or delete the plugin? =
 
 When deactivated, bumps simply stop showing on checkout. Your bump configurations are preserved. When deleted, only temporary cache data is removed. Your bumps remain in the database in case you reinstall.
+
+= Can developers extend it? =
+
+Yes. Commonly used hooks include:
+* `naxoorbu_max_bumps` and `naxoorbu_max_products_per_bump` (filters) - change the limits
+* `naxoorbu_passes_conditions` (filter) - add your own display conditions
+* `naxoorbu_discount_price` (filter) - adjust the bump price
+* `naxoorbu_blocks_bump_placement` (filter) - show block checkout bumps in the order summary or in the checkout form
+* `naxoorbu_after_bump_saved`, `naxoorbu_bump_rendered` and `naxoorbu_bump_added_to_cart` (actions) - react to saves, views and accepted bumps
 
 == Screenshots ==
 
@@ -130,7 +144,7 @@ When deactivated, bumps simply stop showing on checkout. Your bump configuration
 
 == Changelog ==
 
-= 1.0.1 =
+= 1.1.0 =
 * Improved: Rules tab search now shows product image and price
 * New: Live "Already in Products/Rules" indicator in search results
 * Improved: Search shows top 10 recent products on focus (click to browse)
@@ -143,6 +157,15 @@ When deactivated, bumps simply stop showing on checkout. Your bump configuration
 * Fixed: Bump revenue counts all paid order statuses, subtracts refunds and reads the right order storage (HPOS or posts)
 * Fixed: Saving a bump never drops products it already has; the bump limit is also checked on save
 * Improved: Classic and block checkout use the same skin and visibility rules
+* Improved: Faster checkout — far fewer database queries, and bump styles and scripts load only on the checkout page
+* Improved: Block checkout renders bumps once (no hidden duplicate) and sends no tracking requests unless an add-on records them
+* Improved: Cleaner, consistent admin screens (buttons, colors, spacing) with proper browser tab titles
+* Improved: All admin and checkout messages can be translated
+* Improved: Declares compatibility with the WooCommerce Cart and Checkout blocks
+* Fixed: Products with an apostrophe in their name could not be added from search
+* Fixed: A flat discount above 100 could stop the bump from saving later; decimal discounts are accepted
+* Fixed: New product rows showed the rupee sign instead of the store currency
+* Fixed: An unexpected value in the bump form no longer causes an error on save
 
 = 1.0.0 =
 * Initial public release
@@ -164,12 +187,8 @@ When deactivated, bumps simply stop showing on checkout. Your bump configuration
 
 == Upgrade Notice ==
 
-= 1.0.1 =
-* Improved: Rules tab search now shows product image and price
-* New: Live "Already in Products/Rules" indicator in search results
-* Improved: Search shows top 10 recent products on focus (click to browse)
-* Improved: Escape key closes search dropdowns
-* Fixed: Dashboard "unsaved changes" popup on status toggle
+= 1.1.0 =
+Faster checkout, a cleaner admin and several fixes (security, offer checks, revenue totals, saving). Recommended for all users.
 
 = 1.0.0 =
 Initial release. Install and start boosting your checkout revenue!

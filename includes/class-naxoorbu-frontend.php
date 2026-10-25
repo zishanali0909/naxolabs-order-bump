@@ -18,9 +18,6 @@ class Naxoorbu_Frontend {
         add_action( 'woocommerce_review_order_before_payment', [ $this, 'render_before_payment' ], 5 );
         add_action( 'woocommerce_review_order_before_submit',  [ $this, 'render_after_payment'  ], 5 );
 
-        // Block checkout fallback: render bumps in wp_footer, JS injects them
-        add_action( 'wp_footer', [ $this, 'render_block_checkout_fallback' ], 5 );
-
         // Invalidate bump cache when a bump is saved/updated/deleted
         add_action( 'save_post_naxoorbu_order_bump',   [ $this, 'clear_bump_cache' ] );
         add_action( 'delete_post',            [ $this, 'clear_bump_cache' ] );
@@ -34,18 +31,22 @@ class Naxoorbu_Frontend {
     }
 
     /**
-     * Enqueue frontend CSS/JS on checkout page.
+     * Enqueue frontend CSS/JS on the classic checkout. The block checkout gets its
+     * assets from Naxoorbu_Blocks_Integration.
      *
      * @since 1.0.0
      */
     public function enqueue_assets() {
-        if ( ! is_checkout() ) return;
+        if ( ! is_checkout() || $this->is_block_checkout() ) return;
         wp_enqueue_style(  'naxoorbu-frontend', NAXOORBU_URL . 'frontend/css/frontend.css', [], filemtime( plugin_dir_path( dirname( __FILE__ ) ) . 'frontend/css/frontend.css' ) );
         wp_enqueue_script( 'naxoorbu-frontend', NAXOORBU_URL . 'frontend/js/frontend.js', ['jquery'], filemtime( plugin_dir_path( dirname( __FILE__ ) ) . 'frontend/js/frontend.js' ), true );
         wp_localize_script( 'naxoorbu-frontend', 'naxoorbuFrontend', [
             'ajaxUrl'         => admin_url('admin-ajax.php'),
             'nonce'           => wp_create_nonce('naxoorbu_frontend_nonce'),
-            'isBlockCheckout' => $this->is_block_checkout(),
+            'i18n'            => [
+                'error'           => __( 'Something went wrong.', 'naxolabs-order-bump' ),
+                'connectionError' => __( 'Connection error. Please try again.', 'naxolabs-order-bump' ),
+            ],
         ]);
     }
 
@@ -58,26 +59,6 @@ class Naxoorbu_Frontend {
         $post = get_post( $checkout_page_id );
         if ( ! $post ) return false;
         return has_block( 'woocommerce/checkout', $post );
-    }
-
-    /**
-     * Block checkout fallback: output bumps in a hidden container in wp_footer.
-     * frontend.js will detect this and inject into the block checkout via MutationObserver.
-     */
-    public function render_block_checkout_fallback() {
-        if ( ! is_checkout() ) return;
-        if ( ! $this->is_block_checkout() ) return;
-
-        // Get ALL published bumps (no position filter — JS will handle)
-        $all_bumps = Naxoorbu_Visibility::get_published_bumps();
-        if ( empty( $all_bumps ) ) return;
-
-        echo '<div id="naxoorbu-block-checkout-bumps" style="display:none !important;">';
-        foreach ( $all_bumps as $bump_data ) {
-            if ( ! Naxoorbu_Visibility::is_visible( $bump_data ) ) continue;
-            $this->render_single_bump( $bump_data['id'], $bump_data['meta'] );
-        }
-        echo '</div>';
     }
 
     private function get_bumps( $position ) {
@@ -101,17 +82,6 @@ class Naxoorbu_Frontend {
         return $out;
     }
 
-    /**
-     * Free trigger rule check.
-     *
-     * @deprecated 1.0.1 Use Naxoorbu_Visibility::check_trigger().
-     * @param array $meta Bump settings.
-     * @return bool
-     */
-    private function check_trigger( $meta ) {
-        return Naxoorbu_Visibility::check_trigger( $meta );
-    }
-
 
     /**
      * Skin, base layout and header colors for a bump — shared by the classic
@@ -120,7 +90,7 @@ class Naxoorbu_Frontend {
      * A skin that is not available (e.g. a Pro skin while Pro or its module is
      * off) falls back to Skin 1 with Skin 1 colors, instead of a half-styled mix.
      *
-     * @since 1.0.1
+     * @since 1.1.0
      * @param array $meta Bump settings.
      * @return array { skin: string, layout: 'skin1'|'skin2', bg_color: string, text_color: string }
      */
@@ -134,7 +104,7 @@ class Naxoorbu_Frontend {
          * Filter the base layout a skin is built on: 'skin1' (header row) or 'skin2'
          * (content first, call-to-action row at the bottom). Skins only add CSS on top.
          *
-         * @since 1.0.1
+         * @since 1.1.0
          * @param string $layout Base layout.
          * @param string $skin   Skin slug.
          */
@@ -158,11 +128,11 @@ class Naxoorbu_Frontend {
     }
 
     public function render_before_payment() {
-        if ( $this->is_block_checkout() ) return; // Block fallback handles rendering.
+        if ( $this->is_block_checkout() ) return; // The block checkout renders bumps via blocks-checkout.js.
         $this->render_bumps('before_payment');
     }
     public function render_after_payment() {
-        if ( $this->is_block_checkout() ) return; // Block fallback handles rendering.
+        if ( $this->is_block_checkout() ) return; // The block checkout renders bumps via blocks-checkout.js.
         $this->render_bumps('after_payment');
     }
 
@@ -212,8 +182,6 @@ class Naxoorbu_Frontend {
         $show_badge      = !empty( $meta['show_badge'] );
         $badge_text      = $meta['badge_text'] ?? 'Special Offer';
         $show_orig       = !empty( $meta['show_original_price'] );
-        $bump_types      = apply_filters( 'naxoorbu_bump_types', array( 'checkbox' ) );
-        $design_options  = apply_filters( 'naxoorbu_bump_design_options', array( 'skin1', 'skin2' ) );
         $skin_style         = self::get_skin_style( $meta );
         $skin               = $skin_style['skin'];
         $header_color       = $skin_style['bg_color'];
@@ -301,7 +269,7 @@ class Naxoorbu_Frontend {
                     <?php endif; ?>
 
                     <?php $body_pt = ( $show_badge && $badge_text ) ? 28 : 12; ?>
-                    <div style="display:flex;gap:14px;align-items:flex-start;padding:<?php echo $body_pt; ?>px 16px 10px;">
+                    <div style="display:flex;gap:14px;align-items:flex-start;padding:<?php echo absint( $body_pt ); ?>px 16px 10px;">
                         <?php if ( $img_html ): ?>
                             <div style="flex-shrink:0;"><?php echo wp_kses_post( $img_html ); ?></div>
                         <?php endif; ?>

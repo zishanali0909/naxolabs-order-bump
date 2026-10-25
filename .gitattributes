@@ -1,3 +1,13 @@
 # Force LF line endings for shell scripts (required for GitHub Actions)
 *.sh text eol=lf
 *.yml text eol=lf
+
+# Development files left out of `git archive` / GitHub "Download ZIP"
+/.github export-ignore
+/.wordpress-org export-ignore
+/bin export-ignore
+/tests export-ignore
+/.distignore export-ignore
+/.gitattributes export-ignore
+/composer.json export-ignore
+/phpunit.xml export-ignore

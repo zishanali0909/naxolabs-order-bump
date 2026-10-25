@@ -14,6 +14,12 @@ use Automattic\WooCommerce\Blocks\Integrations\IntegrationInterface;
 class Naxoorbu_Blocks_Integration implements IntegrationInterface {
 
     /**
+     * Inner block that holds the bumps of one position in the checkout form
+     * (used when the placement is 'checkout_fields').
+     */
+    const INNER_BLOCK = 'naxolabs-order-bump/order-bumps';
+
+    /**
      * Integration name identifier.
      */
     public function get_name() {
@@ -21,7 +27,10 @@ class Naxoorbu_Blocks_Integration implements IntegrationInterface {
     }
 
     /**
-     * Register scripts and styles for the block checkout.
+     * Register the block checkout script (WooCommerce enqueues it with the checkout block).
+     *
+     * WooCommerce may initialize integrations on any page, so nothing is enqueued here;
+     * the stylesheet follows the checkout block (see enqueue_style()).
      */
     public function initialize() {
         wp_register_script(
@@ -31,16 +40,21 @@ class Naxoorbu_Blocks_Integration implements IntegrationInterface {
             filemtime( plugin_dir_path( dirname( __FILE__ ) ) . 'frontend/js/blocks-checkout.js' ),
             true
         );
+    }
 
-        wp_register_style(
+    /**
+     * Bump styles, only on pages that render the checkout block
+     * (hooked to woocommerce_blocks_enqueue_checkout_block_scripts_after).
+     *
+     * @since 1.1.0
+     */
+    public static function enqueue_style() {
+        wp_enqueue_style(
             'naxoorbu-blocks-checkout',
             NAXOORBU_URL . 'frontend/css/frontend.css',
             [],
-            filemtime( plugin_dir_path( dirname( __FILE__ ) ) . 'frontend/css/frontend.css' )
+            filemtime( NAXOORBU_PATH . 'frontend/css/frontend.css' )
         );
-
-        // Enqueue styles alongside the script
-        wp_enqueue_style( 'naxoorbu-blocks-checkout' );
     }
 
     /**
@@ -69,16 +83,16 @@ class Naxoorbu_Blocks_Integration implements IntegrationInterface {
      * Build the complete bumps data array for the block checkout JS.
      */
     private function get_bumps_data() {
-        $bumps_posts = get_posts( [
-            'post_type'      => 'naxoorbu_order_bump',
-            'post_status'    => 'publish',
-            'posts_per_page' => -1,
-        ] );
+        // Same cached list as the classic checkout (cleared when a bump is saved or deleted).
+        $published = Naxoorbu_Visibility::get_published_bumps();
+
+        self::prime_product_caches( $published );
 
         $bumps = [];
-        foreach ( $bumps_posts as $bump ) {
-            $meta = get_post_meta( $bump->ID, '_naxoorbu_settings', true );
-            if ( empty( $meta ) || empty( $meta['products'] ) ) continue;
+        foreach ( $published as $published_bump ) {
+            $bump_id = (int) $published_bump['id'];
+            $meta    = $published_bump['meta'];
+            if ( empty( $meta['products'] ) ) continue;
 
             // Build products with calculated prices
             $products = [];
@@ -133,7 +147,7 @@ class Naxoorbu_Blocks_Integration implements IntegrationInterface {
             $skin_style = Naxoorbu_Frontend::get_skin_style( $meta );
 
             $bump_data = [
-                'id'                  => $bump->ID,
+                'id'                  => $bump_id,
                 'headline'            => wp_kses_post( $meta['headline'] ?? '' ),
                 'skin'                => $skin_style['skin'],
                 'layout'              => $skin_style['layout'],
@@ -159,12 +173,12 @@ class Naxoorbu_Blocks_Integration implements IntegrationInterface {
              * Products may carry per-product overrides (headline, badge_text, show_badge)
              * which blocks-checkout.js prefers over the bump-level values.
              *
-             * @since 1.0.1
+             * @since 1.1.0
              * @param array $bump_data Bump data for blocks-checkout.js.
              * @param int   $bump_id   Bump post ID.
              * @param array $meta      Bump settings (_naxoorbu_settings).
              */
-            $bumps[] = apply_filters( 'naxoorbu_blocks_bump_data', $bump_data, $bump->ID, $meta );
+            $bumps[] = apply_filters( 'naxoorbu_blocks_bump_data', $bump_data, $bump_id, $meta );
         }
 
         return [
@@ -172,6 +186,108 @@ class Naxoorbu_Blocks_Integration implements IntegrationInterface {
             'ajaxUrl'           => admin_url( 'admin-ajax.php' ),
             'nonce'             => wp_create_nonce( 'naxoorbu_frontend_nonce' ),
             'storeApiNamespace' => Naxoorbu_Cart::STORE_API_NAMESPACE,
+            'placement'         => self::get_placement(),
+            // Only send impression requests when something records them (e.g. Pro Analytics).
+            'trackImpressions'  => (bool) has_action( 'naxoorbu_bump_rendered' ),
         ];
+    }
+
+    /**
+     * Load every bump product, and the thumbnails shown, in a few batched queries
+     * instead of several queries per product.
+     *
+     * @param array $published Bumps from Naxoorbu_Visibility::get_published_bumps().
+     */
+    private static function prime_product_caches( $published ) {
+        $product_ids = [];
+        $with_images = [];
+        foreach ( $published as $published_bump ) {
+            foreach ( (array) ( $published_bump['meta']['products'] ?? [] ) as $pm ) {
+                $id = absint( $pm['id'] ?? 0 );
+                if ( ! $id ) continue;
+                $product_ids[] = $id;
+                if ( ! empty( $published_bump['meta']['show_product_image'] ) && 'custom' !== ( $published_bump['meta']['image_type'] ?? 'product' ) ) {
+                    $with_images[] = $id;
+                }
+            }
+        }
+        if ( ! $product_ids ) return;
+
+        _prime_post_caches( array_unique( $product_ids ) );
+
+        $image_ids = [];
+        foreach ( array_unique( $with_images ) as $id ) {
+            $image_id = absint( get_post_meta( $id, '_thumbnail_id', true ) );
+            if ( $image_id ) $image_ids[] = $image_id;
+        }
+        if ( $image_ids ) {
+            _prime_post_caches( array_unique( $image_ids ), false, true );
+        }
+    }
+
+    // ─── Placement ─────────────────────────────────────
+
+    /**
+     * Where the block checkout shows bumps.
+     *
+     * - 'order_meta' (default): in the order summary, through WooCommerce's ExperimentalOrderMeta slot.
+     * - 'checkout_fields': in the checkout form at each bump's position — before the payment
+     *   methods ("before_payment") or just before the Place Order button ("after_payment"),
+     *   like the classic checkout.
+     *
+     * @since 1.1.0
+     * @return string
+     */
+    public static function get_placement() {
+        /**
+         * Filter where the block checkout shows bumps: 'order_meta' or 'checkout_fields'.
+         *
+         * @since 1.1.0
+         * @param string $placement Placement.
+         */
+        $placement = apply_filters( 'naxoorbu_blocks_bump_placement', 'order_meta' );
+
+        return 'checkout_fields' === $placement ? 'checkout_fields' : 'order_meta';
+    }
+
+    /**
+     * Placeholder markup for the bumps of one position. WooCommerce's block checkout maps it
+     * to the inner block registered in blocks-checkout.js (via data-block-name).
+     *
+     * @since 1.1.0
+     * @param string $position 'before_payment' or 'after_payment'.
+     * @return string
+     */
+    public static function get_placeholder( $position ) {
+        return sprintf(
+            '<div data-block-name="%1$s" data-position="%2$s" class="wp-block-%3$s"></div>',
+            esc_attr( self::INNER_BLOCK ),
+            esc_attr( $position ),
+            esc_attr( str_replace( '/', '-', self::INNER_BLOCK ) )
+        );
+    }
+
+    /**
+     * render_block filter: bumps shown before the payment methods.
+     *
+     * @since 1.1.0
+     * @param string $block_content Payment block markup.
+     * @return string
+     */
+    public static function render_before_payment( $block_content ) {
+        if ( 'checkout_fields' !== self::get_placement() ) return $block_content;
+        return self::get_placeholder( 'before_payment' ) . $block_content;
+    }
+
+    /**
+     * render_block filter: bumps shown just before the Place Order button.
+     *
+     * @since 1.1.0
+     * @param string $block_content Checkout actions block markup.
+     * @return string
+     */
+    public static function render_before_actions( $block_content ) {
+        if ( 'checkout_fields' !== self::get_placement() ) return $block_content;
+        return self::get_placeholder( 'after_payment' ) . $block_content;
     }
 }

@@ -35,6 +35,16 @@
     var nonce   = settingsData.nonce || '';
     var storeApiNamespace = settingsData.storeApiNamespace || '';
 
+    // Impressions are only sent when something records them (e.g. Pro Analytics), and once
+    // per bump per page: the server counts one impression per bump per visitor session.
+    var trackImpressions = !!settingsData.trackImpressions;
+    var trackedBumps = {};
+
+    // Where bumps render: 'order_meta' (order summary slot) or 'checkout_fields'
+    // (inner blocks at each bump's position, placed by the server — see Naxoorbu_Blocks_Integration).
+    var registerCheckoutBlock = blocksCheckout.registerCheckoutBlock || null;
+    var useInnerBlocks = settingsData.placement === 'checkout_fields' && !!registerCheckoutBlock;
+
     // The bump checkbox already shows the item was removed, so skip WooCommerce's
     // '"X" was removed from your cart.' snackbar for bump items (incl. BOGO bonus items).
     if (storeApiNamespace && wp.hooks) {
@@ -48,7 +58,7 @@
         );
     }
 
-    if (!bumps.length || !OrderMetaSlot) {
+    if (!bumps.length || (!useInnerBlocks && !OrderMetaSlot)) {
         // No bumps or no slot available — exit silently
         return;
     }
@@ -122,7 +132,6 @@
     function SingleProductBump(props) {
         var bump    = props.bump;
         var product = props.product;
-        var idx     = props.idx;
 
         var stateArr = useState(false);
         var checked  = stateArr[0];
@@ -163,6 +172,9 @@
 
         // Track impression on mount
         useEffect(function () {
+            if (!trackImpressions || trackedBumps[bump.id]) return;
+            trackedBumps[bump.id] = true;
+
             var formData = new FormData();
             formData.append('action', 'naxoorbu_track_impression');
             formData.append('bump_id', bump.id);
@@ -312,7 +324,10 @@
     /* ═══════════════════════════════════════════════
        Order Bump Container — renders all bumps
     ═══════════════════════════════════════════════ */
-    function OrderBumpBlockComponent() {
+    function OrderBumpBlockComponent(props) {
+        // Inner blocks show only their own position; the order summary slot shows every bump.
+        var position = props && props.position ? props.position : '';
+
         var elements = [];
 
         // Bumps and products the shopper should see, decided on the server (trigger, schedule,
@@ -336,6 +351,7 @@
         bumps.forEach(function (bump) {
             // Without the Store API data (very old WooCommerce), fall back to showing all bumps.
             if (visible !== null && !visible[bump.id]) return;
+            if (position && (bump.position || 'before_payment') !== position) return;
 
             bump.products.forEach(function (product, idx) {
                 if (visible !== null && visible[bump.id].indexOf(product.id) === -1) return;
@@ -344,8 +360,7 @@
                     el(SingleProductBump, {
                         key: bump.id + '-' + idx,
                         bump: bump,
-                        product: product,
-                        idx: idx
+                        product: product
                     })
                 );
             });
@@ -360,8 +375,23 @@
     }
 
     /* ═══════════════════════════════════════════════
-       Register as WooCommerce Checkout Plugin
+       Register: inner blocks in the checkout form, or
+       the order summary slot (default)
     ═══════════════════════════════════════════════ */
+    if (useInnerBlocks) {
+        registerCheckoutBlock({
+            metadata: {
+                name: 'naxolabs-order-bump/order-bumps',
+                parent: ['woocommerce/checkout-fields-block']
+            },
+            // data-position on the placeholder arrives as the position prop.
+            component: function (props) {
+                return el(OrderBumpBlockComponent, { position: props.position });
+            }
+        });
+        return;
+    }
+
     registerPlugin('naxolabs-order-bump-blocks', {
         render: function () {
             return el(OrderMetaSlot, null,

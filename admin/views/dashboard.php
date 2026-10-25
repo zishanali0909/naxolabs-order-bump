@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
              * Fires inside the dashboard header, before the "Add New" button.
              * Use it to add header buttons (e.g. a settings link).
              *
-             * @since 1.0.1
+             * @since 1.1.0
              */
             do_action( 'naxoorbu_dashboard_header_actions' );
 
@@ -41,7 +41,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
             + <?php esc_html_e( 'Add New Order Bump', 'naxolabs-order-bump' ); ?>
         </a>
         <?php else : ?>
-        <span class="naxoorbu-btn" style="background:#f3f4f6;color:#6b7280;cursor:not-allowed;" title="<?php /* translators: %d: maximum bumps allowed */
+        <span class="naxoorbu-btn is-disabled" aria-disabled="true" title="<?php /* translators: %d: maximum bumps allowed */
         echo esc_attr( sprintf( __( 'Maximum %d order bumps allowed.', 'naxolabs-order-bump' ), $max_bumps ) ); ?>">
             <?php /* translators: %1$d: current bump count, %2$d: maximum bumps allowed */
             echo esc_html( sprintf( __( 'Limit: %1$d/%2$d Bumps', 'naxolabs-order-bump' ), $total_bumps, $max_bumps ) ); ?>
@@ -118,8 +118,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                         <td>
                             <?php
                             /* translators: %d: number of products */
-                            /* translators: %d: number of products */
-                                printf( esc_html__( '%d product(s)', 'naxolabs-order-bump' ), count( $prods ) );
+                            printf( esc_html__( '%d product(s)', 'naxolabs-order-bump' ), count( $prods ) );
                             ?>
                         </td>
                         <td><span class="naxoorbu-badge naxoorbu-badge-blue"><?php echo esc_html( $labels[ $trigger ] ?? $trigger ); ?></span></td>
@@ -133,7 +132,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                              * Fires after a bump's status toggle in the dashboard list
                              * (e.g. Pro outputs a "Scheduled" / "Expired" badge). Output must be escaped.
                              *
-                             * @since 1.0.1
+                             * @since 1.1.0
                              * @param int     $bump_id Bump post ID.
                              * @param WP_Post $bump    Bump post.
                              */

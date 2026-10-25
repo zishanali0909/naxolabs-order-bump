@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  *                   Analytics "Net sales"; refunds count towards the original order's date
  *   - storage:      HPOS or posts, whichever WooCommerce currently uses
  *
- * @since 1.0.1
+ * @since 1.1.0
  */
 class Naxoorbu_Order_Query {
 
@@ -43,7 +43,7 @@ class Naxoorbu_Order_Query {
         /**
          * Filter the order statuses whose bump items count as sales in reports.
          *
-         * @since 1.0.1
+         * @since 1.1.0
          * @param string[] $statuses Status slugs without the "wc-" prefix.
          */
         $statuses = (array) apply_filters( 'naxoorbu_report_paid_statuses', $statuses );

@@ -29,15 +29,51 @@ class Naxoorbu_Admin {
             'naxolabs-order-bump',
             [ $this, 'render_dashboard' ]
         );
-        // Hidden page (no menu item) for editing/creating bumps
-        add_submenu_page(
-            null,
+        // Edit/create screen: registered under WooCommerce (so core sets its title and keeps
+        // the menu open), then its own menu item is removed in hide_edit_menu_item().
+        $edit_hook = add_submenu_page(
+            'woocommerce',
             __( 'Edit Order Bump', 'naxolabs-order-bump' ),
-            '',
+            __( 'Edit Order Bump', 'naxolabs-order-bump' ),
             'manage_woocommerce',
             'naxoorbu-edit',
             [ $this, 'render_edit_page' ]
         );
+        if ( $edit_hook ) {
+            add_action( 'load-' . $edit_hook, [ $this, 'set_edit_page_title' ] );
+        }
+        add_action( 'admin_head', [ $this, 'hide_edit_menu_item' ] );
+        add_filter( 'submenu_file', [ $this, 'highlight_submenu' ] );
+    }
+
+    /**
+     * The edit screen is reached from the dashboard, so it gets no menu item of its own.
+     * Runs on admin_head: after core has read the page title, before the menu is printed.
+     */
+    public function hide_edit_menu_item() {
+        remove_submenu_page( 'woocommerce', 'naxoorbu-edit' );
+    }
+
+    /**
+     * Keep "Order Bumps" highlighted while editing a bump.
+     *
+     * @param string|null $submenu_file Submenu file.
+     * @return string|null
+     */
+    public function highlight_submenu( $submenu_file ) {
+        global $plugin_page;
+        return 'naxoorbu-edit' === $plugin_page ? 'naxolabs-order-bump' : $submenu_file;
+    }
+
+    /**
+     * Title "Add New Order Bump" when creating (the registered title is for editing).
+     */
+    public function set_edit_page_title() {
+        global $title;
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only page routing.
+        if ( empty( $_GET['edit'] ) ) {
+            $title = __( 'Add New Order Bump', 'naxolabs-order-bump' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- core reads $title for the admin <title>.
+        }
     }
 
     /**
@@ -89,16 +125,6 @@ class Naxoorbu_Admin {
         $custom_img_url = $edit_meta['image_custom_url'] ?? '';
         $image_type     = $edit_meta['image_type'] ?? 'product';
 
-        // Pass product descriptions data to JS (instead of inline <script>)
-        if ( $edit_id && ! empty( $edit_meta['products'] ) ) {
-            $desc_json = [];
-            foreach ( $edit_meta['products'] as $p ) {
-                $pid = intval( $p['id'] ?? 0 );
-                $desc_json[ $pid ] = $p['description'] ?? '';
-            }
-            wp_add_inline_script( 'naxoorbu-admin', 'var naxoorbuProdDescs = ' . wp_json_encode( $desc_json ) . ';', 'before' );
-        }
-
         wp_localize_script( 'naxoorbu-admin', 'naxoorbuAdmin', [
             'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
             'nonce'          => wp_create_nonce( 'naxoorbu_admin_nonce' ),
@@ -107,10 +133,8 @@ class Naxoorbu_Admin {
             'skin1TextColor' => $edit_meta['skin1_text_color'] ?? '#155724',
             'skin2BgColor'   => $edit_meta['skin2_bg_color'] ?? '#e8f7f9',
             'skin2TextColor' => $edit_meta['skin2_text_color'] ?? '#155724',
-            'skin3BgColor'   => $edit_meta['skin3_bg_color'] ?? '#FFFFFF',
-            'skin3TextColor' => $edit_meta['skin3_text_color'] ?? '#374151',
-            'skin4BgColor'   => $edit_meta['skin4_bg_color'] ?? '#FFFFFF',
-            'skin4TextColor' => $edit_meta['skin4_text_color'] ?? '#111827',
+            'skin3BgColor'   => $edit_meta['skin3_bg_color'] ?? '#eef4fe',
+            'skin3TextColor' => $edit_meta['skin3_text_color'] ?? '#155724',
             'firstProductImg'=> $first_prod_img,
             'customImageUrl' => $custom_img_url,
             'imageType'      => $image_type,
@@ -126,6 +150,26 @@ class Naxoorbu_Admin {
                 'errorDeleting'  => __( 'Error deleting.', 'naxolabs-order-bump' ),
                 'error'          => __( 'Error.', 'naxolabs-order-bump' ),
                 'inStock'        => __( 'in-stock', 'naxolabs-order-bump' ),
+                'searchFailed'   => __( 'Search failed. Try again.', 'naxolabs-order-bump' ),
+                'inRules'        => __( 'Already in Rules', 'naxolabs-order-bump' ),
+                'inProducts'     => __( 'Already in Products', 'naxolabs-order-bump' ),
+                'alsoInProducts' => __( 'Also in Products', 'naxolabs-order-bump' ),
+                /* translators: %1$s: opening HTML tag, %2$s: closing HTML tag */
+                'addProductsFirst' => __( 'First add products in the %1$sProducts tab%2$s.', 'naxolabs-order-bump' ),
+                'descriptionHelp'=> __( 'Use short promotional text. HTML supported: <b>, <i>, <ul>, <li> etc.', 'naxolabs-order-bump' ),
+                'overlapTitle'   => __( 'Overlap detected:', 'naxolabs-order-bump' ),
+                'overlapText'    => __( 'Some products are added in both Products and Rules sections. This may cause the bump to show a product the customer already has in cart.', 'naxolabs-order-bump' ),
+                'dismiss'        => __( 'Dismiss', 'naxolabs-order-bump' ),
+                'delete'         => __( 'Delete', 'naxolabs-order-bump' ),
+                'deleting'       => __( 'Deleting…', 'naxolabs-order-bump' ),
+                /* translators: %s: formatted price with HTML */
+                'regular'        => __( 'Regular: %s', 'naxolabs-order-bump' ),
+                /* translators: %s: formatted price with HTML */
+                'sale'           => __( 'Sale: %s', 'naxolabs-order-bump' ),
+                'percentSale'    => __( '% Sale', 'naxolabs-order-bump' ),
+                /* translators: %s: currency symbol */
+                'flat'           => sprintf( __( 'Flat %s', 'naxolabs-order-bump' ), html_entity_decode( get_woocommerce_currency_symbol(), ENT_QUOTES, 'UTF-8' ) ),
+                'remove'         => __( 'Remove', 'naxolabs-order-bump' ),
                 'maxProductsMsg' => sprintf(
                     /* translators: %d: maximum products per bump */
                     __( 'Maximum %d products per bump allowed.', 'naxolabs-order-bump' ),
@@ -169,7 +213,7 @@ class Naxoorbu_Admin {
      * Never lower than what the bump already has: if the limit goes down (e.g. Pro is
      * deactivated), saving an existing bump keeps all its products; only adding more is blocked.
      *
-     * @since 1.0.1
+     * @since 1.1.0
      * @param int $bump_id Bump ID (0 for a new bump).
      * @return int
      */
@@ -187,7 +231,7 @@ class Naxoorbu_Admin {
      *
      * Existing bumps beyond the limit (e.g. created with Pro) keep working and can be edited.
      *
-     * @since 1.0.1
+     * @since 1.1.0
      */
     private function die_if_bump_limit_reached() {
         $max_bumps     = apply_filters( 'naxoorbu_max_bumps', NAXOORBU_MAX_BUMPS );
@@ -239,8 +283,6 @@ class Naxoorbu_Admin {
             'skin2_text_color'     => '#155724',
             'skin3_bg_color'       => '#eef4fe',
             'skin3_text_color'     => '#155724',
-            'skin4_bg_color'       => '#FFFFFF',
-            'skin4_text_color'     => '#111827',
             'show_product_image'   => 0,
             'image_type'           => 'product',
             'image_width'          => 96,
@@ -303,6 +345,22 @@ class Naxoorbu_Admin {
         $title    = sanitize_text_field( wp_unslash( $_POST['bump_title'] ?? 'Order Bump' ) );
         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- deeply sanitized below
         $settings = wp_unslash( $_POST['naxoorbu_settings'] ?? [] );
+        $settings = is_array( $settings ) ? $settings : [];
+
+        // Lists hold single values (products hold field maps); every other field is a single value.
+        // A value of the wrong type (e.g. from a tampered form) is dropped, so it falls back to its default.
+        foreach ( $settings as $key => $value ) {
+            if ( 'products' === $key ) {
+                $settings[ $key ] = array_map(
+                    function ( $p ) { return is_array( $p ) ? array_filter( $p, 'is_scalar' ) : []; },
+                    (array) $value
+                );
+            } elseif ( in_array( $key, [ 'trigger_products', 'trigger_categories' ], true ) ) {
+                $settings[ $key ] = array_filter( (array) $value, 'is_scalar' );
+            } elseif ( ! is_scalar( $value ) ) {
+                unset( $settings[ $key ] );
+            }
+        }
 
         // Validate title
         if ( empty( trim( $title ) ) ) {
@@ -327,8 +385,6 @@ class Naxoorbu_Admin {
         $clean['skin2_text_color'] = sanitize_hex_color( $settings['skin2_text_color'] ?? '#155724' ) ?: '#155724';
         $clean['skin3_bg_color']   = sanitize_hex_color( $settings['skin3_bg_color'] ?? '#eef4fe' ) ?: '#eef4fe';
         $clean['skin3_text_color'] = sanitize_hex_color( $settings['skin3_text_color'] ?? '#155724' ) ?: '#155724';
-        $clean['skin4_bg_color']   = sanitize_hex_color( $settings['skin4_bg_color'] ?? '#FFFFFF' ) ?: '#FFFFFF';
-        $clean['skin4_text_color'] = sanitize_hex_color( $settings['skin4_text_color'] ?? '#111827' ) ?: '#111827';
 
         // Image settings — clamped values
         $clean['image_type']       = in_array( $settings['image_type'] ?? '', [ 'product', 'custom' ], true ) ? $settings['image_type'] : 'product';

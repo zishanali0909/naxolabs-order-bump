@@ -103,6 +103,19 @@ jobs:
             . || true
           echo "WPCS check completed (non-blocking)"
 
+      # Security and WordPress.org review rules: escaping, sanitizing, nonces, prepared
+      # queries, translations, forbidden functions. Any error here fails the build.
+      - name: WordPress.org security rules (blocking)
+        run: |
+          ~/.composer/vendor/bin/phpcs \
+            --standard=WordPress \
+            --sniffs=WordPress.Security.EscapeOutput,WordPress.Security.NonceVerification,WordPress.Security.ValidatedSanitizedInput,WordPress.Security.SafeRedirect,WordPress.DB.PreparedSQL,WordPress.DB.PreparedSQLPlaceholders,WordPress.DB.DirectDatabaseQuery,WordPress.WP.I18n,WordPress.WP.AlternativeFunctions,WordPress.WP.DiscouragedFunctions,WordPress.WP.EnqueuedResources,WordPress.PHP.DevelopmentFunctions,WordPress.PHP.DiscouragedPHPFunctions,WordPress.PHP.RestrictedPHPFunctions,WordPress.WP.GlobalVariablesOverride,WordPress.NamingConventions.PrefixAllGlobals \
+            --extensions=php \
+            --ignore=vendor/,node_modules/,tests/ \
+            --warning-severity=0 \
+            -s \
+            .
+
   # 4. Inline <script> Tag Check
   inline-script-check:
     name: Inline Script Tag Check

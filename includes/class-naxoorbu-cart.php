@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * (cart/extensions) callback that powers the block checkout, so both
  * flows tag cart items and fire hooks exactly the same way.
  *
- * @since 1.0.1
+ * @since 1.1.0
  */
 class Naxoorbu_Cart {
 
@@ -20,7 +20,7 @@ class Naxoorbu_Cart {
     /**
      * Add a bump product to the cart.
      *
-     * @since 1.0.1
+     * @since 1.1.0
      * @param int $pid     Product ID.
      * @param int $qty     Quantity (clamped to 1–99).
      * @param int $bump_id Bump post ID (0 = resolve from product).
@@ -104,7 +104,7 @@ class Naxoorbu_Cart {
      * Only the item added from a bump is removed; the same product added by the
      * shopper at its normal price is never touched.
      *
-     * @since 1.0.1
+     * @since 1.1.0
      * @param int $pid     Product ID.
      * @param int $bump_id Bump post ID (0 = any bump).
      * @return bool|WP_Error True if removed, false if it was not in the cart, or error.
@@ -130,7 +130,7 @@ class Naxoorbu_Cart {
      * Returns the first matching item in cart order, i.e. the item the shopper ticked;
      * items other modules add under the same bump afterwards (e.g. a BOGO bonus) follow it.
      *
-     * @since 1.0.1
+     * @since 1.1.0
      * @param int $pid     Product ID.
      * @param int $bump_id Bump post ID (0 = any bump).
      * @return string Cart item key, or '' if none.
@@ -150,7 +150,7 @@ class Naxoorbu_Cart {
     /**
      * Whether a published bump offers this product and is visible to the current shopper.
      *
-     * @since 1.0.1
+     * @since 1.1.0
      * @param int $bump_id Bump ID.
      * @param int $pid     Product ID.
      * @return bool
@@ -175,7 +175,7 @@ class Naxoorbu_Cart {
     /**
      * Register cart hooks.
      *
-     * @since 1.0.1
+     * @since 1.1.0
      */
     public static function init() {
         // Runs on cart/checkout load and before an order is placed (classic and Store API),
@@ -192,7 +192,7 @@ class Naxoorbu_Cart {
      * Items another module added under a bump (e.g. a BOGO bonus product) are left to that
      * module; they follow their parent item.
      *
-     * @since 1.0.1
+     * @since 1.1.0
      */
     public static function validate_cart_items() {
         if ( ! function_exists( 'WC' ) || ! WC()->cart ) return;
@@ -256,7 +256,7 @@ class Naxoorbu_Cart {
     /**
      * Find the published bump that offers a given product.
      *
-     * @since 1.0.1
+     * @since 1.1.0
      * @param int $pid Product ID.
      * @return int Bump post ID, or 0 if none.
      */
@@ -289,7 +289,7 @@ class Naxoorbu_Cart {
      *   and products the shopper should see, re-evaluated on every cart/address update like the
      *   classic checkout.
      *
-     * @since 1.0.1
+     * @since 1.1.0
      */
     public static function register_store_api() {
         if ( function_exists( 'woocommerce_store_api_register_update_callback' ) ) {
@@ -327,7 +327,7 @@ class Naxoorbu_Cart {
     /**
      * Store API cart data: bumps the current shopper should see.
      *
-     * @since 1.0.1
+     * @since 1.1.0
      * @return array
      */
     public static function get_store_api_cart_data() {
@@ -342,7 +342,7 @@ class Naxoorbu_Cart {
     /**
      * Store API cart schema for get_store_api_cart_data().
      *
-     * @since 1.0.1
+     * @since 1.1.0
      * @return array
      */
     public static function get_store_api_cart_schema() {
@@ -373,7 +373,7 @@ class Naxoorbu_Cart {
     /**
      * Store API cart item data: the bump this item was added from (0 = not a bump item).
      *
-     * @since 1.0.1
+     * @since 1.1.0
      * @param array $cart_item Cart item.
      * @return array
      */
@@ -386,7 +386,7 @@ class Naxoorbu_Cart {
     /**
      * Store API cart item schema for get_store_api_cart_item_data().
      *
-     * @since 1.0.1
+     * @since 1.1.0
      * @return array
      */
     public static function get_store_api_cart_item_schema() {
@@ -404,7 +404,7 @@ class Naxoorbu_Cart {
      * Store API callback: add/remove a bump product. The Store API recalculates
      * totals and returns the updated cart to the block checkout itself.
      *
-     * @since 1.0.1
+     * @since 1.1.0
      * @param array $data Data sent by extensionCartUpdate().
      * @throws \Automattic\WooCommerce\StoreApi\Exceptions\RouteException On invalid request.
      */

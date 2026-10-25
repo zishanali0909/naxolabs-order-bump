@@ -1,0 +1,16 @@
+# Development files left out of the release zip (WP-CLI dist-archive / WordPress.org deploy).
+/.git
+/.github
+/.wordpress-org
+/bin
+/tests
+/vendor
+/node_modules
+/.distignore
+/.gitattributes
+/.gitignore
+/composer.json
+/composer.lock
+/phpunit.xml
+/phpunit.xml.dist
+/.phpunit.result.cache

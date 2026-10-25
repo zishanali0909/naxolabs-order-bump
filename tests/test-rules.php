@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for check_trigger() — the rules engine.
+ * Tests for Naxoorbu_Visibility::check_trigger() — the rules engine.
  *
  * Key fix: For minimum_order, ensure cart has calculated totals
  * and use proper product prices. Use WC cart session properly.
@@ -8,12 +8,6 @@
  * @package NaxolabsOrderBump
  */
 class Test_Rules extends WP_UnitTestCase {
-
-    /** @var Naxoorbu_Frontend */
-    private $frontend;
-
-    /** @var ReflectionMethod */
-    private $check_trigger;
 
     /** @var WC_Product_Simple */
     private $product_1;
@@ -23,12 +17,6 @@ class Test_Rules extends WP_UnitTestCase {
 
     public function set_up() {
         parent::set_up();
-
-        $this->frontend = new Naxoorbu_Frontend();
-
-        // Access private check_trigger() via reflection.
-        $this->check_trigger = new ReflectionMethod( Naxoorbu_Frontend::class, 'check_trigger' );
-        $this->check_trigger->setAccessible( true );
 
         // Create test products with explicit prices.
         $this->product_1 = WC_Helper_Product::create_simple_product( true, [
@@ -55,20 +43,20 @@ class Test_Rules extends WP_UnitTestCase {
     /** Test: type "all" always returns true. */
     public function test_trigger_all_returns_true() {
         $meta = [ 'trigger_type' => 'all' ];
-        $this->assertTrue( $this->check_trigger->invoke( $this->frontend, $meta ) );
+        $this->assertTrue( Naxoorbu_Visibility::check_trigger( $meta ) );
     }
 
     /** Test: type "all" returns true with items in cart. */
     public function test_trigger_all_with_cart_items() {
         WC()->cart->add_to_cart( $this->product_1->get_id() );
         $meta = [ 'trigger_type' => 'all' ];
-        $this->assertTrue( $this->check_trigger->invoke( $this->frontend, $meta ) );
+        $this->assertTrue( Naxoorbu_Visibility::check_trigger( $meta ) );
     }
 
     /** Test: missing trigger_type defaults to "all" (true). */
     public function test_trigger_missing_type_defaults_to_all() {
         $meta = [];
-        $this->assertTrue( $this->check_trigger->invoke( $this->frontend, $meta ) );
+        $this->assertTrue( Naxoorbu_Visibility::check_trigger( $meta ) );
     }
 
     // ─── trigger_type = "specific_product" ──────────────
@@ -80,7 +68,7 @@ class Test_Rules extends WP_UnitTestCase {
             'trigger_type'     => 'specific_product',
             'trigger_products' => [ $this->product_1->get_id() ],
         ];
-        $this->assertTrue( $this->check_trigger->invoke( $this->frontend, $meta ) );
+        $this->assertTrue( Naxoorbu_Visibility::check_trigger( $meta ) );
     }
 
     /** Test: specific product NOT in cart -> false. */
@@ -90,7 +78,7 @@ class Test_Rules extends WP_UnitTestCase {
             'trigger_type'     => 'specific_product',
             'trigger_products' => [ $this->product_1->get_id() ],
         ];
-        $this->assertFalse( $this->check_trigger->invoke( $this->frontend, $meta ) );
+        $this->assertFalse( Naxoorbu_Visibility::check_trigger( $meta ) );
     }
 
     /** Test: specific product with empty cart -> false. */
@@ -99,7 +87,7 @@ class Test_Rules extends WP_UnitTestCase {
             'trigger_type'     => 'specific_product',
             'trigger_products' => [ $this->product_1->get_id() ],
         ];
-        $this->assertFalse( $this->check_trigger->invoke( $this->frontend, $meta ) );
+        $this->assertFalse( Naxoorbu_Visibility::check_trigger( $meta ) );
     }
 
     /** Test: specific product with empty trigger list -> false. */
@@ -109,7 +97,7 @@ class Test_Rules extends WP_UnitTestCase {
             'trigger_type'     => 'specific_product',
             'trigger_products' => [],
         ];
-        $this->assertFalse( $this->check_trigger->invoke( $this->frontend, $meta ) );
+        $this->assertFalse( Naxoorbu_Visibility::check_trigger( $meta ) );
     }
 
     // ─── trigger_type = "category" ──────────────────────
@@ -124,7 +112,7 @@ class Test_Rules extends WP_UnitTestCase {
             'trigger_type'       => 'category',
             'trigger_categories' => [ $cat['term_id'] ],
         ];
-        $this->assertTrue( $this->check_trigger->invoke( $this->frontend, $meta ) );
+        $this->assertTrue( Naxoorbu_Visibility::check_trigger( $meta ) );
     }
 
     /** Test: product NOT in matching category -> false. */
@@ -138,7 +126,7 @@ class Test_Rules extends WP_UnitTestCase {
             'trigger_type'       => 'category',
             'trigger_categories' => [ $cat_b['term_id'] ],
         ];
-        $this->assertFalse( $this->check_trigger->invoke( $this->frontend, $meta ) );
+        $this->assertFalse( Naxoorbu_Visibility::check_trigger( $meta ) );
     }
 
     // ─── trigger_type = "minimum_order" ─────────────────
@@ -156,7 +144,7 @@ class Test_Rules extends WP_UnitTestCase {
             'trigger_type'         => 'minimum_order',
             'minimum_order_amount' => $subtotal - 1, // Just under the subtotal.
         ];
-        $this->assertTrue( $this->check_trigger->invoke( $this->frontend, $meta ) );
+        $this->assertTrue( Naxoorbu_Visibility::check_trigger( $meta ) );
     }
 
     /** Test: cart subtotal < minimum -> false. */
@@ -170,7 +158,7 @@ class Test_Rules extends WP_UnitTestCase {
             'trigger_type'         => 'minimum_order',
             'minimum_order_amount' => $subtotal + 100, // Above subtotal.
         ];
-        $this->assertFalse( $this->check_trigger->invoke( $this->frontend, $meta ) );
+        $this->assertFalse( Naxoorbu_Visibility::check_trigger( $meta ) );
     }
 
     /** Test: minimum_order_amount = 0 always passes. */
@@ -182,7 +170,7 @@ class Test_Rules extends WP_UnitTestCase {
             'trigger_type'         => 'minimum_order',
             'minimum_order_amount' => 0,
         ];
-        $this->assertTrue( $this->check_trigger->invoke( $this->frontend, $meta ) );
+        $this->assertTrue( Naxoorbu_Visibility::check_trigger( $meta ) );
     }
 
     // ─── trigger_type = unknown ─────────────────────────
@@ -190,6 +178,6 @@ class Test_Rules extends WP_UnitTestCase {
     /** Test: unknown trigger type -> false. */
     public function test_trigger_unknown_type_returns_false() {
         $meta = [ 'trigger_type' => 'magic_unicorn' ];
-        $this->assertFalse( $this->check_trigger->invoke( $this->frontend, $meta ) );
+        $this->assertFalse( Naxoorbu_Visibility::check_trigger( $meta ) );
     }
 }

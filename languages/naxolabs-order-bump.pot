@@ -1,316 +1,656 @@
-# Naxolabs Order Bump Translation Template
 # Copyright (C) 2026 Zishan Ali
-# This file is distributed under the GPLv2 or later.
-#
+# This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Naxolabs Order Bump 1.0.0\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-07 00:00+0530\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"Language: \n"
+"Project-Id-Version: Naxolabs Order Bump 1.1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/naxolabs-order-bump\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Antigravity IDE\n"
+"POT-Creation-Date: 2026-10-24T17:15:52+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: naxolabs-order-bump\n"
 
-#. Plugin Name
+#. Plugin Name of the plugin
+#: order-bump.php
+#: admin/views/dashboard.php:21
 msgid "Naxolabs Order Bump"
 msgstr ""
 
-#. Description
-msgid "Add order bumps to WooCommerce checkout page like FunnelKit"
+#. Plugin URI of the plugin
+#: order-bump.php
+msgid "https://github.com/zishanali0909/naxolabs-order-bump"
 msgstr ""
 
+#. Description of the plugin
+#: order-bump.php
+msgid "Add order bumps to WooCommerce checkout page. Boost average order value with one-click upsells."
+msgstr ""
+
+#. Author of the plugin
+#: order-bump.php
+msgid "Zishan Ali"
+msgstr ""
+
+#. Author URI of the plugin
+#: order-bump.php
+msgid "https://github.com/zishanali0909"
+msgstr ""
+
+#: admin/views/dashboard.php:15
+#: includes/class-naxoorbu-admin.php:26
+#: includes/class-naxoorbu-admin.php:27
+#: includes/class-naxoorbu-post-type.php:26
+#: includes/class-naxoorbu-post-type.php:36
 msgid "Order Bumps"
 msgstr ""
 
-msgid "All Bumps"
-msgstr ""
-
-msgid "Add New"
-msgstr ""
-
+#: admin/views/dashboard.php:22
 msgid "Boost revenue with smart checkout upsells"
 msgstr ""
 
+#: admin/views/dashboard.php:41
+#: includes/class-naxoorbu-admin.php:75
+#: includes/class-naxoorbu-post-type.php:29
 msgid "Add New Order Bump"
 msgstr ""
 
+#. translators: %d: maximum bumps allowed
+#: admin/views/dashboard.php:45
+msgid "Maximum %d order bumps allowed."
+msgstr ""
+
+#. translators: %1$d: current bump count, %2$d: maximum bumps allowed
+#: admin/views/dashboard.php:47
+msgid "Limit: %1$d/%2$d Bumps"
+msgstr ""
+
+#: admin/views/dashboard.php:54
 msgid "Saved successfully."
 msgstr ""
 
+#: admin/views/dashboard.php:57
 msgid "Deleted."
 msgstr ""
 
+#: admin/views/dashboard.php:63
 msgid "Total Bumps"
 msgstr ""
 
+#: admin/views/dashboard.php:67
+#: admin/views/edit-bump.php:44
+#: includes/class-naxoorbu-admin.php:147
 msgid "Active"
 msgstr ""
 
+#: admin/views/dashboard.php:71
+#: admin/views/edit-bump.php:44
+#: includes/class-naxoorbu-admin.php:148
 msgid "Inactive"
 msgstr ""
 
+#: admin/views/dashboard.php:76
+msgid "Bump Revenue"
+msgstr ""
+
+#: admin/views/dashboard.php:86
 msgid "No Order Bumps Yet"
 msgstr ""
 
+#: admin/views/dashboard.php:87
 msgid "Create your first bump."
 msgstr ""
 
+#: admin/views/dashboard.php:89
 msgid "Create First Bump"
 msgstr ""
 
+#: admin/views/dashboard.php:97
 msgid "Name"
 msgstr ""
 
+#: admin/views/dashboard.php:98
+#: admin/views/edit-bump.php:77
 msgid "Products"
 msgstr ""
 
+#: admin/views/dashboard.php:99
 msgid "Trigger"
 msgstr ""
 
+#: admin/views/dashboard.php:100
 msgid "Status"
 msgstr ""
 
+#: admin/views/dashboard.php:101
 msgid "Actions"
 msgstr ""
 
+#: admin/views/dashboard.php:110
 msgid "All"
 msgstr ""
 
+#: admin/views/dashboard.php:111
 msgid "Specific Product"
 msgstr ""
 
+#: admin/views/dashboard.php:112
 msgid "Category"
 msgstr ""
 
+#: admin/views/dashboard.php:113
 msgid "Min. Order"
 msgstr ""
 
-#, php-format
+#. translators: %d: number of products
+#: admin/views/dashboard.php:121
 msgid "%d product(s)"
 msgstr ""
 
+#: admin/views/dashboard.php:144
 msgid "Edit"
 msgstr ""
 
+#: admin/views/dashboard.php:149
+#: includes/class-naxoorbu-admin.php:163
 msgid "Delete"
 msgstr ""
 
-msgid "Save"
+#: admin/views/edit-bump.php:16
+msgid "Edit Bump"
 msgstr ""
 
+#: admin/views/edit-bump.php:21
 msgid "Back"
 msgstr ""
 
-msgid "New Order Bump"
-msgstr ""
-
-#, php-format
+#. translators: %s: bump post title
+#: admin/views/edit-bump.php:29
 msgid "Edit: %s"
 msgstr ""
 
+#: admin/views/edit-bump.php:31
+#: includes/class-naxoorbu-post-type.php:31
+msgid "New Order Bump"
+msgstr ""
+
+#: admin/views/edit-bump.php:35
 msgid "Configure your checkout order bump"
 msgstr ""
 
+#: admin/views/edit-bump.php:46
+msgid "Save"
+msgstr ""
+
+#: admin/views/edit-bump.php:54
 msgid "Order Bump saved successfully."
 msgstr ""
 
+#: admin/views/edit-bump.php:56
+msgid "Saved, but no products added yet. Go to Products tab to add products."
+msgstr ""
+
+#: admin/views/edit-bump.php:67
 msgid "Bump Name (Internal):"
 msgstr ""
 
+#: admin/views/edit-bump.php:71
+msgid "e.g. Accounting Upsell"
+msgstr ""
+
+#: admin/views/edit-bump.php:76
 msgid "Design"
 msgstr ""
 
+#: admin/views/edit-bump.php:78
 msgid "Rules"
 msgstr ""
 
+#: admin/views/edit-bump.php:89
 msgid "Call To Action Text"
 msgstr ""
 
+#: admin/views/edit-bump.php:95
+msgid "Yes! Add {{product_name}} to my order"
+msgstr ""
+
+#. translators: %s: template tag code
+#: admin/views/edit-bump.php:99
+msgid "Use %s to show product name dynamically."
+msgstr ""
+
+#: admin/views/edit-bump.php:107
 msgid "Product Descriptions"
 msgstr ""
 
+#: admin/views/edit-bump.php:166
+#: includes/class-naxoorbu-admin.php:159
+msgid "Use short promotional text. HTML supported: <b>, <i>, <ul>, <li> etc."
+msgstr ""
+
+#. translators: %1$s: opening HTML tag, %2$s: closing HTML tag
+#: admin/views/edit-bump.php:175
+#: includes/class-naxoorbu-admin.php:158
+msgid "First add products in the %1$sProducts tab%2$s."
+msgstr ""
+
+#: admin/views/edit-bump.php:187
 msgid "Display Options"
 msgstr ""
 
+#: admin/views/edit-bump.php:190
 msgid "Position on Checkout"
 msgstr ""
 
+#: admin/views/edit-bump.php:192
 msgid "Before Payment Button (Default)"
 msgstr ""
 
+#: admin/views/edit-bump.php:193
 msgid "After Payment Button"
 msgstr ""
 
+#: admin/views/edit-bump.php:197
 msgid "Skin / Layout"
 msgstr ""
 
+#: admin/views/edit-bump.php:199
 msgid "Skin 1"
 msgstr ""
 
+#: admin/views/edit-bump.php:200
 msgid "Skin 2"
 msgstr ""
 
+#: admin/views/edit-bump.php:204
 msgid "Header Color"
 msgstr ""
 
+#: admin/views/edit-bump.php:208
+#: admin/views/edit-bump.php:219
 msgid "Background"
 msgstr ""
 
+#: admin/views/edit-bump.php:212
+#: admin/views/edit-bump.php:223
 msgid "Text"
 msgstr ""
 
+#: admin/views/edit-bump.php:230
 msgid "Options"
 msgstr ""
 
+#: admin/views/edit-bump.php:233
 msgid "Show Original (Strikethrough) Price"
 msgstr ""
 
+#: admin/views/edit-bump.php:241
 msgid "Badge / Ribbon"
 msgstr ""
 
+#: admin/views/edit-bump.php:245
 msgid "Show Badge"
 msgstr ""
 
+#: admin/views/edit-bump.php:246
+msgid "Display a ribbon/badge on the order bump (e.g. \"Special Offer\")."
+msgstr ""
+
+#: admin/views/edit-bump.php:258
 msgid "Badge Text"
 msgstr ""
 
+#: admin/views/edit-bump.php:263
 msgid "Special Offer"
 msgstr ""
 
+#: admin/views/edit-bump.php:270
 msgid "Product Image"
 msgstr ""
 
+#: admin/views/edit-bump.php:274
 msgid "Show Product Image"
 msgstr ""
 
+#: admin/views/edit-bump.php:275
+msgid "When enabled, the product image will be displayed on the checkout page."
+msgstr ""
+
+#: admin/views/edit-bump.php:291
 msgid "Image Type"
 msgstr ""
 
+#: admin/views/edit-bump.php:297
 msgid "Product"
 msgstr ""
 
+#: admin/views/edit-bump.php:302
 msgid "Custom"
 msgstr ""
 
+#: admin/views/edit-bump.php:308
 msgid "Width (px)"
 msgstr ""
 
+#: admin/views/edit-bump.php:313
 msgid "Image Position"
 msgstr ""
 
+#: admin/views/edit-bump.php:315
 msgid "Left"
 msgstr ""
 
+#: admin/views/edit-bump.php:316
 msgid "Right"
 msgstr ""
 
+#: admin/views/edit-bump.php:321
 msgid "Custom Image URL"
 msgstr ""
 
+#: admin/views/edit-bump.php:324
 msgid "Select"
 msgstr ""
 
+#: admin/views/edit-bump.php:341
 msgid "Preview"
 msgstr ""
 
+#: admin/views/edit-bump.php:437
+#: includes/class-naxoorbu-admin.php:149
 msgid "No description set."
 msgstr ""
 
+#: admin/views/edit-bump.php:439
 msgid "Add products to see preview."
 msgstr ""
 
+#: admin/views/edit-bump.php:463
 msgid "All Products"
 msgstr ""
 
+#: admin/views/edit-bump.php:464
 msgid "Each product can have its own description"
 msgstr ""
 
+#: admin/views/edit-bump.php:471
+msgid "Search & add product..."
+msgstr ""
+
+#: admin/views/edit-bump.php:478
 msgid "No products added yet. Search above to add."
 msgstr ""
 
+#: admin/views/edit-bump.php:491
 msgid "Behaviour"
 msgstr ""
 
+#: admin/views/edit-bump.php:494
 msgid "Add Order Bumps to Cart Items"
 msgstr ""
 
+#: admin/views/edit-bump.php:498
 msgid "Replace Cart Items with Order Bump"
 msgstr ""
 
+#: admin/views/edit-bump.php:508
 msgid "Display Rules — When to show?"
 msgstr ""
 
+#: admin/views/edit-bump.php:511
 msgid "For"
 msgstr ""
 
+#: admin/views/edit-bump.php:513
 msgid "No Rules (Always Show)"
 msgstr ""
 
+#: admin/views/edit-bump.php:514
 msgid "Cart Item(s)"
 msgstr ""
 
+#: admin/views/edit-bump.php:515
 msgid "Cart Category(s)"
 msgstr ""
 
+#: admin/views/edit-bump.php:516
 msgid "Cart Total"
 msgstr ""
 
+#: admin/views/edit-bump.php:520
+#: admin/views/edit-bump.php:540
 msgid "matches any of"
 msgstr ""
 
-msgid "is greater than ₹"
+#: admin/views/edit-bump.php:522
+msgid "Search products..."
 msgstr ""
 
-#, php-format
+#: admin/views/edit-bump.php:554
+msgid "Select categories..."
+msgstr ""
+
+#: admin/views/edit-bump.php:558
+msgid "Search..."
+msgstr ""
+
+#: admin/views/edit-bump.php:576
+msgid "is greater than "
+msgstr ""
+
+#. translators: %s: formatted price with HTML
+#: admin/views/product-row.php:30
+#: includes/class-naxoorbu-admin.php:166
 msgid "Regular: %s"
 msgstr ""
 
-#, php-format
+#. translators: %s: formatted price with HTML
+#: admin/views/product-row.php:34
+#: includes/class-naxoorbu-admin.php:168
 msgid "Sale: %s"
 msgstr ""
 
+#: admin/views/product-row.php:44
+#: includes/class-naxoorbu-admin.php:169
 msgid "% Sale"
 msgstr ""
 
-msgid "Flat ₹"
+#. translators: %s: currency symbol
+#: admin/views/product-row.php:49
+#: includes/class-naxoorbu-admin.php:171
+msgid "Flat %s"
 msgstr ""
 
+#: admin/views/product-row.php:57
+#: includes/class-naxoorbu-admin.php:152
 msgid "in-stock"
 msgstr ""
 
+#: admin/views/product-row.php:57
 msgid "out-of-stock"
 msgstr ""
 
+#: admin/views/product-row.php:61
+#: includes/class-naxoorbu-admin.php:172
 msgid "Remove"
 msgstr ""
 
+#: includes/class-naxoorbu-admin.php:36
+#: includes/class-naxoorbu-admin.php:37
+#: includes/class-naxoorbu-post-type.php:30
+msgid "Edit Order Bump"
+msgstr ""
+
+#: includes/class-naxoorbu-admin.php:143
 msgid "Delete this Order Bump?"
 msgstr ""
 
+#: includes/class-naxoorbu-admin.php:144
 msgid "Product added! Go to Design tab to set its description."
 msgstr ""
 
+#: includes/class-naxoorbu-admin.php:145
 msgid "is already added."
 msgstr ""
 
+#: includes/class-naxoorbu-admin.php:146
 msgid "No products found."
 msgstr ""
 
+#: includes/class-naxoorbu-admin.php:150
 msgid "Error deleting."
 msgstr ""
 
+#: includes/class-naxoorbu-admin.php:151
 msgid "Error."
 msgstr ""
 
-msgid "Security check failed"
+#: includes/class-naxoorbu-admin.php:153
+msgid "Search failed. Try again."
 msgstr ""
 
-msgid "Unauthorized"
+#: includes/class-naxoorbu-admin.php:154
+msgid "Already in Rules"
+msgstr ""
+
+#: includes/class-naxoorbu-admin.php:155
+msgid "Already in Products"
+msgstr ""
+
+#: includes/class-naxoorbu-admin.php:156
+msgid "Also in Products"
+msgstr ""
+
+#: includes/class-naxoorbu-admin.php:160
+msgid "Overlap detected:"
+msgstr ""
+
+#: includes/class-naxoorbu-admin.php:161
+msgid "Some products are added in both Products and Rules sections. This may cause the bump to show a product the customer already has in cart."
+msgstr ""
+
+#: includes/class-naxoorbu-admin.php:162
+msgid "Dismiss"
+msgstr ""
+
+#: includes/class-naxoorbu-admin.php:164
+msgid "Deleting…"
+msgstr ""
+
+#. translators: %d: maximum products per bump
+#: includes/class-naxoorbu-admin.php:175
+msgid "Maximum %d products per bump allowed."
+msgstr ""
+
+#. translators: %d: maximum bumps allowed
+#: includes/class-naxoorbu-admin.php:247
+msgid "Maximum %d order bumps allowed. Delete an existing bump to create a new one."
+msgstr ""
+
+#: includes/class-naxoorbu-admin.php:250
+msgid "Bump Limit Reached"
+msgstr ""
+
+#: includes/class-naxoorbu-admin.php:327
+#: includes/class-naxoorbu-ajax.php:62
+msgid "Security check failed."
+msgstr ""
+
+#: includes/class-naxoorbu-admin.php:330
+msgid "Unauthorized."
+msgstr ""
+
+#: includes/class-naxoorbu-admin.php:337
+#: includes/class-naxoorbu-ajax.php:45
+#: includes/class-naxoorbu-ajax.php:70
+msgid "Invalid order bump."
+msgstr ""
+
+#: includes/class-naxoorbu-admin.php:367
+#: includes/class-naxoorbu-post-type.php:27
+msgid "Order Bump"
+msgstr ""
+
+#: includes/class-naxoorbu-ajax.php:38
+#: includes/class-naxoorbu-ajax.php:65
+#: includes/class-naxoorbu-ajax.php:86
+msgid "Permission denied."
+msgstr ""
+
+#: includes/class-naxoorbu-cart.php:35
+#: includes/class-naxoorbu-cart.php:115
+msgid "Invalid product."
+msgstr ""
+
+#: includes/class-naxoorbu-cart.php:46
+msgid "This offer is no longer available."
+msgstr ""
+
+#: includes/class-naxoorbu-cart.php:51
+msgid "This product is not available."
+msgstr ""
+
+#: includes/class-naxoorbu-cart.php:62
+msgid "This product is already in your cart."
+msgstr ""
+
+#: includes/class-naxoorbu-cart.php:93
+msgid "Could not add product to cart."
+msgstr ""
+
+#. translators: %s: product name.
+#: includes/class-naxoorbu-cart.php:223
+msgid "The special offer for \"%s\" is no longer available, so it has been removed from your order. Please review your order total."
+msgstr ""
+
+#: includes/class-naxoorbu-cart.php:351
+msgid "IDs of the order bumps the shopper should see."
+msgstr ""
+
+#: includes/class-naxoorbu-cart.php:358
+msgid "Products each visible order bump offers to the shopper."
+msgstr ""
+
+#: includes/class-naxoorbu-cart.php:395
+msgid "Order bump this item was added from (0 if none)."
+msgstr ""
+
+#: includes/class-naxoorbu-cart.php:420
+msgid "Invalid request."
+msgstr ""
+
+#: includes/class-naxoorbu-frontend.php:47
+msgid "Something went wrong."
+msgstr ""
+
+#: includes/class-naxoorbu-frontend.php:48
+msgid "Connection error. Please try again."
+msgstr ""
+
+#: includes/class-naxoorbu-post-type.php:28
+msgid "Add New Bump"
+msgstr ""
+
+#: includes/class-naxoorbu-post-type.php:32
+msgid "View Order Bump"
+msgstr ""
+
+#: includes/class-naxoorbu-post-type.php:33
+msgid "Search Order Bumps"
+msgstr ""
+
+#: includes/class-naxoorbu-post-type.php:34
+msgid "No order bumps found"
+msgstr ""
+
+#: includes/class-naxoorbu-post-type.php:35
+msgid "No order bumps found in Trash"
+msgstr ""
+
+#. translators: %1$s: plugin name, %2$s: dependency name
+#: order-bump.php:38
+msgid "<strong>%1$s</strong> requires <strong>%2$s</strong> to be installed and active."
 msgstr ""

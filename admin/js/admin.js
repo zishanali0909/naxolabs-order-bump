@@ -1,5 +1,17 @@
 jQuery(function($) {
 
+    var i18n = naxoorbuAdmin.i18n || {};
+
+    // Text for HTML content and attribute values (quotes included): translations and product names are not markup.
+    function escHtml(text) {
+        return String(text == null ? '' : text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
     /* ═══════════════════════════════════════
        TABS
     ═══════════════════════════════════════ */
@@ -169,8 +181,7 @@ jQuery(function($) {
         var map = {
             skin1: { bgId: '#naxoorbu-skin1-bg', textId: '#naxoorbu-skin1-text', bgDef: naxoorbuAdmin.skin1BgColor || '#FFFDE7', textDef: naxoorbuAdmin.skin1TextColor || '#155724' },
             skin2: { bgId: '#naxoorbu-skin2-bg', textId: '#naxoorbu-skin2-text', bgDef: naxoorbuAdmin.skin2BgColor || '#e8f7f9', textDef: naxoorbuAdmin.skin2TextColor || '#155724' },
-            skin3: { bgId: '#naxoorbu-skin3-bg', textId: '#naxoorbu-skin3-text', bgDef: naxoorbuAdmin.skin3BgColor || '#FFFFFF', textDef: naxoorbuAdmin.skin3TextColor || '#374151' },
-            skin4: { bgId: '#naxoorbu-skin4-bg', textId: '#naxoorbu-skin4-text', bgDef: naxoorbuAdmin.skin4BgColor || '#FFFFFF', textDef: naxoorbuAdmin.skin4TextColor || '#111827' }
+            skin3: { bgId: '#naxoorbu-skin3-bg', textId: '#naxoorbu-skin3-text', bgDef: naxoorbuAdmin.skin3BgColor || '#eef4fe', textDef: naxoorbuAdmin.skin3TextColor || '#155724' }
         };
         var s = map[skin] || map.skin1;
         return {
@@ -318,10 +329,10 @@ jQuery(function($) {
                     var img = p.thumb
                         ? '<img src="'+p.thumb+'">'
                         : '<div class="naxoorbu-product-item-noimg">📦</div>';
-                    html += '<div class="naxoorbu-product-item" data-product=\''+JSON.stringify(p)+'\'>'+img
-                        +'<div><div class="naxoorbu-product-item-name">'+p.name+'</div>'
+                    html += '<div class="naxoorbu-product-item" data-product="'+escHtml(JSON.stringify(p))+'">'+img
+                        +'<div><div class="naxoorbu-product-item-name">'+escHtml(p.name)+'</div>'
                         +'<div class="naxoorbu-product-item-price">'+p.regular_html+' → '+p.price_html+'</div></div>'
-                        +($('#naxoorbu-trigger-tags .naxoorbu-tag[data-id="'+p.id+'"]').length ? '<span style="background:#fff3cd;color:#856404;font-size:11px;padding:2px 6px;border-radius:3px;white-space:nowrap;margin-left:auto;">Already in Rules</span>' : '')
+                        +($('#naxoorbu-trigger-tags .naxoorbu-tag[data-id="'+p.id+'"]').length ? '<span class="naxoorbu-badge naxoorbu-badge-amber naxoorbu-badge-end">' + escHtml(i18n.inRules || 'Already in Rules') + '</span>' : '')
                         +'</div>';
                 });
                 $('#naxoorbu-product-results').html(html).addClass('open');
@@ -343,10 +354,10 @@ jQuery(function($) {
                     var img = p.thumb
                         ? '<img src="'+p.thumb+'">'
                         : '<div class="naxoorbu-product-item-noimg">📦</div>';
-                    html += '<div class="naxoorbu-product-item" data-product=\''+JSON.stringify(p)+'\'>'+img
-                        +'<div><div class="naxoorbu-product-item-name">'+p.name+'</div>'
+                    html += '<div class="naxoorbu-product-item" data-product="'+escHtml(JSON.stringify(p))+'">'+img
+                        +'<div><div class="naxoorbu-product-item-name">'+escHtml(p.name)+'</div>'
                         +'<div class="naxoorbu-product-item-price">'+p.regular_html+' → '+p.price_html+'</div></div>'
-                        +($('#naxoorbu-trigger-tags .naxoorbu-tag[data-id="'+p.id+'"]').length ? '<span style="background:#fff3cd;color:#856404;font-size:11px;padding:2px 6px;border-radius:3px;white-space:nowrap;margin-left:auto;">Already in Rules</span>' : '')
+                        +($('#naxoorbu-trigger-tags .naxoorbu-tag[data-id="'+p.id+'"]').length ? '<span class="naxoorbu-badge naxoorbu-badge-amber naxoorbu-badge-end">' + escHtml(i18n.inRules || 'Already in Rules') + '</span>' : '')
                         +'</div>';
                 });
                 $('#naxoorbu-product-results').html(html).addClass('open');
@@ -364,14 +375,14 @@ jQuery(function($) {
                     var img = p.thumb
                         ? '<img src="'+p.thumb+'">'
                         : '<div class="naxoorbu-product-item-noimg">📦</div>';
-                    html += '<div class="naxoorbu-product-item" data-product=\''+JSON.stringify(p)+'\'>'+img
-                        +'<div><div class="naxoorbu-product-item-name">'+p.name+'</div>'
+                    html += '<div class="naxoorbu-product-item" data-product="'+escHtml(JSON.stringify(p))+'">'+img
+                        +'<div><div class="naxoorbu-product-item-name">'+escHtml(p.name)+'</div>'
                         +'<div class="naxoorbu-product-item-price">'+p.regular_html+' → '+p.price_html+'</div></div>'
-                        +($('#naxoorbu-trigger-tags .naxoorbu-tag[data-id="'+p.id+'"]').length ? '<span style="background:#fff3cd;color:#856404;font-size:11px;padding:2px 6px;border-radius:3px;white-space:nowrap;margin-left:auto;">Already in Rules</span>' : '')
+                        +($('#naxoorbu-trigger-tags .naxoorbu-tag[data-id="'+p.id+'"]').length ? '<span class="naxoorbu-badge naxoorbu-badge-amber naxoorbu-badge-end">' + escHtml(i18n.inRules || 'Already in Rules') + '</span>' : '')
                         +'</div>';
                 });
                 $('#naxoorbu-product-results').html(html).addClass('open');
-            }).fail(function() { $('#naxoorbu-product-results').html('<div style="padding:10px;color:#EF4444;font-size:13px;">Search failed. Try again.</div>').addClass('open'); });
+            }).fail(function() { $('#naxoorbu-product-results').html('<div style="padding:10px;color:#DC2626;font-size:13px;">' + escHtml(i18n.searchFailed || 'Search failed. Try again.') + '</div>').addClass('open'); });
         }, 200);
     });
 
@@ -418,16 +429,16 @@ jQuery(function($) {
             + '<span class="naxoorbu-drag-handle">⠿</span>'
             + thumb
             + '<div class="naxoorbu-product-row-info">'
-            + '<strong>'+p.name+'</strong>'
-            + '<span class="naxoorbu-muted">Regular: '+p.regular_html+' | Sale: '+p.price_html+'</span>'
+            + '<strong>'+escHtml(p.name)+'</strong>'
+            + '<span class="naxoorbu-muted">'+escHtml(i18n.regular || 'Regular: %s').replace('%s', p.regular_html)+' | '+escHtml(i18n.sale || 'Sale: %s').replace('%s', p.price_html)+'</span>'
             + '</div>'
             + '<div class="naxoorbu-product-row-controls">'
-            + '<input type="number" name="'+prefix+'[discount]" value="0" class="naxoorbu-input naxoorbu-input-sm" min="0" style="width:60px" placeholder="0">'
+            + '<input type="number" name="'+prefix+'[discount]" value="0" class="naxoorbu-input naxoorbu-input-sm" min="0" step="0.01" style="width:70px" placeholder="0">'
             + '<select name="'+prefix+'[discount_type]" class="naxoorbu-select naxoorbu-select-sm">'
-            + '<option value="percentage">% Sale</option><option value="flat">Flat ₹</option></select>'
-            + '<input type="number" name="'+prefix+'[qty]" value="1" class="naxoorbu-input naxoorbu-input-sm" min="1" style="width:52px">'
+            + '<option value="percentage">'+escHtml(i18n.percentSale || '% Sale')+'</option><option value="flat">'+escHtml(i18n.flat || 'Flat')+'</option></select>'
+            + '<input type="number" name="'+prefix+'[qty]" value="1" class="naxoorbu-input naxoorbu-input-sm" min="1" max="99" style="width:52px">'
             + '<span class="naxoorbu-badge '+stockClass+'" style="white-space:nowrap">'+stockText+'</span>'
-            + '<button type="button" class="naxoorbu-remove-product naxoorbu-btn-icon" data-id="'+p.id+'" title="Remove">🗑️</button>'
+            + '<button type="button" class="naxoorbu-remove-product naxoorbu-btn-icon" data-id="'+escHtml(p.id)+'" title="'+escHtml(i18n.remove || 'Remove')+'">🗑️</button>'
             + '</div>'
             + '<input type="hidden" name="'+prefix+'[id]" value="'+p.id+'">'
             + '</div>'
@@ -488,10 +499,10 @@ jQuery(function($) {
                 var html = '';
                 res.data.forEach(function(p) {
                     var tImg = p.thumb ? '<img src="'+p.thumb+'">' : '<div class="naxoorbu-product-item-noimg">📦</div>';
-                    html += '<div class="naxoorbu-product-item" data-id="'+p.id+'" data-name="'+p.name+'">'+tImg
-                        +'<div><div class="naxoorbu-product-item-name">'+p.name+'</div>'
+                    html += '<div class="naxoorbu-product-item" data-id="'+escHtml(p.id)+'" data-name="'+escHtml(p.name)+'">'+tImg
+                        +'<div><div class="naxoorbu-product-item-name">'+escHtml(p.name)+'</div>'
                         +'<div class="naxoorbu-product-item-price">'+p.regular_html+' → '+p.price_html+'</div></div>'
-                        +($('#naxoorbu-products-list .naxoorbu-product-row[data-product-id="'+p.id+'"]').length ? '<span style="background:#fff3cd;color:#856404;font-size:11px;padding:2px 6px;border-radius:3px;white-space:nowrap;margin-left:auto;">Already in Products</span>' : '')
+                        +($('#naxoorbu-products-list .naxoorbu-product-row[data-product-id="'+p.id+'"]').length ? '<span class="naxoorbu-badge naxoorbu-badge-amber naxoorbu-badge-end">' + escHtml(i18n.inProducts || 'Already in Products') + '</span>' : '')
                         +'</div>';
                 });
                 $('#naxoorbu-trigger-results').html(html).addClass('open');
@@ -510,10 +521,10 @@ jQuery(function($) {
                 var html = '';
                 res.data.forEach(function(p) {
                     var tImg = p.thumb ? '<img src="'+p.thumb+'">' : '<div class="naxoorbu-product-item-noimg">📦</div>';
-                    html += '<div class="naxoorbu-product-item" data-id="'+p.id+'" data-name="'+p.name+'">'+tImg
-                        +'<div><div class="naxoorbu-product-item-name">'+p.name+'</div>'
+                    html += '<div class="naxoorbu-product-item" data-id="'+escHtml(p.id)+'" data-name="'+escHtml(p.name)+'">'+tImg
+                        +'<div><div class="naxoorbu-product-item-name">'+escHtml(p.name)+'</div>'
                         +'<div class="naxoorbu-product-item-price">'+p.regular_html+' → '+p.price_html+'</div></div>'
-                        +($('#naxoorbu-products-list .naxoorbu-product-row[data-product-id="'+p.id+'"]').length ? '<span style="background:#fff3cd;color:#856404;font-size:11px;padding:2px 6px;border-radius:3px;white-space:nowrap;margin-left:auto;">Already in Products</span>' : '')
+                        +($('#naxoorbu-products-list .naxoorbu-product-row[data-product-id="'+p.id+'"]').length ? '<span class="naxoorbu-badge naxoorbu-badge-amber naxoorbu-badge-end">' + escHtml(i18n.inProducts || 'Already in Products') + '</span>' : '')
                         +'</div>';
                 });
                 $('#naxoorbu-trigger-results').html(html).addClass('open');
@@ -526,10 +537,10 @@ jQuery(function($) {
                 var html = '';
                 res.data.forEach(function(p) {
                     var tImg = p.thumb ? '<img src="'+p.thumb+'">' : '<div class="naxoorbu-product-item-noimg">📦</div>';
-                    html += '<div class="naxoorbu-product-item" data-id="'+p.id+'" data-name="'+p.name+'">'+tImg
-                        +'<div><div class="naxoorbu-product-item-name">'+p.name+'</div>'
+                    html += '<div class="naxoorbu-product-item" data-id="'+escHtml(p.id)+'" data-name="'+escHtml(p.name)+'">'+tImg
+                        +'<div><div class="naxoorbu-product-item-name">'+escHtml(p.name)+'</div>'
                         +'<div class="naxoorbu-product-item-price">'+p.regular_html+' → '+p.price_html+'</div></div>'
-                        +($('#naxoorbu-products-list .naxoorbu-product-row[data-product-id="'+p.id+'"]').length ? '<span style="background:#fff3cd;color:#856404;font-size:11px;padding:2px 6px;border-radius:3px;white-space:nowrap;margin-left:auto;">Already in Products</span>' : '')
+                        +($('#naxoorbu-products-list .naxoorbu-product-row[data-product-id="'+p.id+'"]').length ? '<span class="naxoorbu-badge naxoorbu-badge-amber naxoorbu-badge-end">' + escHtml(i18n.inProducts || 'Already in Products') + '</span>' : '')
                         +'</div>';
                 });
                 $('#naxoorbu-trigger-results').html(html).addClass('open');
@@ -546,8 +557,8 @@ jQuery(function($) {
             return;
         }
         $('#naxoorbu-trigger-tags').append(
-            '<span class="naxoorbu-tag" data-id="'+id+'">'+name
-            +'<input type="hidden" name="naxoorbu_settings[trigger_products][]" value="'+id+'">'
+            '<span class="naxoorbu-tag" data-id="'+escHtml(id)+'">'+escHtml(name)
+            +'<input type="hidden" name="naxoorbu_settings[trigger_products][]" value="'+escHtml(id)+'">'
             +'<button type="button" class="naxoorbu-tag-remove">×</button></span>'
         );
         $('#naxoorbu-trigger-results').removeClass('open');
@@ -589,13 +600,13 @@ jQuery(function($) {
         if (!confirm(naxoorbuAdmin.i18n.deleteConfirm || 'Delete this Order Bump?')) return;
         var id = $(this).data('id'), nonce = $(this).data('nonce');
         var $btn = $(this);
-        $btn.text('Deleting...').css('pointer-events', 'none');
+        $btn.text(i18n.deleting || 'Deleting…').css('pointer-events', 'none');
         $.post(naxoorbuAdmin.ajaxUrl, { action: 'naxoorbu_delete_bump', id: id, nonce: nonce }, function(res) {
             if (res.success) window.location = naxoorbuAdmin.ajaxUrl.replace('admin-ajax.php', '') + 'admin.php?page=naxolabs-order-bump&deleted=1';
-            else { alert(naxoorbuAdmin.i18n.errorDeleting || 'Error deleting.'); $btn.text('Delete').css('pointer-events', ''); }
+            else { alert(naxoorbuAdmin.i18n.errorDeleting || 'Error deleting.'); $btn.text(i18n.delete || 'Delete').css('pointer-events', ''); }
         }).fail(function() {
             alert(naxoorbuAdmin.i18n.error || 'Error. Please try again.');
-            $btn.text('Delete').css('pointer-events', '');
+            $btn.text(i18n.delete || 'Delete').css('pointer-events', '');
         });
     });
 
@@ -632,7 +643,7 @@ jQuery(function($) {
             $descCard.find('.naxoorbu-desc-panel').hide();
             $descCard.find('.naxoorbu-help').hide();
             if (!$descCard.find('.naxoorbu-no-prod-hint').length) {
-                $descCard.append('<p class="naxoorbu-help naxoorbu-no-prod-hint" style="padding:12px 0;text-align:center;">First add products in the <strong>Products tab</strong>.</p>');
+                $descCard.append('<p class="naxoorbu-help naxoorbu-no-prod-hint" style="padding:12px 0;text-align:center;">' + escHtml(i18n.addProductsFirst || 'First add products in the %1$sProducts tab%2$s.').replace('%1$s', '<strong>').replace('%2$s', '</strong>') + '</p>');
             }
             $descCard.find('.naxoorbu-no-prod-hint').show();
             return;
@@ -642,9 +653,9 @@ jQuery(function($) {
 
         if (!$switcherWrap.length) {
             $descCard.html('');
-            $descCard.append('<div class="naxoorbu-desc-switcher-wrap" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;padding:10px;background:#F5F3FF;border-radius:8px;border:1px solid #E5E2FF;"></div>');
+            $descCard.append('<div class="naxoorbu-desc-switcher-wrap"></div>');
             $descCard.append('<div class="naxoorbu-desc-editors-wrap" style="position:relative;"></div>');
-            $descCard.append('<p class="naxoorbu-help" style="margin-top:6px;">Use short promotional text. HTML supported.</p>');
+            $descCard.append($('<p class="naxoorbu-help">').text(i18n.descriptionHelp || 'Use short promotional text. HTML supported: <b>, <i>, <ul>, <li> etc.'));
             $switcherWrap = $descCard.find('.naxoorbu-desc-switcher-wrap');
         }
 
@@ -652,7 +663,7 @@ jQuery(function($) {
         products.forEach(function(p, idx) {
             var shortName = p.name.length > 40 ? p.name.substring(0, 40) + '...' : p.name;
             var activeClass = idx === 0 ? ' naxoorbu-switch-active' : '';
-            $switcherWrap.append('<button type="button" class="naxoorbu-desc-switch-btn' + activeClass + '" data-index="' + idx + '" id="naxoorbu-swbtn-' + idx + '">' + shortName + '</button>');
+            $switcherWrap.append('<button type="button" class="naxoorbu-desc-switch-btn' + activeClass + '" data-index="' + idx + '" id="naxoorbu-swbtn-' + idx + '">' + escHtml(shortName) + '</button>');
         });
         $switcherWrap.show();
 
@@ -733,15 +744,6 @@ jQuery(function($) {
         descTextEl.innerHTML = content || '<em style="color:#9CA3AF">' + (naxoorbuAdmin.i18n.noDescription || 'No description set.') + '</em>';
     }
 
-    // Sync active editor to preview on product switch
-    $(document).on('click', '.naxoorbu-prod-switch-btn', function() {
-        var idx = $(this).data('index');
-        var editorId = 'naxoorbu_prod_editor_' + idx;
-        setTimeout(function() {
-            naxoorbuSyncDescToPreview(editorId);
-        }, 200);
-    });
-
     // Also sync on textarea change (Code view)
     $(document).on('input change', 'textarea[id^="naxoorbu_prod_editor_"]', function() {
         naxoorbuSyncDescToPreview(this.id);
@@ -821,7 +823,7 @@ jQuery(function($) {
             if (productIds.indexOf(tid) !== -1) {
                 $(this).addClass('naxoorbu-tag-warn');
                 $(this).find('.naxoorbu-tag-remove').before(
-                    '<span class="naxoorbu-overlap-badge" style="background:#fff3cd;color:#856404;font-size:11px;padding:2px 6px;border-radius:3px;white-space:nowrap; margin-left:4px;">Also in Products</span>'
+                    '<span class="naxoorbu-overlap-badge naxoorbu-badge naxoorbu-badge-amber">' + escHtml(i18n.alsoInProducts || 'Also in Products') + '</span>'
                 );
             }
         });
@@ -831,15 +833,11 @@ jQuery(function($) {
         $('.naxoorbu-overlap-page-warn').remove();
         if (overlap.length > 0) {
             var msg = '<div class="naxoorbu-overlap-page-warn">' +
-                      '<span class="naxoorbu-warn-icon">⚠️</span> <strong>Overlap detected:</strong> ' +
-                      'Some products are added in both Products and Rules sections. ' +
-                      'This may cause the bump to show a product the customer already has in cart.' +
-                      '<button type="button" class="naxoorbu-overlap-dismiss" style="float:right;background:none;border:none;cursor:pointer;font-size:16px;color:#856404;">✕</button>' +
+                      '<span class="naxoorbu-warn-icon">⚠️</span> <strong>' + escHtml(i18n.overlapTitle || 'Overlap detected:') + '</strong> ' +
+                      escHtml(i18n.overlapText || 'Some products are added in both Products and Rules sections. This may cause the bump to show a product the customer already has in cart.') +
+                      '<button type="button" class="naxoorbu-overlap-dismiss" aria-label="' + escHtml(i18n.dismiss || 'Dismiss') + '">✕</button>' +
                       '</div>';
             $('.naxoorbu-name-bar').after(msg);
-            $(document).on('click', '.naxoorbu-overlap-dismiss', function() {
-                $('.naxoorbu-overlap-page-warn').slideUp(200, function() { $(this).remove(); });
-            });
         }
     }
 
@@ -860,13 +858,13 @@ jQuery(function($) {
     // Clear on page load (TinyMCE init can set dirty flags).
     setTimeout(obpClearDirtyFlags, 500);
     setTimeout(obpClearDirtyFlags, 1500);
-    // Clear on form submit
-    $('form#naxoorbu-edit-form, form.naxoorbu-edit-form').on('submit', function() {
+    // Clear on form submit (also fired by the header Save button, which targets the form).
+    $('#naxoorbu-edit-form').on('submit', function() {
         obpClearDirtyFlags();
     });
-    // Also clear when Save button is clicked
-    $(document).on('click', '.naxoorbu-btn-save, [type="submit"]', function() {
-        obpClearDirtyFlags();
+
+    $(document).on('click', '.naxoorbu-overlap-dismiss', function() {
+        $('.naxoorbu-overlap-page-warn').slideUp(200, function() { $(this).remove(); });
     });
 
     /* ═══════════════════════════════════════
@@ -923,8 +921,8 @@ jQuery(function($) {
 
             if ($cb.is(':checked')) {
                 // Add tag
-                var tag = '<span class="naxoorbu-cat-tag" data-id="' + id + '">' +
-                          name +
+                var tag = '<span class="naxoorbu-cat-tag" data-id="' + escHtml(id) + '">' +
+                          escHtml(name) +
                           '<button type="button" class="naxoorbu-cat-tag-remove">&times;</button>' +
                           '</span>';
                 $tags.append(tag);
