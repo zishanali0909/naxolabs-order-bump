@@ -18,12 +18,11 @@ class Test_Discount extends WP_UnitTestCase {
     public function set_up() {
         parent::set_up();
 
-        // Simulate AJAX context so apply_bump_discounts() doesn't exit early.
-        // In real site: checkout is frontend (is_admin=false) or AJAX (DOING_AJAX=true).
-        // In PHPUnit: is_admin()=true and DOING_AJAX undefined, so function returns early.
-        if ( ! defined( 'DOING_AJAX' ) ) {
-            define( 'DOING_AJAX', true );
-        }
+        // Simulate an AJAX request so apply_bump_discounts() doesn't return early, as on the
+        // checkout (frontend or AJAX). A filter, not the DOING_AJAX constant: the test case
+        // removes it after each test, while a constant would turn every later test into an
+        // AJAX request (wp_die() would then end the whole run).
+        add_filter( 'wp_doing_ajax', '__return_true' );
 
         // Create discount instance but REMOVE the hook to prevent
         // double-application when WC->cart->calculate_totals() runs.

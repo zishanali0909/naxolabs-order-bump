@@ -215,8 +215,11 @@ jQuery(function($) {
     }
 
     function naxoorbuUpdatePreviewSkin(skin) {
-        $('#naxoorbu-preview-bump')[0].className = $('#naxoorbu-preview-bump')[0].className.replace(/naxoorbu-preview-skin\w+/g, '').trim();
-        $('#naxoorbu-preview-bump').addClass('naxoorbu-preview-' + skin);
+        var preview = $('#naxoorbu-preview-bump')[0];
+        if (!preview) return; // Only the edit screen has the preview; this script runs on every plugin screen.
+
+        preview.className = preview.className.replace(/naxoorbu-preview-skin\w+/g, '').trim();
+        $(preview).addClass('naxoorbu-preview-' + skin);
         if (skin === 'skin2') {
             $('#naxoorbu-colors-skin1').hide();
             $('#naxoorbu-colors-skin2').css('display', 'flex');

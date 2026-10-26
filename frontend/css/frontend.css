@@ -411,7 +411,7 @@
 }
 /* Responsive - Mobile checkout */
 @media (max-width: 768px) {
-    .naxoorbu-bump-wrap { margin: 10px 0 !important; }
+    .naxoorbu-bump-wrap { margin: 10px 0; }
     .naxoorbu-bump-description { font-size: 13px !important; }
 }
 @media (max-width: 480px) {

@@ -88,7 +88,7 @@ class Naxoorbu_Discount {
      * Apply discounted prices to cart items that were added via order bumps.
      */
     public function apply_bump_discounts( $cart ) {
-        if ( is_admin() && ! defined( 'DOING_AJAX' ) ) return;
+        if ( is_admin() && ! wp_doing_ajax() ) return;
 
         if ( null === self::$base_prices ) {
             self::$base_prices = new SplObjectStorage();
