@@ -349,7 +349,10 @@ class Naxoorbu_Frontend {
                  id="<?php echo esc_attr( $wrap_id ); ?>"
                  data-product-id="<?php echo intval( $product->get_id() ); ?>"
                  data-bump-id="<?php echo intval( $bump_id ); ?>"
-                 data-qty="<?php echo intval( $pm['qty'] ?? 1 ); ?>">
+                 data-qty="<?php echo intval( $pm['qty'] ?? 1 ); ?>"
+                 data-bump-name="<?php echo esc_attr( get_post_field( 'post_title', $bump_id ) ); ?>"
+                 data-name="<?php echo esc_attr( $prod_name ); ?>"
+                 data-price="<?php echo esc_attr( wc_format_decimal( $offer_price, wc_get_price_decimals() ) ); ?>">
 
                 <?php if ( $skin_style['layout'] === 'skin2' ): ?>
                     <!-- ═══ SKIN 2: Teal border, badge above, image+text row, CTA bottom ═══ -->

@@ -235,13 +235,11 @@ class Naxoorbu_Admin {
      * @since 1.1.0
      */
     private function die_if_bump_limit_reached() {
-        $max_bumps     = apply_filters( 'naxoorbu_max_bumps', NAXOORBU_MAX_BUMPS );
-        $current_count = wp_count_posts( 'naxoorbu_order_bump' );
-        $total         = intval( $current_count->publish ?? 0 ) + intval( $current_count->draft ?? 0 );
-        if ( $total < $max_bumps ) {
+        if ( self::can_create_bump() ) {
             return;
         }
 
+        $max_bumps = apply_filters( 'naxoorbu_max_bumps', NAXOORBU_MAX_BUMPS );
         wp_die(
             sprintf(
                 /* translators: %d: maximum bumps allowed */
@@ -364,8 +362,56 @@ class Naxoorbu_Admin {
         }
 
         $title    = sanitize_text_field( wp_unslash( $_POST['bump_title'] ?? 'Order Bump' ) );
-        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- deeply sanitized below
+        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- deeply sanitized by sanitize_settings()
         $settings = wp_unslash( $_POST['naxoorbu_settings'] ?? [] );
+
+        // Validate title
+        if ( empty( trim( $title ) ) ) {
+            $title = __( 'Order Bump', 'naxolabs-order-bump' );
+        }
+
+        $clean = self::sanitize_settings( $settings, $bump_id );
+
+        // Save post
+        $post_data = [
+            'post_title'  => $title,
+            'post_type'   => 'naxoorbu_order_bump',
+            'post_status' => $clean['bump_status'],
+        ];
+        if ( $bump_id ) {
+            $post_data['ID'] = $bump_id;
+            wp_update_post( $post_data );
+        } else {
+            $bump_id = wp_insert_post( $post_data );
+        }
+
+        update_post_meta( $bump_id, '_naxoorbu_settings', $clean );
+
+        /**
+         * Fires after an order bump is saved.
+         *
+         * @param int   $bump_id The bump post ID.
+         * @param array $clean   The sanitized bump settings.
+         */
+        do_action( 'naxoorbu_after_bump_saved', $bump_id, $clean );
+
+        // Redirect with status
+        $active_tab = sanitize_key( $_POST['active_tab'] ?? 'design' );
+        $status     = empty( $clean['products'] ) ? 'saved_no_products' : 'saved';
+        wp_safe_redirect( admin_url( 'admin.php?page=naxoorbu-edit&edit=' . $bump_id . '&naxoorbu_status=' . $status . '&tab=' . $active_tab ) );
+        exit;
+    }
+
+    /**
+     * Sanitize bump settings, as sent by the edit form: a toggle is on when its key is present.
+     * Also used by extensions that save bumps from elsewhere (e.g. Pro's import).
+     *
+     * @since 1.2.0
+     * @param mixed $settings Raw settings (unslashed).
+     * @param int   $bump_id  Bump ID (0 for a new bump), for its product limit.
+     * @return array Clean settings, every field set.
+     */
+    public static function sanitize_settings( $settings, $bump_id = 0 ) {
         $settings = is_array( $settings ) ? $settings : [];
 
         // Lists hold single values (products hold field maps); every other field is a single value.
@@ -381,11 +427,6 @@ class Naxoorbu_Admin {
             } elseif ( ! is_scalar( $value ) ) {
                 unset( $settings[ $key ] );
             }
-        }
-
-        // Validate title
-        if ( empty( trim( $title ) ) ) {
-            $title = __( 'Order Bump', 'naxolabs-order-bump' );
         }
 
         $clean = [];
@@ -452,33 +493,19 @@ class Naxoorbu_Admin {
             ];
         }
 
-        // Save post
-        $post_data = [
-            'post_title'  => $title,
-            'post_type'   => 'naxoorbu_order_bump',
-            'post_status' => $clean['bump_status'],
-        ];
-        if ( $bump_id ) {
-            $post_data['ID'] = $bump_id;
-            wp_update_post( $post_data );
-        } else {
-            $bump_id = wp_insert_post( $post_data );
-        }
+        return $clean;
+    }
 
-        update_post_meta( $bump_id, '_naxoorbu_settings', $clean );
-
-        /**
-         * Fires after an order bump is saved.
-         *
-         * @param int   $bump_id The bump post ID.
-         * @param array $clean   The sanitized bump settings.
-         */
-        do_action( 'naxoorbu_after_bump_saved', $bump_id, $clean );
-
-        // Redirect with status
-        $active_tab = sanitize_key( $_POST['active_tab'] ?? 'design' );
-        $status     = empty( $clean['products'] ) ? 'saved_no_products' : 'saved';
-        wp_safe_redirect( admin_url( 'admin.php?page=naxoorbu-edit&edit=' . $bump_id . '&naxoorbu_status=' . $status . '&tab=' . $active_tab ) );
-        exit;
+    /**
+     * Whether another bump may be created (the limit Free sets, raised by e.g. Pro).
+     *
+     * @since 1.2.0
+     * @return bool
+     */
+    public static function can_create_bump() {
+        $max_bumps     = apply_filters( 'naxoorbu_max_bumps', NAXOORBU_MAX_BUMPS );
+        $current_count = wp_count_posts( 'naxoorbu_order_bump' );
+        $total         = intval( $current_count->publish ?? 0 ) + intval( $current_count->draft ?? 0 );
+        return $total < $max_bumps;
     }
 }

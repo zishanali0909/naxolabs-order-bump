@@ -126,6 +126,14 @@
         );
     }
 
+    /**
+     * Tell other scripts (e.g. Pro's GA4 / Meta Pixel events) a bump was added or removed.
+     * Same event and detail as the classic frontend.js.
+     */
+    function emitToggled(detail) {
+        document.body.dispatchEvent(new CustomEvent('naxoorbu_bump_toggled', { bubbles: true, detail: detail }));
+    }
+
     /* ═══════════════════════════════════════════════
        Single Product Bump Component
     ═══════════════════════════════════════════════ */
@@ -194,6 +202,16 @@
             updateBumpInCart(newChecked, bump, product)
                 .then(function () {
                     setLoading(false);
+                    emitToggled({
+                        added: newChecked,
+                        bumpId: bump.id,
+                        bumpName: bump.title || '',
+                        productId: product.id,
+                        name: product.name,
+                        price: product.final_price,
+                        quantity: product.qty || 1,
+                        placement: props.placement || 'checkout'
+                    });
                 })
                 .catch(function () {
                     // Revert on failure
@@ -245,7 +263,11 @@
                 className: 'naxoorbu-bump-wrap naxoorbu-skin-' + skin + (checked ? ' naxoorbu-bump-is-added' : '') + (showBadge ? ' naxoorbu-has-badge' : ''),
                 style: skinVars,
                 'data-product-id': product.id,
-                'data-qty': product.qty
+                'data-qty': product.qty,
+                'data-bump-id': bump.id,
+                'data-bump-name': bump.title || '',
+                'data-name': product.name,
+                'data-price': product.final_price
             },
                 badgeEl,
                 // Image + Description row
@@ -284,7 +306,11 @@
             className: 'naxoorbu-bump-wrap naxoorbu-skin-' + skin + (checked ? ' naxoorbu-bump-is-added' : '') + (showBadge ? ' naxoorbu-has-badge' : ''),
             style: skinVars,
             'data-product-id': product.id,
-            'data-qty': product.qty
+            'data-qty': product.qty,
+            'data-bump-id': bump.id,
+            'data-bump-name': bump.title || '',
+            'data-name': product.name,
+            'data-price': product.final_price
         },
             badgeEl,
             // Headline row
@@ -336,10 +362,18 @@
         // display rules, products already in the cart) and re-sent by the Store API with every
         // cart/address update. Returned as a string so the selector result stays referentially stable.
         var visibleKey = useSelect(function (select) {
-            var data = select(CART_STORE).getCartData();
+            var store = select(CART_STORE);
+            // Until the cart has loaded it has no extension data: show nothing yet, not every bump
+            // (which would flash bumps that are not offered, and count impressions for them).
+            if (store.hasFinishedResolution && !store.hasFinishedResolution('getCartData')) return 'loading';
+            var data = store.getCartData();
             var ext  = data && data.extensions ? data.extensions[storeApiNamespace] : null;
             return ext && Array.isArray(ext.visible_products) ? JSON.stringify(ext.visible_products) : null;
         }, []);
+
+        if (visibleKey === 'loading') {
+            return el('div', { className: 'naxoorbu-blocks-checkout-wrap', style: { display: 'none' } });
+        }
 
         // bump ID => offered product IDs (null = no Store API data).
         var visible = null;
@@ -363,7 +397,8 @@
                     el(SingleProductBump, {
                         key: bump.id + '-' + idx,
                         bump: bump,
-                        product: product
+                        product: product,
+                        placement: placement
                     })
                 );
             });

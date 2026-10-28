@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-28T18:29:46+00:00\n"
+"POT-Creation-Date: 2026-10-28T19:01:11+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: naxolabs-order-bump\n"
@@ -564,30 +564,30 @@ msgid "Maximum %d products per bump allowed."
 msgstr ""
 
 #. translators: %d: maximum bumps allowed
-#: includes/class-naxoorbu-admin.php:248
+#: includes/class-naxoorbu-admin.php:246
 msgid "Maximum %d order bumps allowed. Delete an existing bump to create a new one."
 msgstr ""
 
-#: includes/class-naxoorbu-admin.php:251
+#: includes/class-naxoorbu-admin.php:249
 msgid "Bump Limit Reached"
 msgstr ""
 
-#: includes/class-naxoorbu-admin.php:348
+#: includes/class-naxoorbu-admin.php:346
 #: includes/class-naxoorbu-ajax.php:62
 msgid "Security check failed."
 msgstr ""
 
-#: includes/class-naxoorbu-admin.php:351
+#: includes/class-naxoorbu-admin.php:349
 msgid "Unauthorized."
 msgstr ""
 
-#: includes/class-naxoorbu-admin.php:358
+#: includes/class-naxoorbu-admin.php:356
 #: includes/class-naxoorbu-ajax.php:45
 #: includes/class-naxoorbu-ajax.php:70
 msgid "Invalid order bump."
 msgstr ""
 
-#: includes/class-naxoorbu-admin.php:388
+#: includes/class-naxoorbu-admin.php:370
 #: includes/class-naxoorbu-post-type.php:27
 msgid "Order Bump"
 msgstr ""

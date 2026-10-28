@@ -140,6 +140,7 @@ class Naxoorbu_Blocks_Integration implements IntegrationInterface {
 
             $bump_data = [
                 'id'                  => $bump_id,
+                'title'               => get_post_field( 'post_title', $bump_id ),
                 'headline'            => wp_kses_post( $meta['headline'] ?? '' ),
                 'skin'                => $skin_style['skin'],
                 'layout'              => $skin_style['layout'],

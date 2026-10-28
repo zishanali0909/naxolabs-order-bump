@@ -152,7 +152,8 @@ Yes. Commonly used hooks include:
 * New: Works with WooCommerce Subscriptions: subscription products (also variable ones) show their billing details (e.g. "/ month"), sign-up fees are charged once, and a bump that would make WooCommerce Subscriptions empty the cart is not offered
 * Improved: The edit screen preview shows the product's name in place of {{product_name}}, as the checkout does
 * Improved: Bumps use your theme's font with a lighter headline, so they match the rest of the checkout
-* Developers: new `naxoorbu_bump_placements` filter, `naxoorbu_admin_after_position` action and `Naxoorbu_Frontend::render_bump_list()`, so extensions can show bumps in more places (e.g. the cart page)
+* Developers: new `naxoorbu_bump_placements` filter, `naxoorbu_admin_after_position` action and `Naxoorbu_Frontend::render_bump_list()`, so extensions can show bumps in more places (e.g. the cart page), a `naxoorbu_bump_toggled` browser event when a bump is added or removed, and `Naxoorbu_Admin::sanitize_settings()` / `can_create_bump()` for saving bumps from elsewhere (e.g. an import)
+* Fixed: The block checkout could show bumps not offered to the shopper for a split second while loading, and count impressions for them
 * Fixed: With Skin 2, editing the headline in the preview could replace the price
 * Fixed: "Replace Cart Items with Order Bump" now works: ticking the bump swaps out the items that made it show (e.g. to upgrade to a bundle), and unticking it puts them back
 

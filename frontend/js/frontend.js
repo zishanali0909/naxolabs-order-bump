@@ -104,6 +104,22 @@ jQuery(function ($) {
             $(document.body).trigger('wc_fragment_refresh');
         }
         $(document.body).trigger('naxoorbu_bump_updated', [adding, $wrap]);
+
+        // Same event and detail as blocks-checkout.js, for other scripts (e.g. Pro's GA4 / Meta Pixel events).
+        var places = { checkout: 'checkout', cart: 'cart', fragments: 'mini_cart', 'mini-cart': 'mini_cart' };
+        document.body.dispatchEvent(new CustomEvent('naxoorbu_bump_toggled', {
+            bubbles: true,
+            detail: {
+                added: adding,
+                bumpId: parseInt($wrap.data('bump-id'), 10) || 0,
+                bumpName: String($wrap.data('bump-name') || ''),
+                productId: parseInt($wrap.data('product-id'), 10) || 0,
+                name: String($wrap.data('name') || ''),
+                price: parseFloat($wrap.data('price')) || 0,
+                quantity: parseInt($wrap.data('qty'), 10) || 1,
+                placement: places[mode] || mode
+            }
+        }));
     }
 
     /**
