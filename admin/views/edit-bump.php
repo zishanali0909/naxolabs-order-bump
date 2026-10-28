@@ -205,6 +205,16 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                     <option value="after_payment" <?php selected( $meta['position'], 'after_payment' ); ?>><?php esc_html_e( 'After Payment Button', 'naxolabs-order-bump' ); ?></option>
                                 </select>
                             </div>
+                            <?php
+                            /**
+                             * Fires after the checkout position field, e.g. for fields setting other places the bump shows.
+                             *
+                             * @since 1.2.0
+                             * @param int   $edit_id Bump ID (0 for a new bump).
+                             * @param array $meta    Bump settings.
+                             */
+                            do_action( 'naxoorbu_admin_after_position', $edit_id, $meta );
+                            ?>
                             <div class="naxoorbu-field">
                                 <label class="naxoorbu-label"><?php esc_html_e( 'Skin / Layout', 'naxolabs-order-bump' ); ?></label>
                                 <select name="naxoorbu_settings[skin]" class="naxoorbu-select">
@@ -515,6 +525,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                             <input type="radio" name="naxoorbu_settings[behaviour]" value="replace" <?php checked( $meta['behaviour'] ?? 'add', 'replace' ); ?>>
                             <?php esc_html_e( 'Replace Cart Items with Order Bump', 'naxolabs-order-bump' ); ?>
                         </label>
+                        <p class="naxoorbu-help"><?php esc_html_e( 'Replace: ticking the bump swaps out the items that made it show (the products or categories in Rules, or the whole cart when it shows on every order), e.g. to upgrade to a bundle. Unticking it puts them back.', 'naxolabs-order-bump' ); ?></p>
                     </div>
                 </div>
             </div>

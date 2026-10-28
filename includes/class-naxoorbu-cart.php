@@ -47,7 +47,7 @@ class Naxoorbu_Cart {
         }
 
         $product = wc_get_product( $pid );
-        if ( ! $product || ! $product->is_purchasable() || ! $product->is_in_stock() ) {
+        if ( ! $product || ! self::can_offer( $product ) || ! self::fits_cart( $product ) || ! $product->is_purchasable() || ! $product->is_in_stock() ) {
             return new WP_Error( 'product_unavailable', __( 'This product is not available.', 'naxolabs-order-bump' ) );
         }
 
@@ -63,10 +63,20 @@ class Naxoorbu_Cart {
         }
 
         $cart_item_data = [];
+        $replace_keys   = [];
         if ( $bump_id ) {
             $cart_item_data['naxoorbu_bump_id'] = $bump_id;
             // Get discount info from bump settings
             $bump_meta = get_post_meta( $bump_id, '_naxoorbu_settings', true );
+
+            // "Replace" behaviour: the bump takes the place of the items that triggered it.
+            // They are remembered on the bump item, so unticking it puts them back.
+            if ( is_array( $bump_meta ) && 'replace' === ( $bump_meta['behaviour'] ?? 'add' ) ) {
+                $replace_keys = self::items_to_replace( $bump_meta );
+                if ( $replace_keys ) {
+                    $cart_item_data['naxoorbu_replaced'] = self::describe_items( $replace_keys );
+                }
+            }
             if ( is_array( $bump_meta ) && ! empty( $bump_meta['products'] ) ) {
                 foreach ( $bump_meta['products'] as $bp ) {
                     if ( intval( $bp['id'] ) === $pid ) {
@@ -88,9 +98,16 @@ class Naxoorbu_Cart {
          */
         $cart_item_data = apply_filters( 'naxoorbu_cart_item_data', $cart_item_data, $pid, $bump_id );
 
-        $cart_item_key = WC()->cart->add_to_cart( $pid, $qty, 0, [], $cart_item_data );
+        // A variation is added with its own attributes (WooCommerce resolves its parent product).
+        $attributes    = $product instanceof WC_Product_Variation ? $product->get_variation_attributes() : [];
+        $cart_item_key = WC()->cart->add_to_cart( $pid, $qty, 0, $attributes, $cart_item_data );
         if ( ! $cart_item_key ) {
             return new WP_Error( 'add_failed', __( 'Could not add product to cart.', 'naxolabs-order-bump' ) );
+        }
+
+        // Only once the bump is in the cart: if it could not be added, nothing is removed.
+        foreach ( $replace_keys as $key ) {
+            WC()->cart->remove_cart_item( $key );
         }
 
         do_action( 'naxoorbu_bump_added_to_cart', $bump_id, $pid, $cart_item_key );
@@ -140,11 +157,75 @@ class Naxoorbu_Cart {
 
         foreach ( WC()->cart->get_cart() as $key => $item ) {
             $item_bump = (int) ( $item['naxoorbu_bump_id'] ?? 0 );
-            if ( ! $item_bump || (int) $item['product_id'] !== (int) $pid ) continue;
+            if ( ! $item_bump || self::item_offer_id( $item ) !== (int) $pid ) continue;
             if ( $bump_id && $item_bump !== (int) $bump_id ) continue;
             return $key;
         }
         return '';
+    }
+
+    /**
+     * Whether a product can be offered in a bump: added to the cart with one click, without
+     * the shopper choosing options.
+     *
+     * @since 1.2.0
+     * @param WC_Product $product Product.
+     * @return bool
+     */
+    public static function can_offer( $product ) {
+        // Class checks also cover types built on them (e.g. variable subscriptions).
+        if ( $product instanceof WC_Product_Variable ) {
+            return false;
+        }
+        if ( $product instanceof WC_Product_Variation ) {
+            if ( 'publish' !== get_post_status( $product->get_parent_id() ) ) {
+                return false;
+            }
+            // An empty value is an "Any …" attribute, which the shopper would have to choose.
+            foreach ( $product->get_variation_attributes() as $value ) {
+                if ( '' === (string) $value ) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Whether adding a product keeps the cart valid for WooCommerce Subscriptions, which removes
+     * subscriptions from the cart when one is mixed with other products ("Mixed checkout" off)
+     * or when a second subscription is added. Such an offer is not shown.
+     *
+     * @since 1.2.0
+     * @param WC_Product $product Product.
+     * @return bool
+     */
+    public static function fits_cart( $product ) {
+        if ( ! class_exists( 'WC_Subscriptions_Product' ) || ! class_exists( 'WC_Subscriptions_Cart' ) ) {
+            return true;
+        }
+
+        $is_subscription  = WC_Subscriptions_Product::is_subscription( $product );
+        $has_subscription = WC_Subscriptions_Cart::cart_contains_subscription();
+        if ( $is_subscription && $has_subscription ) {
+            return false;
+        }
+
+        // WooCommerce Subscriptions' "Mixed checkout" setting.
+        $mixed = 'yes' === get_option( 'woocommerce_subscriptions_multiple_purchase', 'no' );
+        return $mixed || ( ! $is_subscription && ! $has_subscription );
+    }
+
+    /**
+     * The product a bump offers that a cart item holds: its variation when it is one, else the
+     * product. Bumps list variations by their own ID.
+     *
+     * @since 1.2.0
+     * @param array $item Cart item.
+     * @return int
+     */
+    public static function item_offer_id( $item ) {
+        return (int) ( ! empty( $item['variation_id'] ) ? $item['variation_id'] : ( $item['product_id'] ?? 0 ) );
     }
 
     /**
@@ -181,6 +262,115 @@ class Naxoorbu_Cart {
         // Runs on cart/checkout load and before an order is placed (classic and Store API),
         // the same place WooCommerce re-validates coupons.
         add_action( 'woocommerce_check_cart_items', [ __CLASS__, 'validate_cart_items' ] );
+
+        // "Replace" bumps: however the bump item leaves the cart (unticked, removed on the cart
+        // page, offer no longer available), the items it replaced come back; "Undo" on the cart
+        // page swaps them out again.
+        add_action( 'woocommerce_cart_item_removed', [ __CLASS__, 'restore_replaced_items' ], 10, 2 );
+        add_action( 'woocommerce_cart_item_restored', [ __CLASS__, 'reapply_replacement' ], 10, 2 );
+    }
+
+    /**
+     * Cart items a "Replace" bump takes the place of: the items that triggered it (its trigger
+     * products, or items in its trigger categories), or every item for bumps shown on any cart.
+     * Items added from bumps are never replaced.
+     *
+     * @since 1.2.0
+     * @param array $meta Bump settings.
+     * @return string[] Cart item keys.
+     */
+    public static function items_to_replace( $meta ) {
+        if ( ! function_exists( 'WC' ) || ! WC()->cart ) return [];
+
+        $type = $meta['trigger_type'] ?? 'all';
+        $keys = [];
+        foreach ( WC()->cart->get_cart() as $key => $item ) {
+            if ( ! empty( $item['naxoorbu_bump_id'] ) ) continue;
+
+            $pid = (int) $item['product_id'];
+            if ( 'specific_product' === $type ) {
+                $match = in_array( $pid, array_map( 'intval', (array) ( $meta['trigger_products'] ?? [] ) ), true );
+            } elseif ( 'category' === $type ) {
+                $terms = wp_get_post_terms( $pid, 'product_cat', [ 'fields' => 'ids' ] );
+                $match = ! is_wp_error( $terms ) && array_intersect( $terms, array_map( 'intval', (array) ( $meta['trigger_categories'] ?? [] ) ) );
+            } else {
+                $match = true; // 'all' and 'minimum_order': the bump replaces the cart.
+            }
+
+            if ( $match ) {
+                $keys[] = $key;
+            }
+        }
+        return $keys;
+    }
+
+    /**
+     * What to remember about replaced items to put them back later, and to keep counting them
+     * for display rules while they are replaced.
+     *
+     * @since 1.2.0
+     * @param string[] $keys Cart item keys.
+     * @return array[] { product_id, variation_id, variation, quantity, line_subtotal }
+     */
+    private static function describe_items( $keys ) {
+        $out = [];
+        foreach ( $keys as $key ) {
+            $item = WC()->cart->get_cart_item( $key );
+            if ( ! $item ) continue;
+            $out[] = [
+                'product_id'    => (int) $item['product_id'],
+                'variation_id'  => (int) ( $item['variation_id'] ?? 0 ),
+                'variation'     => (array) ( $item['variation'] ?? [] ),
+                'quantity'      => (int) $item['quantity'],
+                'line_subtotal' => (float) ( $item['line_subtotal'] ?? 0 ),
+            ];
+        }
+        return $out;
+    }
+
+    /**
+     * Put back the items a "Replace" bump item took the place of, when that bump item is removed.
+     * The cart empties itself after an order without removing items one by one, so placing an
+     * order never brings them back.
+     *
+     * @since 1.2.0
+     * @param string  $key  Removed cart item key.
+     * @param WC_Cart $cart Cart.
+     */
+    public static function restore_replaced_items( $key, $cart ) {
+        $item = $cart->removed_cart_contents[ $key ] ?? null;
+        if ( empty( $item['naxoorbu_replaced'] ) || ! is_array( $item['naxoorbu_replaced'] ) ) return;
+
+        foreach ( $item['naxoorbu_replaced'] as $replaced ) {
+            $cart->add_to_cart(
+                (int) ( $replaced['product_id'] ?? 0 ),
+                max( 1, (int) ( $replaced['quantity'] ?? 1 ) ),
+                (int) ( $replaced['variation_id'] ?? 0 ),
+                (array) ( $replaced['variation'] ?? [] )
+            );
+        }
+    }
+
+    /**
+     * "Undo" on the cart page brought a "Replace" bump item back: take its replaced items out again.
+     *
+     * @since 1.2.0
+     * @param string  $key  Restored cart item key.
+     * @param WC_Cart $cart Cart.
+     */
+    public static function reapply_replacement( $key, $cart ) {
+        $item = $cart->get_cart_item( $key );
+        if ( empty( $item['naxoorbu_replaced'] ) || ! is_array( $item['naxoorbu_replaced'] ) ) return;
+
+        foreach ( $item['naxoorbu_replaced'] as $replaced ) {
+            foreach ( $cart->get_cart() as $other_key => $other ) {
+                if ( ! empty( $other['naxoorbu_bump_id'] ) ) continue;
+                if ( (int) $other['product_id'] !== (int) ( $replaced['product_id'] ?? 0 ) ) continue;
+                if ( (int) ( $other['variation_id'] ?? 0 ) !== (int) ( $replaced['variation_id'] ?? 0 ) ) continue;
+                $cart->remove_cart_item( $other_key );
+                break;
+            }
+        }
     }
 
     /**
@@ -203,7 +393,7 @@ class Naxoorbu_Cart {
             $bump_id = (int) ( $item['naxoorbu_bump_id'] ?? 0 );
             if ( ! $bump_id ) continue;
 
-            $pid = (int) $item['product_id'];
+            $pid = self::item_offer_id( $item );
             if ( ! self::bump_lists_product( $bump_id, $pid ) && self::is_bump_published( $bump_id ) ) {
                 continue; // Not one of the offer's products: owned by another module.
             }

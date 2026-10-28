@@ -67,7 +67,7 @@ class Naxoorbu_Discount {
             if ( empty( $meta['products'] ) ) continue;
 
             foreach ( $meta['products'] as $pm ) {
-                if ( intval( $pm['id'] ) === intval( $product_id ) ) {
+                if ( intval( $pm['id'] ) === intval( $variation_id ? $variation_id : $product_id ) ) { // Bumps list a variation by its own ID.
                     $discount      = floatval( $pm['discount'] ?? 0 );
                     $discount_type = $pm['discount_type'] ?? 'percentage';
 
@@ -102,21 +102,14 @@ class Naxoorbu_Discount {
             // Totals can be calculated several times per request (e.g. Store API add + response),
             // and items can be added in between. Always discount from the original price so the
             // result is the same on every run, instead of skipping later runs.
+            // The stored price is used (store currency, before price filters): multi-currency plugins
+            // convert the price and WooCommerce Subscriptions adds sign-up fees when it is read, so
+            // they apply once on top of the discounted price, as for any other product.
             if ( ! self::$base_prices->contains( $product ) ) {
-                self::$base_prices[ $product ] = floatval( $product->get_price() );
+                self::$base_prices[ $product ] = floatval( $product->get_price( 'edit' ) );
             }
             $original_price = self::$base_prices[ $product ];
-            $discount      = floatval( $cart_item['naxoorbu_discount'] );
-            $discount_type = $cart_item['naxoorbu_discount_type'] ?? 'percentage';
-
-            if ( $discount_type === 'percentage' ) {
-                $new_price = $original_price * ( 1 - $discount / 100 );
-            } else {
-                // flat discount
-                $new_price = $original_price - $discount;
-            }
-
-            $new_price = max( 0, $new_price );
+            $new_price      = self::offer_price( $original_price, $cart_item['naxoorbu_discount'], $cart_item['naxoorbu_discount_type'] ?? 'percentage' );
             /**
              * Filter the discounted price before applying.
              *
@@ -128,6 +121,61 @@ class Naxoorbu_Discount {
             $product->set_price( $new_price );
         }
     
+    }
+
+    /**
+     * Price after a bump discount. Prices and flat discounts are in the store currency.
+     *
+     * @since 1.2.0
+     * @param float  $price    Price.
+     * @param float  $discount Discount (percent or flat amount).
+     * @param string $type     'percentage' or 'flat'.
+     * @return float
+     */
+    public static function offer_price( $price, $discount, $type ) {
+        $price    = (float) $price;
+        $discount = (float) $discount;
+        if ( $discount > 0 ) {
+            $price = 'percentage' === $type ? $price * ( 1 - $discount / 100 ) : $price - $discount;
+        }
+        return max( 0.0, $price );
+    }
+
+    /**
+     * What the shopper pays for a product sold at an amount in the store currency: the product's
+     * price filters run on it as in the cart (e.g. a multi-currency plugin converting it).
+     *
+     * @since 1.2.0
+     * @param WC_Product $product Product.
+     * @param float      $amount  Amount in the store currency.
+     * @return float
+     */
+    public static function shown_price( $product, $amount ) {
+        $copy = clone $product;
+        $copy->set_price( $amount );
+        return (float) $copy->get_price();
+    }
+
+    /**
+     * An amount set in the store currency (e.g. a minimum order amount), in the currency the
+     * shopper pays in, converted as a product price would be.
+     *
+     * @since 1.2.0
+     * @param float $amount Amount in the store currency.
+     * @return float
+     */
+    public static function convert_amount( $amount ) {
+        $amount    = (float) $amount;
+        $converted = $amount > 0 ? self::shown_price( new WC_Product_Simple(), $amount ) : $amount;
+
+        /**
+         * Filter an amount converted from the store currency to the shopper's currency.
+         *
+         * @since 1.2.0
+         * @param float $converted Converted amount.
+         * @param float $amount    Amount in the store currency.
+         */
+        return (float) apply_filters( 'naxoorbu_convert_amount', $converted, $amount );
     }
 
     /**
@@ -178,7 +226,7 @@ class Naxoorbu_Discount {
         foreach ( $order->get_items() as $item ) {
             $bump_id = $item->get_meta( '_naxoorbu_bump_id' );
             if ( $bump_id ) {
-                $product_id = $item->get_product_id();
+                $product_id = $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id(); // The offered product (a variation by its own ID).
                 $revenue    = floatval( $item->get_total() );
 
                 /**

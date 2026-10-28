@@ -327,6 +327,8 @@
     function OrderBumpBlockComponent(props) {
         // Inner blocks show only their own position; the order summary slot shows every bump.
         var position = props && props.position ? props.position : '';
+        // 'checkout' or 'cart': only bumps set to show there (see Naxoorbu_Frontend::get_placements()).
+        var placement = props && props.placement ? props.placement : 'checkout';
 
         var elements = [];
 
@@ -352,6 +354,7 @@
             // Without the Store API data (very old WooCommerce), fall back to showing all bumps.
             if (visible !== null && !visible[bump.id]) return;
             if (position && (bump.position || 'before_payment') !== position) return;
+            if ((bump.placements || ['checkout']).indexOf(placement) === -1) return;
 
             bump.products.forEach(function (product, idx) {
                 if (visible !== null && visible[bump.id].indexOf(product.id) === -1) return;
@@ -376,7 +379,8 @@
 
     /* ═══════════════════════════════════════════════
        Register: inner blocks in the checkout form, or
-       the order summary slot (default)
+       the order summary slot (default). The cart block's
+       order summary always uses the slot.
     ═══════════════════════════════════════════════ */
     if (useInnerBlocks) {
         registerCheckoutBlock({
@@ -389,13 +393,19 @@
                 return el(OrderBumpBlockComponent, { position: props.position });
             }
         });
-        return;
+    }
+
+    // The slot passes its context ('woocommerce/cart' or 'woocommerce/checkout') to its fills.
+    function OrderMetaBumps(props) {
+        var placement = props && props.context === 'woocommerce/cart' ? 'cart' : 'checkout';
+        if (placement === 'checkout' && useInnerBlocks) return null;
+        return el(OrderBumpBlockComponent, { placement: placement });
     }
 
     registerPlugin('naxolabs-order-bump-blocks', {
         render: function () {
             return el(OrderMetaSlot, null,
-                el(OrderBumpBlockComponent)
+                el(OrderMetaBumps)
             );
         },
         scope: 'woocommerce-checkout',

@@ -38,6 +38,16 @@ class Naxoorbu_Frontend {
      */
     public function enqueue_assets() {
         if ( ! is_checkout() || $this->is_block_checkout() ) return;
+        self::enqueue_classic_assets();
+    }
+
+    /**
+     * Bump styles and script for bumps rendered by PHP (classic checkout, and other places
+     * an extension renders them with render_bump_list(), e.g. Pro on the cart page).
+     *
+     * @since 1.2.0
+     */
+    public static function enqueue_classic_assets() {
         wp_enqueue_style(  'naxoorbu-frontend', NAXOORBU_URL . 'frontend/css/frontend.css', [], filemtime( plugin_dir_path( dirname( __FILE__ ) ) . 'frontend/css/frontend.css' ) );
         wp_enqueue_script( 'naxoorbu-frontend', NAXOORBU_URL . 'frontend/js/frontend.js', ['jquery'], filemtime( plugin_dir_path( dirname( __FILE__ ) ) . 'frontend/js/frontend.js' ), true );
         wp_localize_script( 'naxoorbu-frontend', 'naxoorbuFrontend', [
@@ -66,6 +76,7 @@ class Naxoorbu_Frontend {
 
         foreach ( Naxoorbu_Visibility::get_published_bumps() as $bump_data ) {
             if ( ( $bump_data['meta']['position'] ?? 'before_payment' ) !== $position ) continue;
+            if ( ! in_array( 'checkout', self::get_placements( $bump_data ), true ) ) continue;
             if ( ! Naxoorbu_Visibility::is_visible( $bump_data ) ) continue;
 
             $out[] = $bump_data;
@@ -161,9 +172,46 @@ class Naxoorbu_Frontend {
          */
         do_action( 'naxoorbu_before_checkout', $bumps, $position );
 
+        self::render_bump_list( $bumps );
+    }
+
+    /**
+     * Where a bump shows. The checkout is the default; extensions add other places
+     * (e.g. Pro: cart page) through the `naxoorbu_bump_placements` filter.
+     *
+     * @since 1.2.0
+     * @param array $bump_data [ 'id' => int, 'meta' => array ].
+     * @return string[] Placement slugs, e.g. [ 'checkout', 'cart' ].
+     */
+    public static function get_placements( $bump_data ) {
+        /**
+         * Filter where a bump shows.
+         *
+         * @since 1.2.0
+         * @param string[] $placements Placement slugs. Default [ 'checkout' ].
+         * @param array    $bump_data  [ 'id' => int, 'meta' => array ].
+         */
+        return array_values( array_unique( (array) apply_filters( 'naxoorbu_bump_placements', [ 'checkout' ], $bump_data ) ) );
+    }
+
+    /**
+     * Render bumps with the classic markup (enqueue_classic_assets() handles the checkboxes).
+     *
+     * @since 1.2.0
+     * @param array $bumps List of [ 'id' => int, 'meta' => array ], already checked as visible.
+     * @param array $args {
+     *     Optional.
+     *
+     *     @type int[] $exclude    Product IDs not to offer (e.g. the product being viewed).
+     *     @type bool  $skip_added Leave out products already added from the bump. Default false
+     *                             (at checkout they stay, so they can be unticked).
+     * }
+     */
+    public static function render_bump_list( $bumps, $args = [] ) {
+        $args = wp_parse_args( $args, [ 'exclude' => [], 'skip_added' => false ] );
         foreach ( $bumps as $b ) {
             ob_start();
-            $this->render_single_bump( $b['id'], $b['meta'] );
+            self::render_single_bump( $b['id'], $b['meta'], $args );
             $html = ob_get_clean();
 
             /**
@@ -178,7 +226,41 @@ class Naxoorbu_Frontend {
         }
     }
 
-    private function render_single_bump( $bump_id, $meta ) {
+    /**
+     * The price the shopper pays for a bump product, as the cart charges it: the discount applies
+     * to the stored price, then the product's price filters (e.g. currency conversion) run.
+     *
+     * @since 1.2.0
+     * @param WC_Product $product Product.
+     * @param array      $pm      The bump's settings for this product.
+     * @return float
+     */
+    public static function bump_price( $product, $pm ) {
+        if ( floatval( $pm['discount'] ?? 0 ) <= 0 ) {
+            return floatval( $product->get_price() );
+        }
+        $offer = Naxoorbu_Discount::offer_price( $product->get_price( 'edit' ), $pm['discount'], $pm['discount_type'] ?? 'percentage' );
+        return Naxoorbu_Discount::shown_price( $product, $offer );
+    }
+
+    /**
+     * Price HTML for a bump product; a subscription also shows its billing details
+     * (e.g. "₹150 / month"), worded by WooCommerce Subscriptions.
+     *
+     * @since 1.2.0
+     * @param WC_Product $product Product.
+     * @param float      $amount  Price.
+     * @return string
+     */
+    public static function price_html( $product, $amount ) {
+        $html = wc_price( $amount );
+        if ( class_exists( 'WC_Subscriptions_Product' ) && WC_Subscriptions_Product::is_subscription( $product ) ) {
+            $html = WC_Subscriptions_Product::get_price_string( $product, [ 'price' => $html ] );
+        }
+        return $html;
+    }
+
+    private static function render_single_bump( $bump_id, $meta, $args = [ 'exclude' => [], 'skip_added' => false ] ) {
         $products_meta = $meta['products'] ?? [];
         if ( empty($products_meta) ) return;
 
@@ -208,6 +290,8 @@ class Naxoorbu_Frontend {
 
         foreach ( $products_meta as $idx => $pm ) {
             if ( ! in_array( intval( $pm['id'] ?? 0 ), $offered_ids, true ) ) continue;
+            if ( in_array( intval( $pm['id'] ), array_map( 'intval', (array) $args['exclude'] ), true ) ) continue;
+            if ( $args['skip_added'] && Naxoorbu_Visibility::has_bump_item_in_cart( $bump_id, intval( $pm['id'] ) ) ) continue;
 
             $product = wc_get_product( $pm['id'] ?? 0 );
             if ( !$product ) continue;
@@ -221,13 +305,7 @@ class Naxoorbu_Frontend {
             do_action( 'naxoorbu_bump_rendered', $bump_id, $product->get_id() );
 
             $regular     = floatval( $product->get_regular_price() );
-            $sale        = floatval( $product->get_price() );
-            $discount    = floatval( $pm['discount'] ?? 0 );
-            $dtype       = $pm['discount_type'] ?? 'percentage';
-            $offer_price = $discount > 0
-                ? ( $dtype === 'percentage' ? $sale * (1 - $discount/100) : $sale - $discount )
-                : $sale;
-            $offer_price = max( 0, $offer_price );
+            $offer_price = self::bump_price( $product, $pm );
 
             $prod_name    = $product->get_name();
             $description  = mb_substr( $pm['description'] ?? '', 0, 2000 );
@@ -262,7 +340,7 @@ class Naxoorbu_Frontend {
                 <?php if ( $show_orig && $regular > $offer_price ): ?>
                     <del class="naxoorbu-price-orig"><?php echo wp_kses_post( wc_price( $regular ) ); ?></del>
                 <?php endif; ?>
-                <span class="naxoorbu-price-final"><?php echo wp_kses_post( wc_price( $offer_price ) ); ?></span>
+                <span class="naxoorbu-price-final"><?php echo wp_kses_post( self::price_html( $product, $offer_price ) ); ?></span>
             </div>
             <?php $price_html = ob_get_clean(); ?>
 

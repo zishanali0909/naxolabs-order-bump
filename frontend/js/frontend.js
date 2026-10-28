@@ -25,6 +25,19 @@ jQuery(function ($) {
         var qty = parseInt($wrap.data('qty'), 10) || 1;
         var adding = $cb.is(':checked');
 
+        // Bumps inside a form marked data-naxoorbu-refresh="form" (e.g. Pro on the product page)
+        // are not added on tick: they go with that form as naxoorbu_form_bumps[] = "bumpId:productId".
+        if ($wrap.closest('[data-naxoorbu-refresh]').data('naxoorbu-refresh') === 'form') {
+            var value = ($wrap.data('bump-id') || 0) + ':' + pid;
+            var $form = $wrap.closest('form');
+            $wrap.toggleClass('naxoorbu-bump-is-added', adding);
+            $form.find('input[name="naxoorbu_form_bumps[]"]').filter(function () { return this.value === value; }).remove();
+            if (adding) {
+                $('<input type="hidden" name="naxoorbu_form_bumps[]">').val(value).appendTo($form);
+            }
+            return;
+        }
+
         // Abort previous request for this product
         if (pending[pid]) {
             pending[pid].abort();
@@ -59,7 +72,7 @@ jQuery(function ($) {
                 $wrap.removeClass('naxoorbu-bump-loading-state');
 
                 if (res.success) {
-                    $('body').trigger('update_checkout');
+                    refreshPage($wrap, adding);
                 } else {
                     revertState($cb, $wrap, pid, adding);
                     showBumpError($wrap, res.data && res.data.message ? res.data.message : (naxoorbuFrontend.i18n.error || 'Something went wrong.'));
@@ -75,6 +88,23 @@ jQuery(function ($) {
             }
         });
     });
+
+    /**
+     * Refresh what shows the cart, with WooCommerce's own events, by the bump's container
+     * (data-naxoorbu-refresh): the checkout (default), the cart page ("cart"), or the classic
+     * mini-cart ("fragments"). Other containers handle it on the naxoorbu_bump_updated event.
+     */
+    function refreshPage($wrap, adding) {
+        var mode = $wrap.closest('[data-naxoorbu-refresh]').data('naxoorbu-refresh') || 'checkout';
+        if (mode === 'checkout') {
+            $('body').trigger('update_checkout');
+        } else if (mode === 'cart') {
+            $(document.body).trigger('wc_update_cart');
+        } else if (mode === 'fragments') {
+            $(document.body).trigger('wc_fragment_refresh');
+        }
+        $(document.body).trigger('naxoorbu_bump_updated', [adding, $wrap]);
+    }
 
     /**
      * Revert checkbox and visual state on failure.

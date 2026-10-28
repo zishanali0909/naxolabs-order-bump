@@ -11,7 +11,8 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  *   3. `naxoorbu_passes_conditions` filter (e.g. Pro display rules)
  * A bump whose product the shopper already added stays visible, so it can be unticked;
  * whether it is still eligible is re-checked at checkout (see Naxoorbu_Cart::validate_cart_items()).
- * Products the shopper put in the cart themselves are not offered again (see get_offered_product_ids()).
+ * Products the shopper put in the cart themselves, and products that need options chosen,
+ * are not offered (see get_offered_product_ids()).
  *
  * Cart-based rules ignore items added from bumps, so a bump can never qualify itself
  * (e.g. its own price pushing the cart over a minimum order amount).
@@ -76,7 +77,15 @@ class Naxoorbu_Visibility {
         foreach ( (array) ( $bump_data['meta']['products'] ?? [] ) as $bp ) {
             $pid = intval( $bp['id'] ?? 0 );
             if ( ! $pid ) continue;
-            if ( in_array( $pid, $owned_pids, true ) && ! self::has_bump_item_in_cart( $bump_id, $pid ) ) continue;
+            $in_cart = self::has_bump_item_in_cart( $bump_id, $pid );
+            if ( in_array( $pid, $owned_pids, true ) && ! $in_cart ) continue;
+            // A product that needs the shopper to choose options (e.g. a variable product saved
+            // before 1.2.0) cannot be added with one click, and one that WooCommerce Subscriptions
+            // would not allow in this cart would empty it, so neither is offered.
+            if ( ! $in_cart ) {
+                $product = wc_get_product( $pid );
+                if ( ! $product || ! Naxoorbu_Cart::can_offer( $product ) || ! Naxoorbu_Cart::fits_cart( $product ) ) continue;
+            }
             $ids[] = $pid;
         }
         return $ids;
@@ -144,7 +153,8 @@ class Naxoorbu_Visibility {
             return false;
         }
         if ( $type === 'minimum_order' ) {
-            return $cart_total >= floatval( $meta['minimum_order_amount'] ?? 0 );
+            // Set in the store currency; the cart is in the shopper's currency.
+            return $cart_total >= Naxoorbu_Discount::convert_amount( $meta['minimum_order_amount'] ?? 0 );
         }
         return false;
     }
@@ -159,10 +169,18 @@ class Naxoorbu_Visibility {
 
         $ids = [];
         foreach ( WC()->cart->get_cart() as $item ) {
+            // Items a "Replace" bump took the place of still count: the shopper qualified with them.
+            foreach ( (array) ( $item['naxoorbu_replaced'] ?? [] ) as $replaced ) {
+                $ids[] = (int) ( $replaced['product_id'] ?? 0 );
+            }
             if ( ! empty( $item['naxoorbu_bump_id'] ) ) continue;
             $ids[] = (int) $item['product_id'];
+            // A variation counts as itself too: rules and bumps can list a single variation.
+            if ( ! empty( $item['variation_id'] ) ) {
+                $ids[] = (int) $item['variation_id'];
+            }
         }
-        return $ids;
+        return array_values( array_unique( $ids ) );
     }
 
     /**
@@ -178,6 +196,10 @@ class Naxoorbu_Visibility {
         foreach ( WC()->cart->get_cart() as $item ) {
             if ( ! empty( $item['naxoorbu_bump_id'] ) ) {
                 $subtotal -= (float) ( $item['line_subtotal'] ?? 0 );
+            }
+            // Items a "Replace" bump took the place of still count, as in get_cart_product_ids().
+            foreach ( (array) ( $item['naxoorbu_replaced'] ?? [] ) as $replaced ) {
+                $subtotal += (float) ( $replaced['line_subtotal'] ?? 0 );
             }
         }
         return max( 0.0, $subtotal );
@@ -195,7 +217,7 @@ class Naxoorbu_Visibility {
 
         foreach ( WC()->cart->get_cart() as $item ) {
             if ( (int) ( $item['naxoorbu_bump_id'] ?? 0 ) !== (int) $bump_id ) continue;
-            if ( ! $pid || (int) $item['product_id'] === (int) $pid ) return true;
+            if ( ! $pid || Naxoorbu_Cart::item_offer_id( $item ) === (int) $pid ) return true;
         }
         return false;
     }

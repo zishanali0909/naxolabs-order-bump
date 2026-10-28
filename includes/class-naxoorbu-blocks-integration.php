@@ -104,15 +104,7 @@ class Naxoorbu_Blocks_Integration implements IntegrationInterface {
                 $regular       = floatval( $product->get_regular_price() );
                 $discount      = floatval( $pm['discount'] ?? 0 );
                 $discount_type = $pm['discount_type'] ?? 'percentage';
-
-                if ( $discount > 0 ) {
-                    $final = $discount_type === 'percentage'
-                        ? $price * ( 1 - $discount / 100 )
-                        : $price - $discount;
-                } else {
-                    $final = $price;
-                }
-                $final = max( 0, $final );
+                $final         = Naxoorbu_Frontend::bump_price( $product, $pm );
 
                 $img_url = '';
                 $img_type = $meta['image_type'] ?? 'product';
@@ -132,7 +124,7 @@ class Naxoorbu_Blocks_Integration implements IntegrationInterface {
                     'final_price'      => round( $final, 2 ),
                     'price_html'       => html_entity_decode( wp_strip_all_tags( wc_price( $price ) ), ENT_QUOTES, 'UTF-8' ),
                     'regular_html'     => html_entity_decode( wp_strip_all_tags( wc_price( $regular ) ), ENT_QUOTES, 'UTF-8' ),
-                    'final_price_html' => html_entity_decode( wp_strip_all_tags( wc_price( $final ) ), ENT_QUOTES, 'UTF-8' ),
+                    'final_price_html' => html_entity_decode( wp_strip_all_tags( Naxoorbu_Frontend::price_html( $product, $final ) ), ENT_QUOTES, 'UTF-8' ),
                     'discount'         => $discount,
                     'discount_type'    => $discount_type,
                     'qty'              => intval( $pm['qty'] ?? 1 ),
@@ -160,6 +152,7 @@ class Naxoorbu_Blocks_Integration implements IntegrationInterface {
                 'show_product_image'  => ! empty( $meta['show_product_image'] ),
                 'image_position'      => $meta['image_position'] ?? 'left',
                 'position'            => $meta['position'] ?? 'before_payment',
+                'placements'          => Naxoorbu_Frontend::get_placements( $published_bump ),
                 'image_width'         => intval( $meta['image_width'] ?? 96 ),
                 'trigger_type'        => $meta['trigger_type'] ?? 'all',
                 'trigger_products'    => array_map( 'intval', (array) ( $meta['trigger_products'] ?? [] ) ),

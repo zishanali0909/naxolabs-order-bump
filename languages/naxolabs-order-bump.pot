@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-28T10:55:51+00:00\n"
+"POT-Creation-Date: 2026-10-28T18:29:46+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: naxolabs-order-bump\n"
@@ -262,196 +262,200 @@ msgstr ""
 msgid "After Payment Button"
 msgstr ""
 
-#: admin/views/edit-bump.php:209
+#: admin/views/edit-bump.php:219
 msgid "Skin / Layout"
 msgstr ""
 
-#: admin/views/edit-bump.php:211
+#: admin/views/edit-bump.php:221
 msgid "Skin 1"
 msgstr ""
 
-#: admin/views/edit-bump.php:212
+#: admin/views/edit-bump.php:222
 msgid "Skin 2"
 msgstr ""
 
-#: admin/views/edit-bump.php:216
+#: admin/views/edit-bump.php:226
 msgid "Header Color"
 msgstr ""
 
-#: admin/views/edit-bump.php:220
-#: admin/views/edit-bump.php:231
+#: admin/views/edit-bump.php:230
+#: admin/views/edit-bump.php:241
 msgid "Background"
 msgstr ""
 
-#: admin/views/edit-bump.php:224
-#: admin/views/edit-bump.php:235
+#: admin/views/edit-bump.php:234
+#: admin/views/edit-bump.php:245
 msgid "Text"
 msgstr ""
 
-#: admin/views/edit-bump.php:242
+#: admin/views/edit-bump.php:252
 msgid "Options"
 msgstr ""
 
-#: admin/views/edit-bump.php:245
+#: admin/views/edit-bump.php:255
 msgid "Show Original (Strikethrough) Price"
 msgstr ""
 
-#: admin/views/edit-bump.php:253
+#: admin/views/edit-bump.php:263
 msgid "Badge / Ribbon"
 msgstr ""
 
-#: admin/views/edit-bump.php:257
+#: admin/views/edit-bump.php:267
 msgid "Show Badge"
 msgstr ""
 
-#: admin/views/edit-bump.php:258
+#: admin/views/edit-bump.php:268
 msgid "Display a ribbon/badge on the order bump (e.g. \"Special Offer\")."
 msgstr ""
 
-#: admin/views/edit-bump.php:270
+#: admin/views/edit-bump.php:280
 msgid "Badge Text"
 msgstr ""
 
-#: admin/views/edit-bump.php:275
+#: admin/views/edit-bump.php:285
 msgid "Special Offer"
 msgstr ""
 
-#: admin/views/edit-bump.php:282
+#: admin/views/edit-bump.php:292
 msgid "Product Image"
 msgstr ""
 
-#: admin/views/edit-bump.php:286
+#: admin/views/edit-bump.php:296
 msgid "Show Product Image"
 msgstr ""
 
-#: admin/views/edit-bump.php:287
+#: admin/views/edit-bump.php:297
 msgid "When enabled, the product image will be displayed on the checkout page."
 msgstr ""
 
-#: admin/views/edit-bump.php:303
+#: admin/views/edit-bump.php:313
 msgid "Image Type"
 msgstr ""
 
-#: admin/views/edit-bump.php:309
+#: admin/views/edit-bump.php:319
 msgid "Product"
 msgstr ""
 
-#: admin/views/edit-bump.php:314
+#: admin/views/edit-bump.php:324
 msgid "Custom"
 msgstr ""
 
-#: admin/views/edit-bump.php:320
+#: admin/views/edit-bump.php:330
 msgid "Width (px)"
 msgstr ""
 
-#: admin/views/edit-bump.php:325
+#: admin/views/edit-bump.php:335
 msgid "Image Position"
 msgstr ""
 
-#: admin/views/edit-bump.php:327
+#: admin/views/edit-bump.php:337
 msgid "Left"
 msgstr ""
 
-#: admin/views/edit-bump.php:328
+#: admin/views/edit-bump.php:338
 msgid "Right"
 msgstr ""
 
-#: admin/views/edit-bump.php:333
+#: admin/views/edit-bump.php:343
 msgid "Custom Image URL"
 msgstr ""
 
-#: admin/views/edit-bump.php:336
+#: admin/views/edit-bump.php:346
 msgid "Select"
 msgstr ""
 
-#: admin/views/edit-bump.php:353
+#: admin/views/edit-bump.php:363
 msgid "Preview"
 msgstr ""
 
-#: admin/views/edit-bump.php:391
+#: admin/views/edit-bump.php:401
 #: includes/class-naxoorbu-admin.php:144
 msgid "Product name"
 msgstr ""
 
-#: admin/views/edit-bump.php:455
+#: admin/views/edit-bump.php:465
 #: includes/class-naxoorbu-admin.php:150
 msgid "No description set."
 msgstr ""
 
-#: admin/views/edit-bump.php:457
+#: admin/views/edit-bump.php:467
 msgid "Add products to see preview."
 msgstr ""
 
-#: admin/views/edit-bump.php:481
+#: admin/views/edit-bump.php:491
 msgid "All Products"
 msgstr ""
 
-#: admin/views/edit-bump.php:482
+#: admin/views/edit-bump.php:492
 msgid "Each product can have its own description"
 msgstr ""
 
-#: admin/views/edit-bump.php:489
+#: admin/views/edit-bump.php:499
 msgid "Search & add product..."
 msgstr ""
 
-#: admin/views/edit-bump.php:496
+#: admin/views/edit-bump.php:506
 msgid "No products added yet. Search above to add."
 msgstr ""
 
-#: admin/views/edit-bump.php:509
+#: admin/views/edit-bump.php:519
 msgid "Behaviour"
 msgstr ""
 
-#: admin/views/edit-bump.php:512
+#: admin/views/edit-bump.php:522
 msgid "Add Order Bumps to Cart Items"
 msgstr ""
 
-#: admin/views/edit-bump.php:516
+#: admin/views/edit-bump.php:526
 msgid "Replace Cart Items with Order Bump"
 msgstr ""
 
-#: admin/views/edit-bump.php:526
+#: admin/views/edit-bump.php:528
+msgid "Replace: ticking the bump swaps out the items that made it show (the products or categories in Rules, or the whole cart when it shows on every order), e.g. to upgrade to a bundle. Unticking it puts them back."
+msgstr ""
+
+#: admin/views/edit-bump.php:537
 msgid "Display Rules — When to show?"
 msgstr ""
 
-#: admin/views/edit-bump.php:529
+#: admin/views/edit-bump.php:540
 msgid "For"
 msgstr ""
 
-#: admin/views/edit-bump.php:531
+#: admin/views/edit-bump.php:542
 msgid "No Rules (Always Show)"
 msgstr ""
 
-#: admin/views/edit-bump.php:532
+#: admin/views/edit-bump.php:543
 msgid "Cart Item(s)"
 msgstr ""
 
-#: admin/views/edit-bump.php:533
+#: admin/views/edit-bump.php:544
 msgid "Cart Category(s)"
 msgstr ""
 
-#: admin/views/edit-bump.php:534
+#: admin/views/edit-bump.php:545
 msgid "Cart Total"
 msgstr ""
 
-#: admin/views/edit-bump.php:538
-#: admin/views/edit-bump.php:558
+#: admin/views/edit-bump.php:549
+#: admin/views/edit-bump.php:569
 msgid "matches any of"
 msgstr ""
 
-#: admin/views/edit-bump.php:540
+#: admin/views/edit-bump.php:551
 msgid "Search products..."
 msgstr ""
 
-#: admin/views/edit-bump.php:572
+#: admin/views/edit-bump.php:583
 msgid "Select categories..."
 msgstr ""
 
-#: admin/views/edit-bump.php:576
+#: admin/views/edit-bump.php:587
 msgid "Search..."
 msgstr ""
 
-#: admin/views/edit-bump.php:594
+#: admin/views/edit-bump.php:605
 msgid "is greater than "
 msgstr ""
 
@@ -595,7 +599,7 @@ msgid "Permission denied."
 msgstr ""
 
 #: includes/class-naxoorbu-cart.php:35
-#: includes/class-naxoorbu-cart.php:115
+#: includes/class-naxoorbu-cart.php:132
 msgid "Invalid product."
 msgstr ""
 
@@ -611,36 +615,36 @@ msgstr ""
 msgid "This product is already in your cart."
 msgstr ""
 
-#: includes/class-naxoorbu-cart.php:93
+#: includes/class-naxoorbu-cart.php:105
 msgid "Could not add product to cart."
 msgstr ""
 
 #. translators: %s: product name.
-#: includes/class-naxoorbu-cart.php:223
+#: includes/class-naxoorbu-cart.php:413
 msgid "The special offer for \"%s\" is no longer available, so it has been removed from your order. Please review your order total."
 msgstr ""
 
-#: includes/class-naxoorbu-cart.php:351
+#: includes/class-naxoorbu-cart.php:541
 msgid "IDs of the order bumps the shopper should see."
 msgstr ""
 
-#: includes/class-naxoorbu-cart.php:358
+#: includes/class-naxoorbu-cart.php:548
 msgid "Products each visible order bump offers to the shopper."
 msgstr ""
 
-#: includes/class-naxoorbu-cart.php:395
+#: includes/class-naxoorbu-cart.php:585
 msgid "Order bump this item was added from (0 if none)."
 msgstr ""
 
-#: includes/class-naxoorbu-cart.php:420
+#: includes/class-naxoorbu-cart.php:610
 msgid "Invalid request."
 msgstr ""
 
-#: includes/class-naxoorbu-frontend.php:47
+#: includes/class-naxoorbu-frontend.php:57
 msgid "Something went wrong."
 msgstr ""
 
-#: includes/class-naxoorbu-frontend.php:48
+#: includes/class-naxoorbu-frontend.php:58
 msgid "Connection error. Please try again."
 msgstr ""
 

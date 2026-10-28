@@ -147,9 +147,14 @@ Yes. Commonly used hooks include:
 
 = 1.2.0 =
 * New: Highlight words in the bump headline by wrapping them in `<mark>…</mark>`, in a colour you choose. New bumps start with a highlighted "Yes!"
+* New: Offer a single variation of a variable product (e.g. "T-shirt – Large"). The Products search lists variations; a variable product, or a variation with an "Any…" option, needs the shopper to choose and is not offered
+* New: Works with multi-currency plugins that convert prices (e.g. CURCY, FOX): the bump discount applies once, in your store currency, and the shopper sees and pays the converted price. Minimum order amounts are compared in the shopper's currency
+* New: Works with WooCommerce Subscriptions: subscription products (also variable ones) show their billing details (e.g. "/ month"), sign-up fees are charged once, and a bump that would make WooCommerce Subscriptions empty the cart is not offered
 * Improved: The edit screen preview shows the product's name in place of {{product_name}}, as the checkout does
 * Improved: Bumps use your theme's font with a lighter headline, so they match the rest of the checkout
+* Developers: new `naxoorbu_bump_placements` filter, `naxoorbu_admin_after_position` action and `Naxoorbu_Frontend::render_bump_list()`, so extensions can show bumps in more places (e.g. the cart page)
 * Fixed: With Skin 2, editing the headline in the preview could replace the price
+* Fixed: "Replace Cart Items with Order Bump" now works: ticking the bump swaps out the items that made it show (e.g. to upgrade to a bundle), and unticking it puts them back
 
 = 1.1.0 =
 * Improved: Rules tab search now shows product image and price
@@ -195,7 +200,7 @@ Yes. Commonly used hooks include:
 == Upgrade Notice ==
 
 = 1.2.0 =
-Highlight words in your bump headline, and bumps now use your theme's font. Existing bumps keep their text and colours.
+Highlight words in your bump headline, offer single variations of variable products, and a working "Replace" option. Existing bumps keep their text and colours.
 
 = 1.1.0 =
 Faster checkout, a cleaner admin and several fixes (security, offer checks, revenue totals, saving). Recommended for all users.

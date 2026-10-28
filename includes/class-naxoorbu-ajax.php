@@ -88,10 +88,16 @@ class Naxoorbu_Ajax {
 
         $q = ( isset( $_POST['q'] ) ? sanitize_text_field( wp_unslash( $_POST['q'] ) ) : '' );
 
+        // Products to offer in a bump (Products tab): simple products and the variations of
+        // variable products, which can be added with one click. A variable product itself, or a
+        // variation with an "Any …" attribute, needs the shopper to choose options, so it is left out.
+        // Rules keep searching whole products (a variable product matches all its variations).
+        $offer = isset( $_POST['context'] ) && 'offer' === sanitize_key( wp_unslash( $_POST['context'] ) );
+
         $args = [
-            'post_type'      => 'product',
+            'post_type'      => $offer ? [ 'product', 'product_variation' ] : 'product',
             'post_status'    => 'publish',
-            'posts_per_page' => 10,
+            'posts_per_page' => $offer ? 30 : 10,
         ];
 
         // Empty/short query = browse recent products; 2+ chars = search.
@@ -108,6 +114,8 @@ class Naxoorbu_Ajax {
         foreach ( $query->posts as $post ) {
             $p = wc_get_product( $post->ID );
             if ( ! $p ) continue;
+            if ( $offer && ! Naxoorbu_Cart::can_offer( $p ) ) continue;
+            if ( count( $data ) >= 10 ) break;
             $data[] = [
                 'id'            => $p->get_id(),
                 'name'          => $p->get_name(),

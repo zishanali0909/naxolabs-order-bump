@@ -338,7 +338,7 @@ jQuery(function($) {
     $('#naxoorbu-product-search').on('focus', function() {
         var q = $(this).val().trim();
         if (q.length < 2 && !$('#naxoorbu-product-results').hasClass('open')) {
-            $.post(naxoorbuAdmin.ajaxUrl, { action: 'naxoorbu_search_products', q: '', nonce: naxoorbuAdmin.nonce }, function(res) {
+            $.post(naxoorbuAdmin.ajaxUrl, { action: 'naxoorbu_search_products', q: '', context: 'offer', nonce: naxoorbuAdmin.nonce }, function(res) {
                 if (!res.success || !res.data.length) return;
                 var html = '';
                 res.data.forEach(function(p) {
@@ -363,7 +363,7 @@ jQuery(function($) {
         var q = $(this).val().trim();
         if (q.length < 2) {
             // Show recent products instead of empty
-            $.post(naxoorbuAdmin.ajaxUrl, { action: 'naxoorbu_search_products', q: '', nonce: naxoorbuAdmin.nonce }, function(res) {
+            $.post(naxoorbuAdmin.ajaxUrl, { action: 'naxoorbu_search_products', q: '', context: 'offer', nonce: naxoorbuAdmin.nonce }, function(res) {
                 if (!res.success || !res.data.length) { $('#naxoorbu-product-results').removeClass('open').html(''); return; }
                 var html = '';
                 res.data.forEach(function(p) {
@@ -381,7 +381,7 @@ jQuery(function($) {
             return;
         }
         searchTimer = setTimeout(function() {
-            $.post(naxoorbuAdmin.ajaxUrl, { action: 'naxoorbu_search_products', q: q, nonce: naxoorbuAdmin.nonce }, function(res) {
+            $.post(naxoorbuAdmin.ajaxUrl, { action: 'naxoorbu_search_products', q: q, context: 'offer', nonce: naxoorbuAdmin.nonce }, function(res) {
                 if (!res.success || !res.data.length) {
                     $('#naxoorbu-product-results').html('<div style="padding:10px;color:#9CA3AF;font-size:13px;">' + (naxoorbuAdmin.i18n.noProducts || 'No products found.') + '</div>').addClass('open');
                     return;
