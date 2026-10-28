@@ -200,6 +200,10 @@
 .naxoorbu-preview-bump{font-size:12px;border-radius:8px;overflow:hidden}
 #naxoorbu-preview-bump{overflow:visible;position:relative}
 .naxoorbu-preview-headline{border-bottom:1px solid #F0E060;padding:8px 10px;display:flex;align-items:center;gap:7px;font-weight:700;font-size:12px}
+/* Highlighted words in the headline (<mark>), as on the checkout. */
+#naxoorbu-preview-bump mark{background:none;color:var(--naxoorbu-highlight,#E15334);padding:0}
+.naxoorbu-highlight-color{display:flex;align-items:center;gap:10px;margin-top:10px}
+.naxoorbu-highlight-color .naxoorbu-label{margin:0}
 .naxoorbu-preview-arrow{color:#E15334;font-size:13px}
 .naxoorbu-preview-check{color:var(--p);font-size:14px}
 .naxoorbu-preview-desc{padding:8px 10px;font-size:11px;color:#374151;overflow:hidden}

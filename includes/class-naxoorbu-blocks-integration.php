@@ -153,6 +153,7 @@ class Naxoorbu_Blocks_Integration implements IntegrationInterface {
                 'layout'              => $skin_style['layout'],
                 'bg_color'            => $skin_style['bg_color'],
                 'text_color'          => $skin_style['text_color'],
+                'highlight_color'     => Naxoorbu_Frontend::highlight_color( $meta ),
                 'show_badge'          => ! empty( $meta['show_badge'] ),
                 'badge_text'          => $meta['badge_text'] ?? '',
                 'show_original_price' => ! empty( $meta['show_original_price'] ),

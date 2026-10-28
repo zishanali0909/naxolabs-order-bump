@@ -84,6 +84,18 @@ class Naxoorbu_Frontend {
 
 
     /**
+     * Colour of the highlighted (<mark>) words in a bump's headline — shared by the
+     * classic and the block checkout. Bumps saved before 1.2.0 get the default.
+     *
+     * @since 1.2.0
+     * @param array $meta Bump settings.
+     * @return string Hex colour.
+     */
+    public static function highlight_color( $meta ) {
+        return sanitize_hex_color( $meta['highlight_color'] ?? '' ) ?: '#E15334';
+    }
+
+    /**
      * Skin, base layout and header colors for a bump — shared by the classic
      * checkout and the block checkout so both look the same.
      *
@@ -255,7 +267,7 @@ class Naxoorbu_Frontend {
             <?php $price_html = ob_get_clean(); ?>
 
             <div class="naxoorbu-bump-wrap naxoorbu-skin-<?php echo esc_attr( $skin ); ?> <?php echo esc_attr( $added_class ); ?> <?php echo ( $show_badge && $badge_text ) ? 'naxoorbu-has-badge' : ''; ?>"
-                 style="--naxoorbu-header-color:<?php echo esc_attr( $header_color ); ?>;--naxoorbu-header-text:<?php echo esc_attr( $header_text_color ); ?>;"
+                 style="--naxoorbu-header-color:<?php echo esc_attr( $header_color ); ?>;--naxoorbu-header-text:<?php echo esc_attr( $header_text_color ); ?>;--naxoorbu-highlight:<?php echo esc_attr( self::highlight_color( $meta ) ); ?>;"
                  id="<?php echo esc_attr( $wrap_id ); ?>"
                  data-product-id="<?php echo intval( $product->get_id() ); ?>"
                  data-bump-id="<?php echo intval( $bump_id ); ?>"
@@ -289,7 +301,7 @@ class Naxoorbu_Frontend {
                         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;margin:0;" for="<?php echo esc_attr( $check_id ); ?>">
                             <input type="checkbox" class="naxoorbu-bump-checkbox" id="<?php echo esc_attr( $check_id ); ?>" <?php checked( $in_cart ); ?>>
                             <span class="naxoorbu-bump-checkmark"></span>
-                            <span style="font-size:14px;font-weight:800;color:<?php echo esc_attr( $header_text_color ); ?>;"><?php echo wp_kses_post( $headline_html ); ?></span>
+                            <span style="font-size:14px;font-weight:700;color:<?php echo esc_attr( $header_text_color ); ?>;"><?php echo wp_kses_post( $headline_html ); ?></span>
                         </label>
                         <?php echo wp_kses_post( $price_html ); ?>
                     </div>

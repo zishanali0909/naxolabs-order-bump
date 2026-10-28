@@ -141,6 +141,7 @@ class Naxoorbu_Admin {
             'maxProducts'    => self::get_max_products( $edit_id ),
             'i18n'           => [
                 'deleteConfirm'  => __( 'Delete this Order Bump?', 'naxolabs-order-bump' ),
+                'sampleName'     => __( 'Product name', 'naxolabs-order-bump' ),
                 'productAdded'   => __( 'Product added! Go to Design tab to set its description.', 'naxolabs-order-bump' ),
                 'alreadyAdded'   => __( 'is already added.', 'naxolabs-order-bump' ),
                 'noProducts'     => __( 'No products found.', 'naxolabs-order-bump' ),
@@ -273,7 +274,8 @@ class Naxoorbu_Admin {
             'trigger_products'     => [],
             'trigger_categories'   => [],
             'minimum_order_amount' => '',
-            'headline'             => 'Yes! Add {{product_name}} to my order',
+            'headline'             => '<mark>Yes!</mark> Add {{product_name}} to my order',
+            'highlight_color'      => '#E15334',
             'badge_text'           => 'Special Offer',
             'show_badge'           => 0,
             'show_original_price'  => 1,
@@ -317,6 +319,25 @@ class Naxoorbu_Admin {
         $tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'design';
 
         include NAXOORBU_PATH . 'admin/views/edit-bump.php';
+    }
+
+    /**
+     * Clean a bump headline: plain text on one line, where <mark> highlights words
+     * (shown in the bump's highlight colour); every other tag is removed. At most 200 characters.
+     *
+     * @since 1.2.0
+     *
+     * @param mixed $text Raw headline.
+     * @return string
+     */
+    public static function sanitize_headline( $text ) {
+        $allowed = [ 'mark' => [] ];
+        $text    = wp_kses( wp_check_invalid_utf8( (string) $text ), $allowed );
+        $text    = mb_substr( trim( preg_replace( '/\s+/u', ' ', $text ) ), 0, 200 );
+
+        // Cutting to length may split a tag ("<ma") or a <mark> pair: drop the broken tag, close the pair.
+        $text = preg_replace( '/<[^>]*$/', '', $text );
+        return force_balance_tags( wp_kses( $text, $allowed ) );
     }
 
     /**
@@ -370,7 +391,7 @@ class Naxoorbu_Admin {
         $clean = [];
 
         // Text fields with length limits
-        $clean['headline']   = mb_substr( sanitize_text_field( $settings['headline'] ?? '' ), 0, 200 );
+        $clean['headline']   = self::sanitize_headline( $settings['headline'] ?? '' );
         $clean['badge_text'] = mb_substr( sanitize_text_field( $settings['badge_text'] ?? '' ), 0, 50 );
 
         // Boolean toggles
@@ -385,6 +406,7 @@ class Naxoorbu_Admin {
         $clean['skin2_text_color'] = sanitize_hex_color( $settings['skin2_text_color'] ?? '#155724' ) ?: '#155724';
         $clean['skin3_bg_color']   = sanitize_hex_color( $settings['skin3_bg_color'] ?? '#eef4fe' ) ?: '#eef4fe';
         $clean['skin3_text_color'] = sanitize_hex_color( $settings['skin3_text_color'] ?? '#155724' ) ?: '#155724';
+        $clean['highlight_color']  = sanitize_hex_color( $settings['highlight_color'] ?? '#E15334' ) ?: '#E15334';
 
         // Image settings — clamped values
         $clean['image_type']       = in_array( $settings['image_type'] ?? '', [ 'product', 'custom' ], true ) ? $settings['image_type'] : 'product';

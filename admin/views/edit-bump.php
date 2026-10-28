@@ -97,8 +97,19 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                 <?php
                                 /* translators: %s: template tag code */
                                 printf( esc_html__( 'Use %s to show product name dynamically.', 'naxolabs-order-bump' ), '<code>{{product_name}}</code>' );
+                                echo ' ';
+                                printf(
+                                    /* translators: 1: highlight tag code, 2: example */
+                                    esc_html__( 'Wrap words in %1$s to highlight them, e.g. %2$s.', 'naxolabs-order-bump' ),
+                                    '<code>' . esc_html( '<mark>…</mark>' ) . '</code>',
+                                    '<code>' . esc_html( '<mark>Yes!</mark>' ) . '</code>'
+                                );
                                 ?>
                             </p>
+                            <div class="naxoorbu-highlight-color">
+                                <label class="naxoorbu-label" for="naxoorbu-highlight-color"><?php esc_html_e( 'Highlight colour', 'naxolabs-order-bump' ); ?></label>
+                                <input type="color" name="naxoorbu_settings[highlight_color]" id="naxoorbu-highlight-color" value="<?php echo esc_attr( $meta['highlight_color'] ?? '#E15334' ); ?>">
+                            </div>
                         </div>
                     </div>
 
@@ -124,6 +135,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                                 class="naxoorbu-desc-switch-btn <?php echo $pi === 0 ? 'naxoorbu-switch-active' : ''; ?>"
                                                 data-index="<?php echo intval( $pi ); ?>"
                                                 data-thumb="<?php echo esc_url( $pp['thumb'] ?? '' ); ?>"
+                                                data-name="<?php echo esc_attr( $pp['name'] ?? '' ); ?>"
                                                 id="naxoorbu-swbtn-<?php echo intval( $pi ); ?>">
                                             <?php echo esc_html( $name ); ?>
                                         </button>
@@ -373,7 +385,13 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                     }
                                 }
                                 ?>
-                                <div class="naxoorbu-preview-bump naxoorbu-preview-<?php echo esc_attr( $cur_skin ); ?>" id="naxoorbu-preview-bump" data-skin="<?php echo esc_attr( $cur_skin ); ?>" style="position:relative;overflow:visible;--naxoorbu-header-color:<?php echo esc_attr( $prev_bg ); ?>;--naxoorbu-header-text:<?php echo esc_attr( $prev_text ); ?>;">
+                                <?php
+                                // The headline as the checkout shows it: {{product_name}} becomes the first product's
+                                // name, or a sample name while the bump has no products yet.
+                                $naxoorbu_preview_name     = ! empty( $saved_products[0]['name'] ) ? $saved_products[0]['name'] : __( 'Product name', 'naxolabs-order-bump' );
+                                $naxoorbu_preview_headline = str_replace( '{{product_name}}', esc_html( $naxoorbu_preview_name ), wp_kses_post( $meta['headline'] ) );
+                                ?>
+                                <div class="naxoorbu-preview-bump naxoorbu-preview-<?php echo esc_attr( $cur_skin ); ?>" id="naxoorbu-preview-bump" data-skin="<?php echo esc_attr( $cur_skin ); ?>" style="position:relative;overflow:visible;--naxoorbu-header-color:<?php echo esc_attr( $prev_bg ); ?>;--naxoorbu-header-text:<?php echo esc_attr( $prev_text ); ?>;--naxoorbu-highlight:<?php echo esc_attr( $meta['highlight_color'] ?? '#E15334' ); ?>;">
                                     <!-- Preview Badge -->
                                     <div id="naxoorbu-preview-badge" class="naxoorbu-preview-badge" style="<?php echo ! empty( $meta['show_badge'] ) ? '' : 'display:none;'; ?>position:absolute;top:-8px;left:12px;background:#E15334;color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:4px;z-index:2;text-transform:uppercase;letter-spacing:0.5px;">
                                         <?php echo esc_html( $meta['badge_text'] ?? 'Special Offer' ); ?>
@@ -381,7 +399,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                     <div class="naxoorbu-preview-headline" id="naxoorbu-preview-headline" style="background:<?php echo esc_attr( $prev_bg ); ?>;color:<?php echo esc_attr( $prev_text ); ?>;<?php echo ! empty( $meta['show_badge'] ) ? 'padding-top:18px;' : ''; ?>">
                                         <span class="naxoorbu-preview-arrow">➡</span>
                                         <span class="naxoorbu-preview-check">☐</span>
-                                        <span id="naxoorbu-preview-headline-text"><?php echo wp_kses_post( $meta['headline'] ); ?></span>
+                                        <span id="naxoorbu-preview-headline-text"><?php echo $naxoorbu_preview_headline; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_kses_post() headline with an esc_html() name, built above. ?></span>
                                         <?php echo $prev_price_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built above from escaped parts (wc_price via wp_kses_post). ?>
                                     </div>
                                     <div id="naxoorbu-preview-desc-area" class="naxoorbu-preview-desc" style="<?php echo $cur_skin === 'skin2' ? 'background:' . esc_attr( $prev_bg ) . ';color:' . esc_attr( $prev_text ) . ';' : ''; ?>">
@@ -445,7 +463,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                     <div class="naxoorbu-preview-cta-row" id="naxoorbu-preview-cta-row" style="display:none;">
                                         <span style="color:#E15334;">➡</span>
                                         <span>☐</span>
-                                        <span><?php echo wp_kses_post( $meta['headline'] ); ?></span>
+                                        <span class="naxoorbu-preview-cta-text"><?php echo $naxoorbu_preview_headline; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_kses_post() headline with an esc_html() name, built above. ?></span>
                                         <?php echo $prev_price_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built above from escaped parts (wc_price via wp_kses_post). ?>
                                     </div>
                                 </div>

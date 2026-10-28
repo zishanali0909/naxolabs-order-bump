@@ -73,11 +73,22 @@ jQuery(function($) {
     /* ═══════════════════════════════════════
        HEADLINE — live update in preview
     ═══════════════════════════════════════ */
-    $('input[name="naxoorbu_settings[headline]"]').on('input', function() {
-        var text = $(this).val() || 'Yes! Add {{product_name}} to my order';
-        $('#naxoorbu-preview-headline-text').html(text);
-        // Also update skin2 CTA row
-        $('#naxoorbu-preview-cta-row span').last().html(text);
+    // As on the checkout, {{product_name}} shows the name of the product picked in the Design tab
+    // (the first one by default), or a sample name while the bump has no products yet.
+    function renderPreviewHeadline() {
+        var text = $('input[name="naxoorbu_settings[headline]"]').val() || 'Yes! Add {{product_name}} to my order';
+        var $active = $('.naxoorbu-desc-switch-btn.naxoorbu-switch-active');
+        var name = $active.length ? ($active.attr('data-name') || $active.text().trim()) : (i18n.sampleName || 'Product name');
+        var html = text.split('{{product_name}}').join(escHtml(name));
+        $('#naxoorbu-preview-headline-text').html(html);
+        $('#naxoorbu-preview-cta-row .naxoorbu-preview-cta-text').html(html); // Skin 2 CTA row
+    }
+    $('input[name="naxoorbu_settings[headline]"]').on('input', renderPreviewHeadline);
+
+    // Colour of the <mark> words in the headline.
+    $('#naxoorbu-highlight-color').on('input change', function() {
+        var preview = document.getElementById('naxoorbu-preview-bump');
+        if (preview) preview.style.setProperty('--naxoorbu-highlight', this.value);
     });
 
     /* ═══════════════════════════════════════
@@ -301,6 +312,8 @@ jQuery(function($) {
             display: 'block', position: 'relative',
             width: '', height: '', overflow: '', opacity: '', pointerEvents: ''
         });
+
+        renderPreviewHeadline();
 
         // Update preview description
         var eid = 'naxoorbu_prod_editor_' + idx;
@@ -649,6 +662,7 @@ jQuery(function($) {
                 $descCard.append('<p class="naxoorbu-help naxoorbu-no-prod-hint" style="padding:12px 0;text-align:center;">' + escHtml(i18n.addProductsFirst || 'First add products in the %1$sProducts tab%2$s.').replace('%1$s', '<strong>').replace('%2$s', '</strong>') + '</p>');
             }
             $descCard.find('.naxoorbu-no-prod-hint').show();
+            renderPreviewHeadline();
             return;
         }
 
@@ -666,9 +680,10 @@ jQuery(function($) {
         products.forEach(function(p, idx) {
             var shortName = p.name.length > 40 ? p.name.substring(0, 40) + '...' : p.name;
             var activeClass = idx === 0 ? ' naxoorbu-switch-active' : '';
-            $switcherWrap.append('<button type="button" class="naxoorbu-desc-switch-btn' + activeClass + '" data-index="' + idx + '" id="naxoorbu-swbtn-' + idx + '">' + escHtml(shortName) + '</button>');
+            $switcherWrap.append('<button type="button" class="naxoorbu-desc-switch-btn' + activeClass + '" data-index="' + idx + '" data-name="' + escHtml(p.name) + '" id="naxoorbu-swbtn-' + idx + '">' + escHtml(shortName) + '</button>');
         });
         $switcherWrap.show();
+        renderPreviewHeadline();
 
         var $editorsWrap = $descCard.find('.naxoorbu-desc-editors-wrap');
         if (!$editorsWrap.length) {

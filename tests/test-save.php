@@ -109,6 +109,31 @@ class Test_Save extends WP_UnitTestCase {
         $this->assertEquals( 200, mb_strlen( $meta['headline'] ) );
     }
 
+    /** Test: the headline keeps <mark> highlights; every other tag goes, and it stays on one line. */
+    public function test_headline_keeps_mark_only() {
+        $meta = $this->simulate_save( [ 'headline' => "<mark>Yes!</mark> Add <b>{{product_name}}</b>\n<script>alert(1)</script>now", 'bump_status' => 'draft' ] );
+        $this->assertNotNull( $meta );
+        $this->assertSame( '<mark>Yes!</mark> Add {{product_name}} alert(1)now', $meta['headline'] );
+    }
+
+    /** Test: cutting to 200 characters never leaves a broken tag or an open <mark>. */
+    public function test_headline_cut_keeps_tags_whole() {
+        $this->assertSame( str_repeat( 'A', 196 ), Naxoorbu_Admin::sanitize_headline( str_repeat( 'A', 196 ) . '<mark>Yes!</mark>' ), 'A tag cut in half ("<mar") is dropped.' );
+        $this->assertSame( str_repeat( 'A', 190 ) . '<mark>Yes!</mark>', Naxoorbu_Admin::sanitize_headline( str_repeat( 'A', 190 ) . '<mark>Yes!</mark>' ) );
+        $this->assertSame( str_repeat( 'A', 180 ) . '<mark>Yes! Yes! Yes!</mark>', Naxoorbu_Admin::sanitize_headline( str_repeat( 'A', 180 ) . '<mark>Yes! Yes! Yes! Yes!</mark>' ), 'A <mark> cut open is closed.' );
+    }
+
+    /** Test: highlight colour saved; invalid or missing falls back to the default red. */
+    public function test_highlight_color() {
+        $meta = $this->simulate_save( [ 'highlight_color' => '#0055ff', 'bump_status' => 'draft' ] );
+        $this->assertSame( '#0055ff', $meta['highlight_color'] );
+
+        $meta = $this->simulate_save( [ 'highlight_color' => 'red; background:url(x)', 'bump_status' => 'draft' ] );
+        $this->assertSame( '#E15334', $meta['highlight_color'] );
+
+        $this->assertSame( '#E15334', Naxoorbu_Frontend::highlight_color( [] ), 'Bumps saved before 1.2.0 get the default.' );
+    }
+
     /** Test: badge_text truncated to 50 chars. */
     public function test_badge_text_max_50_chars() {
         $meta = $this->simulate_save( [ 'badge_text' => str_repeat( 'B', 100 ), 'bump_status' => 'draft' ] );

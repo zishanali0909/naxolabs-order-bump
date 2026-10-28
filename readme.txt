@@ -4,7 +4,7 @@ Tags: woocommerce, order bump, checkout upsell, one click upsell, sales boost
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,6 +24,7 @@ Increase your average order value effortlessly by offering relevant products rig
 * **Custom Badges** - Add eye-catching ribbons like "Special Offer" or "Limited Deal"
 * **Product Images** - Display product or custom images with configurable width and position (left/right)
 * **Live Admin Preview** - See exactly how your bump will look while editing in real-time
+* **Highlighted Headline Words** - Make words like "Yes!" stand out in a colour you choose
 * **AJAX Add to Cart** - Smooth, no-reload experience on checkout
 * **Per-Product Descriptions** - Rich text descriptions with full WordPress Editor support
 * **Revenue Tracking** - Track bump revenue directly in your admin dashboard
@@ -144,6 +145,12 @@ Yes. Commonly used hooks include:
 
 == Changelog ==
 
+= 1.2.0 =
+* New: Highlight words in the bump headline by wrapping them in `<mark>…</mark>`, in a colour you choose. New bumps start with a highlighted "Yes!"
+* Improved: The edit screen preview shows the product's name in place of {{product_name}}, as the checkout does
+* Improved: Bumps use your theme's font with a lighter headline, so they match the rest of the checkout
+* Fixed: With Skin 2, editing the headline in the preview could replace the price
+
 = 1.1.0 =
 * Improved: Rules tab search now shows product image and price
 * New: Live "Already in Products/Rules" indicator in search results
@@ -186,6 +193,9 @@ Yes. Commonly used hooks include:
 * Developer hooks and filters for extensibility
 
 == Upgrade Notice ==
+
+= 1.2.0 =
+Highlight words in your bump headline, and bumps now use your theme's font. Existing bumps keep their text and colours.
 
 = 1.1.0 =
 Faster checkout, a cleaner admin and several fixes (security, offer checks, revenue totals, saving). Recommended for all users.

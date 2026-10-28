@@ -22,10 +22,12 @@
     margin: 14px 0;
     overflow: hidden;
     background: #fff;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: inherit; /* The theme's font, so the bump matches the checkout around it. */
     transition: border-color .25s;
 }
 .naxoorbu-bump-wrap + .naxoorbu-bump-wrap { margin-top: 16px; }
+/* Highlighted words in the headline (<mark>): the bump's highlight colour, without the theme's mark background. */
+.naxoorbu-bump-wrap mark { background: none; color: var(--naxoorbu-highlight, #E15334); padding: 0; }
 
 /* Loading overlay (hidden — we use naxoorbu-bump-loading-state class instead) */
 .naxoorbu-bump-loading { display: none !important; }
@@ -192,7 +194,7 @@
 }
 /* Skin1 checkmark — perfectly centered like skin2 */
 .naxoorbu-skin-skin1 .naxoorbu-bump-headline-text {
-    font-size: 14px; font-weight: 800;
+    font-size: 14px; font-weight: 700;
     color: inherit; line-height: 1.3;
 }
 
@@ -246,7 +248,7 @@
 .naxoorbu-skin-skin2 .naxoorbu-bump-check-label::after { display: none !important; }
 
 .naxoorbu-skin-skin2 .naxoorbu-bump-headline-text {
-    font-size: 14px; font-weight: 800;
+    font-size: 14px; font-weight: 700;
     color: #E15334; line-height: 1.3;
 }
 

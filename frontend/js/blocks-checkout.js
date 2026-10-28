@@ -237,7 +237,7 @@
         );
 
         // Skin colors as CSS variables on the wrapper, like the classic checkout (used by Pro skins).
-        var skinVars = { '--naxoorbu-header-color': bgColor, '--naxoorbu-header-text': txtColor };
+        var skinVars = { '--naxoorbu-header-color': bgColor, '--naxoorbu-header-text': txtColor, '--naxoorbu-highlight': bump.highlight_color || '#E15334' };
 
         // ── SKIN 2 layout ──
         if (layout === 'skin2') {
@@ -271,7 +271,7 @@
                     },
                         el('input', { type: 'checkbox', className: 'naxoorbu-bump-checkbox', checked: checked, readOnly: true }),
                         el('span', { className: 'naxoorbu-bump-checkmark' }),
-                        el('span', { style: { fontSize: '14px', fontWeight: 800, color: txtColor }, dangerouslySetInnerHTML: { __html: headline } })
+                        el('span', { style: { fontSize: '14px', fontWeight: 700, color: txtColor }, dangerouslySetInnerHTML: { __html: headline } })
                     ),
                     priceEl
                 ),
