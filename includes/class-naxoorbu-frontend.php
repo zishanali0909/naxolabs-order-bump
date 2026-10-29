@@ -202,13 +202,15 @@ class Naxoorbu_Frontend {
      * @param array $args {
      *     Optional.
      *
-     *     @type int[] $exclude    Product IDs not to offer (e.g. the product being viewed).
-     *     @type bool  $skip_added Leave out products already added from the bump. Default false
-     *                             (at checkout they stay, so they can be unticked).
+     *     @type int[] $skip_products Product IDs not to offer (e.g. the product being viewed).
+     *     @type bool  $skip_added    Leave out products already added from the bump. Default false
+     *                                (at checkout they stay, so they can be unticked).
+     *     @type bool  $compact       Headline and price only, without the image and description
+     *                                (e.g. a small mini-cart dropdown). Default false.
      * }
      */
     public static function render_bump_list( $bumps, $args = [] ) {
-        $args = wp_parse_args( $args, [ 'exclude' => [], 'skip_added' => false ] );
+        $args = wp_parse_args( $args, [ 'skip_products' => [], 'skip_added' => false, 'compact' => false ] );
         foreach ( $bumps as $b ) {
             ob_start();
             self::render_single_bump( $b['id'], $b['meta'], $args );
@@ -260,7 +262,7 @@ class Naxoorbu_Frontend {
         return $html;
     }
 
-    private static function render_single_bump( $bump_id, $meta, $args = [ 'exclude' => [], 'skip_added' => false ] ) {
+    private static function render_single_bump( $bump_id, $meta, $args = [ 'skip_products' => [], 'skip_added' => false, 'compact' => false ] ) {
         $products_meta = $meta['products'] ?? [];
         if ( empty($products_meta) ) return;
 
@@ -290,7 +292,7 @@ class Naxoorbu_Frontend {
 
         foreach ( $products_meta as $idx => $pm ) {
             if ( ! in_array( intval( $pm['id'] ?? 0 ), $offered_ids, true ) ) continue;
-            if ( in_array( intval( $pm['id'] ), array_map( 'intval', (array) $args['exclude'] ), true ) ) continue;
+            if ( in_array( intval( $pm['id'] ), array_map( 'intval', (array) $args['skip_products'] ), true ) ) continue;
             if ( $args['skip_added'] && Naxoorbu_Visibility::has_bump_item_in_cart( $bump_id, intval( $pm['id'] ) ) ) continue;
 
             $product = wc_get_product( $pm['id'] ?? 0 );
@@ -330,8 +332,12 @@ class Naxoorbu_Frontend {
                 }
             }
 
+            if ( ! empty( $args['compact'] ) ) {
+                $description = '';
+                $img_html    = '';
+            }
+
             $wrap_id     = 'naxoorbu-bump-' . $bump_id . '-' . $idx;
-            $check_id    = 'naxoorbu-check-' . $bump_id . '-' . $idx;
             $added_class = $in_cart ? 'naxoorbu-bump-is-added' : '';
 
             // Price HTML (wc_price already returns safe HTML)
@@ -379,10 +385,10 @@ class Naxoorbu_Frontend {
                                 <path d="M1 6H11M11 6L7 2M11 6L7 10" stroke="#E15334" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                         </div>
-                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;margin:0;" for="<?php echo esc_attr( $check_id ); ?>">
-                            <input type="checkbox" class="naxoorbu-bump-checkbox" id="<?php echo esc_attr( $check_id ); ?>" <?php checked( $in_cart ); ?>>
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;margin:0;">
+                            <input type="checkbox" class="naxoorbu-bump-checkbox" <?php checked( $in_cart ); ?>>
                             <span class="naxoorbu-bump-checkmark"></span>
-                            <span style="font-size:14px;font-weight:700;color:<?php echo esc_attr( $header_text_color ); ?>;"><?php echo wp_kses_post( $headline_html ); ?></span>
+                            <span class="naxoorbu-bump-cta-headline" style="font-size:14px;font-weight:700;color:<?php echo esc_attr( $header_text_color ); ?>;"><?php echo wp_kses_post( $headline_html ); ?></span>
                         </label>
                         <?php echo wp_kses_post( $price_html ); ?>
                     </div>
@@ -398,8 +404,8 @@ class Naxoorbu_Frontend {
                                 <path d="M1 6H11M11 6L7 2M11 6L7 10" stroke="#E15334" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                         </div>
-                        <label class="naxoorbu-bump-check-label" for="<?php echo esc_attr( $check_id ); ?>" style="display:inline-flex !important;align-items:center !important;gap:8px;flex:1;min-width:0;cursor:pointer;margin:0;padding:0;font-weight:normal;">
-                            <input type="checkbox" class="naxoorbu-bump-checkbox" id="<?php echo esc_attr( $check_id ); ?>" <?php checked( $in_cart ); ?>>
+                        <label class="naxoorbu-bump-check-label" style="display:inline-flex !important;align-items:center !important;gap:8px;flex:1;min-width:0;cursor:pointer;margin:0;padding:0;font-weight:normal;">
+                            <input type="checkbox" class="naxoorbu-bump-checkbox" <?php checked( $in_cart ); ?>>
                             <span class="naxoorbu-bump-checkmark"></span>
                             <span class="naxoorbu-bump-headline-text"><?php echo wp_kses_post( $headline_html ); ?></span>
                         </label>

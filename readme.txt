@@ -154,6 +154,7 @@ Yes. Commonly used hooks include:
 * Improved: Bumps use your theme's font with a lighter headline, so they match the rest of the checkout
 * Developers: new `naxoorbu_bump_placements` filter, `naxoorbu_admin_after_position` action and `Naxoorbu_Frontend::render_bump_list()`, so extensions can show bumps in more places (e.g. the cart page), a `naxoorbu_bump_toggled` browser event when a bump is added or removed, and `Naxoorbu_Admin::sanitize_settings()` / `can_create_bump()` for saving bumps from elsewhere (e.g. an import)
 * Fixed: The block checkout could show bumps not offered to the shopper for a split second while loading, and count impressions for them
+* Fixed: When the same bump showed twice on a page (e.g. in a theme's desktop and mobile header cart), clicking a headline could tick the other copy
 * Fixed: With Skin 2, editing the headline in the preview could replace the price
 * Fixed: "Replace Cart Items with Order Bump" now works: ticking the bump swaps out the items that made it show (e.g. to upgrade to a bundle), and unticking it puts them back
 
@@ -201,7 +202,7 @@ Yes. Commonly used hooks include:
 == Upgrade Notice ==
 
 = 1.2.0 =
-Highlight words in your bump headline, offer single variations of variable products, and a working "Replace" option. Existing bumps keep their text and colours.
+Highlight words in your bump headline, offer single variations of variable products, a working "Replace" option, and support for multi-currency plugins and WooCommerce Subscriptions. Existing bumps keep their text and colours.
 
 = 1.1.0 =
 Faster checkout, a cleaner admin and several fixes (security, offer checks, revenue totals, saving). Recommended for all users.
