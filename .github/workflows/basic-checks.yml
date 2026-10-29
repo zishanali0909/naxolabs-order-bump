@@ -126,7 +126,7 @@ jobs:
 
       - name: Scan for inline script tags
         run: |
-          echo "Scanning for inline script tags in PHP files..."
+          echo "Scanning for inline script tags in PHP files (tests excluded: they hold attack strings on purpose)..."
           found=0
           while IFS= read -r file; do
             matches=$(grep -n '<script' "$file" | grep -v '//.*<script\|/\*.*<script\|\* .*<script' || true)
@@ -136,7 +136,7 @@ jobs:
               echo "$matches"
               found=$((found + $(echo "$matches" | wc -l)))
             fi
-          done < <(find . -name "*.php" -not -path "./vendor/*" -not -path "./node_modules/*")
+          done < <(find . -name "*.php" -not -path "./vendor/*" -not -path "./node_modules/*" -not -path "./tests/*")
           echo ""
           if [ $found -gt 0 ]; then
             echo "Found $found inline script tag(s)! Use wp_add_inline_script() instead."
