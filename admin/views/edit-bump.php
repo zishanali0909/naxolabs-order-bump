@@ -372,14 +372,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                 if ( ! empty( $saved_products ) ) {
                                     $first_prod = wc_get_product( $saved_products[0]['id'] ?? 0 );
                                     if ( $first_prod ) {
+                                        // The same price as on the checkout (offer price, subscription details).
                                         $regular     = floatval( $first_prod->get_regular_price() );
-                                        $sale        = floatval( $first_prod->get_price() );
-                                        $discount    = floatval( $saved_products[0]['discount'] ?? 0 );
-                                        $dtype       = $saved_products[0]['discount_type'] ?? 'percentage';
-                                        $offer_price = $discount > 0
-                                            ? ( $dtype === 'percentage' ? $sale * (1 - $discount/100) : $sale - $discount )
-                                            : $sale;
-                                        $offer_price = max( 0, $offer_price );
+                                        $offer_price = Naxoorbu_Frontend::bump_price( $first_prod, $saved_products[0] );
                                         $show_orig   = !empty( $meta['show_original_price'] );
 
                                         ob_start();
@@ -388,7 +383,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                             <?php if ( $show_orig && $regular > $offer_price ): ?>
                                                 <del class="naxoorbu-price-orig" style="color:var(--muted);font-size:10px;text-decoration:line-through;margin-right:4px;"><?php echo wp_kses_post( wc_price( $regular ) ); ?></del>
                                             <?php endif; ?>
-                                            <span class="naxoorbu-price-final" style="font-size:14px;font-weight:800;color:#5460dc;"><?php echo wp_kses_post( wc_price( $offer_price ) ); ?></span>
+                                            <span class="naxoorbu-price-final" style="font-size:14px;font-weight:800;color:#5460dc;"><?php echo wp_kses_post( Naxoorbu_Frontend::price_html( $first_prod, $offer_price ) ); ?></span>
                                         </div>
                                         <?php
                                         $prev_price_html = ob_get_clean();

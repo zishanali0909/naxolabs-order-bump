@@ -74,6 +74,46 @@ class Test_Replace extends WP_UnitTestCase {
         $this->assertSame( 2, (int) $restored[0]['quantity'], 'Restored with its quantity.' );
     }
 
+    /** A replaced item comes back with what other plugins stored on it (e.g. add-ons, a gift note). */
+    public function test_untick_restores_item_data() {
+        WC()->cart->add_to_cart( $this->main->get_id(), 1, 0, [], [ 'gift_note' => 'Happy birthday' ] );
+
+        Naxoorbu_Cart::add_bump_product( $this->offer->get_id(), 1, $this->bump_id );
+        Naxoorbu_Cart::remove_bump_product( $this->offer->get_id(), $this->bump_id );
+
+        $restored = array_values( WC()->cart->get_cart() );
+        $this->assertCount( 1, $restored );
+        $this->assertSame( $this->main->get_id(), (int) $restored[0]['product_id'] );
+        $this->assertSame( 'Happy birthday', $restored[0]['gift_note'] ?? null );
+    }
+
+    /** A replaced variation still counts as owned, so no other bump offers it again. */
+    public function test_replaced_variation_still_owned() {
+        $variable  = new WC_Product_Variable();
+        $attribute = new WC_Product_Attribute();
+        $attribute->set_name( 'size' );
+        $attribute->set_options( [ 'Small' ] );
+        $attribute->set_visible( true );
+        $attribute->set_variation( true );
+        $variable->set_name( 'Shirt' );
+        $variable->set_attributes( [ $attribute ] );
+        $variable->save();
+        $variation = new WC_Product_Variation();
+        $variation->set_parent_id( $variable->get_id() );
+        $variation->set_attributes( [ 'size' => 'Small' ] );
+        $variation->set_regular_price( 500 );
+        $variation->set_status( 'publish' );
+        $variation->save();
+        $variation = wc_get_product( $variation->get_id() );
+        $this->settings( [ 'behaviour' => 'replace', 'trigger_type' => 'specific_product', 'trigger_products' => [ $variation->get_id() ] ] ); // A trigger can list a variation.
+
+        WC()->cart->add_to_cart( $variable->get_id(), 1, $variation->get_id(), $variation->get_variation_attributes() );
+        Naxoorbu_Cart::add_bump_product( $this->offer->get_id(), 1, $this->bump_id );
+
+        $this->assertEqualsCanonicalizing( [ $this->offer->get_id() ], $this->cart_product_ids(), 'The variation was replaced.' );
+        $this->assertContains( $variation->get_id(), Naxoorbu_Visibility::get_cart_product_ids(), 'And still counts as owned.' );
+    }
+
     /** The replaced trigger still counts for the rules, so the bump is not dropped at checkout. */
     public function test_replaced_item_keeps_bump_valid() {
         WC()->cart->add_to_cart( $this->main->get_id() );

@@ -158,15 +158,39 @@ class Naxoorbu_Discount {
 
     /**
      * An amount set in the store currency (e.g. a minimum order amount), in the currency the
-     * shopper pays in, converted as a product price would be.
+     * shopper's cart is in, through the multi-currency plugin's own conversion. Only the currency
+     * changes: price rules of other plugins (memberships, wholesale) don't apply to it. Another
+     * plugin can convert it through the `naxoorbu_convert_amount` filter.
      *
      * @since 1.2.0
      * @param float $amount Amount in the store currency.
      * @return float
      */
     public static function convert_amount( $amount ) {
+        global $WOOCS; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase -- FOX's own global.
+
         $amount    = (float) $amount;
-        $converted = $amount > 0 ? self::shown_price( new WC_Product_Simple(), $amount ) : $amount;
+        $converted = $amount;
+        if ( $amount > 0 ) {
+            // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- the multi-currency plugins' own hooks.
+            if ( function_exists( 'wmc_get_price' ) ) {
+                // CURCY (WooCommerce Multi Currency); it leaves the amount as is where the cart stays
+                // in the store currency (paying in other currencies off).
+                $converted = (float) wmc_get_price( $amount );
+            } elseif ( is_object( $WOOCS ) && has_filter( 'woocs_exchange_value' ) ) {
+                // FOX Currency Switcher: the cart is in the shopper's currency only with "Is multiple allowed" on.
+                // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- FOX's property.
+                $converted = ! empty( $WOOCS->is_multiple_allowed ) ? (float) apply_filters( 'woocs_exchange_value', $amount ) : $amount;
+            } elseif ( function_exists( 'WC_Payments_Multi_Currency' ) && is_object( WC_Payments_Multi_Currency() ) && method_exists( WC_Payments_Multi_Currency(), 'get_price' ) ) {
+                $converted = (float) WC_Payments_Multi_Currency()->get_price( $amount, 'product' ); // WooPayments Multi-Currency.
+            } elseif ( has_filter( 'wc_aelia_cs_convert' ) ) {
+                // Aelia Currency Switcher.
+                $converted = (float) apply_filters( 'wc_aelia_cs_convert', $amount, get_option( 'woocommerce_currency' ), get_woocommerce_currency() );
+            } elseif ( has_filter( 'wcml_raw_price_amount' ) ) {
+                $converted = (float) apply_filters( 'wcml_raw_price_amount', $amount ); // WPML WooCommerce Multilingual.
+            }
+            // phpcs:enable
+        }
 
         /**
          * Filter an amount converted from the store currency to the shopper's currency.

@@ -72,6 +72,7 @@ class Naxoorbu_Visibility {
     public static function get_offered_product_ids( $bump_data ) {
         $bump_id    = (int) $bump_data['id'];
         $owned_pids = self::get_cart_product_ids();
+        $replaced   = Naxoorbu_Cart::replaced_by( $bump_data['meta'] ?? [] ); // Leave the cart if a "Replace" bump is ticked.
 
         $ids = [];
         foreach ( (array) ( $bump_data['meta']['products'] ?? [] ) as $bp ) {
@@ -84,7 +85,7 @@ class Naxoorbu_Visibility {
             // would not allow in this cart would empty it, so neither is offered.
             if ( ! $in_cart ) {
                 $product = wc_get_product( $pid );
-                if ( ! $product || ! Naxoorbu_Cart::can_offer( $product ) || ! Naxoorbu_Cart::fits_cart( $product ) ) continue;
+                if ( ! $product || ! Naxoorbu_Cart::can_offer( $product ) || ! Naxoorbu_Cart::fits_cart( $product, $replaced ) ) continue;
             }
             $ids[] = $pid;
         }
@@ -172,6 +173,9 @@ class Naxoorbu_Visibility {
             // Items a "Replace" bump took the place of still count: the shopper qualified with them.
             foreach ( (array) ( $item['naxoorbu_replaced'] ?? [] ) as $replaced ) {
                 $ids[] = (int) ( $replaced['product_id'] ?? 0 );
+                if ( ! empty( $replaced['variation_id'] ) ) {
+                    $ids[] = (int) $replaced['variation_id'];
+                }
             }
             if ( ! empty( $item['naxoorbu_bump_id'] ) ) continue;
             $ids[] = (int) $item['product_id'];

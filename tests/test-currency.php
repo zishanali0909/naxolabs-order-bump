@@ -24,6 +24,8 @@ class Test_Currency extends WP_UnitTestCase {
 
     public function tear_down() {
         remove_filter( 'woocommerce_product_get_price', [ $this, 'convert' ], 99 );
+        remove_filter( 'woocs_exchange_value', [ $this, 'convert' ] );
+        unset( $GLOBALS['WOOCS'] );
         WC()->cart->empty_cart();
         parent::tear_down();
     }
@@ -87,6 +89,13 @@ class Test_Currency extends WP_UnitTestCase {
     /** A minimum order amount is compared in the shopper's currency. */
     public function test_minimum_order_amount_is_converted() {
         $meta = [ 'trigger_type' => 'minimum_order', 'minimum_order_amount' => 500 ];
+        $this->assertEqualsWithDelta( 500.0, Naxoorbu_Discount::convert_amount( 500 ), 0.001, 'Price rules alone (e.g. memberships) never change it.' );
+
+        // FOX Currency Switcher: its conversion, while the cart is in the shopper's currency.
+        $GLOBALS['WOOCS'] = (object) [ 'is_multiple_allowed' => 0 ];
+        add_filter( 'woocs_exchange_value', [ $this, 'convert' ] );
+        $this->assertEqualsWithDelta( 500.0, Naxoorbu_Discount::convert_amount( 500 ), 0.001, 'Paying in other currencies off: the cart stays in the store currency.' );
+        $GLOBALS['WOOCS']->is_multiple_allowed = 1;
         $this->assertEqualsWithDelta( 1000.0, Naxoorbu_Discount::convert_amount( 500 ), 0.001 );
 
         WC()->cart->add_to_cart( $this->product( 300 )->get_id() ); // 600 in the shopper's currency.

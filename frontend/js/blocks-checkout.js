@@ -350,6 +350,9 @@
     /* ═══════════════════════════════════════════════
        Order Bump Container — renders all bumps
     ═══════════════════════════════════════════════ */
+    // Whether the cart has loaded once (see OrderBumpBlockComponent).
+    var cartLoaded = false;
+
     function OrderBumpBlockComponent(props) {
         // Inner blocks show only their own position; the order summary slot shows every bump.
         var position = props && props.position ? props.position : '';
@@ -363,9 +366,13 @@
         // cart/address update. Returned as a string so the selector result stays referentially stable.
         var visibleKey = useSelect(function (select) {
             var store = select(CART_STORE);
-            // Until the cart has loaded it has no extension data: show nothing yet, not every bump
-            // (which would flash bumps that are not offered, and count impressions for them).
-            if (store.hasFinishedResolution && !store.hasFinishedResolution('getCartData')) return 'loading';
+            // Until the cart has first loaded it has no extension data: show nothing yet, not every
+            // bump (which would flash bumps that are not offered, and count impressions for them).
+            // Later reloads of the cart (e.g. after a bump is ticked) keep the bumps on screen.
+            if (!cartLoaded) {
+                if (store.hasFinishedResolution && !store.hasFinishedResolution('getCartData')) return 'loading';
+                cartLoaded = true;
+            }
             var data = store.getCartData();
             var ext  = data && data.extensions ? data.extensions[storeApiNamespace] : null;
             return ext && Array.isArray(ext.visible_products) ? JSON.stringify(ext.visible_products) : null;
@@ -437,13 +444,16 @@
         return el(OrderBumpBlockComponent, { placement: placement });
     }
 
-    registerPlugin('naxolabs-order-bump-blocks', {
-        render: function () {
-            return el(OrderMetaSlot, null,
-                el(OrderMetaBumps)
-            );
-        },
-        scope: 'woocommerce-checkout',
-    });
+    // Only where WooCommerce has the slot (inner blocks work without it).
+    if (OrderMetaSlot) {
+        registerPlugin('naxolabs-order-bump-blocks', {
+            render: function () {
+                return el(OrderMetaSlot, null,
+                    el(OrderMetaBumps)
+                );
+            },
+            scope: 'woocommerce-checkout',
+        });
+    }
 
 })();

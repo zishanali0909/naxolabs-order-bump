@@ -238,6 +238,17 @@ class Test_Save extends WP_UnitTestCase {
         $this->assertEquals( 99, $meta['products'][1]['qty'] );
     }
 
+    /** Test: a description keeps its backslashes and quotes (posted slashed, unslashed once). */
+    public function test_product_description_keeps_backslashes() {
+        $meta = $this->simulate_save( wp_slash( [
+            'bump_status' => 'draft',
+            'products'    => [
+                [ 'id' => 1, 'discount' => 0, 'discount_type' => 'percentage', 'qty' => 1, 'description' => 'Save to C:\\Docs "now"' ],
+            ],
+        ] ) );
+        $this->assertSame( 'Save to C:\\Docs "now"', $meta['products'][0]['description'] );
+    }
+
     /** Test: product without ID is skipped. */
     public function test_product_without_id_skipped() {
         $meta = $this->simulate_save( [

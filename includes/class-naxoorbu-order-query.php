@@ -141,10 +141,14 @@ class Naxoorbu_Order_Query {
             $select[] = 'CAST( oim_bump.meta_value AS UNSIGNED ) AS bump_id';
         }
         if ( in_array( 'product', $group_by, true ) ) {
-            $select[] = 'CAST( oim_product.meta_value AS UNSIGNED ) AS product_id';
+            // A variation counts as itself, as bumps offer and count impressions per variation.
+            $select[] = "CAST( COALESCE( NULLIF( NULLIF( oim_variation.meta_value, '0' ), '' ), oim_product.meta_value ) AS UNSIGNED ) AS product_id";
             $joins[]  = "INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS oim_product
                           ON oim_product.order_item_id = oim_bump.order_item_id
                           AND oim_product.meta_key = '_product_id'";
+            $joins[]  = "LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS oim_variation
+                          ON oim_variation.order_item_id = oim_bump.order_item_id
+                          AND oim_variation.meta_key = '_variation_id'";
         }
         if ( in_array( 'day', $group_by, true ) ) {
             // Day in the site timezone, using its current UTC offset.

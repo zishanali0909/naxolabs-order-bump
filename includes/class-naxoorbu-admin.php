@@ -385,7 +385,7 @@ class Naxoorbu_Admin {
             $bump_id = wp_insert_post( $post_data );
         }
 
-        update_post_meta( $bump_id, '_naxoorbu_settings', $clean );
+        update_post_meta( $bump_id, '_naxoorbu_settings', wp_slash( $clean ) ); // Meta functions unslash what they save.
 
         /**
          * Fires after an order bump is saved.
@@ -489,7 +489,7 @@ class Naxoorbu_Admin {
                 'discount'      => $discount,
                 'discount_type' => $dtype,
                 'qty'           => max( 1, min( 99, intval( $p['qty'] ?? 1 ) ) ),
-                'description'   => mb_substr( wp_kses_post( stripslashes( $p['description'] ?? '' ) ), 0, 2000 ),
+                'description'   => mb_substr( wp_kses_post( (string) ( $p['description'] ?? '' ) ), 0, 2000 ),
             ];
         }
 
