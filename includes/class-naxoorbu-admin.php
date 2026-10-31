@@ -18,23 +18,30 @@ class Naxoorbu_Admin {
     }
 
     /**
-     * Register admin menu pages.
+     * Register admin menu pages: a menu of its own, which extensions add their screens to.
      */
     public function add_menu() {
+        add_menu_page(
+            __( 'Order Bumps', 'naxolabs-order-bump' ),
+            __( 'Naxo Order Bump', 'naxolabs-order-bump' ),
+            'manage_woocommerce',
+            'naxolabs-order-bump',
+            [ $this, 'render_dashboard' ],
+            'dashicons-cart',
+            '55.6' // Right below WooCommerce and its Products menu.
+        );
         add_submenu_page(
-            'woocommerce',
+            'naxolabs-order-bump',
             __( 'Order Bumps', 'naxolabs-order-bump' ),
-            __( 'Order Bumps', 'naxolabs-order-bump' ),
+            __( 'All Bumps', 'naxolabs-order-bump' ),
             'manage_woocommerce',
             'naxolabs-order-bump',
             [ $this, 'render_dashboard' ]
         );
-        // Edit/create screen: registered under WooCommerce (so core sets its title and keeps
-        // the menu open), then its own menu item is removed in hide_edit_menu_item().
         $edit_hook = add_submenu_page(
-            'woocommerce',
+            'naxolabs-order-bump',
             __( 'Edit Order Bump', 'naxolabs-order-bump' ),
-            __( 'Edit Order Bump', 'naxolabs-order-bump' ),
+            __( 'Add New', 'naxolabs-order-bump' ),
             'manage_woocommerce',
             'naxoorbu-edit',
             [ $this, 'render_edit_page' ]
@@ -42,27 +49,19 @@ class Naxoorbu_Admin {
         if ( $edit_hook ) {
             add_action( 'load-' . $edit_hook, [ $this, 'set_edit_page_title' ] );
         }
-        add_action( 'admin_head', [ $this, 'hide_edit_menu_item' ] );
         add_filter( 'submenu_file', [ $this, 'highlight_submenu' ] );
     }
 
     /**
-     * The edit screen is reached from the dashboard, so it gets no menu item of its own.
-     * Runs on admin_head: after core has read the page title, before the menu is printed.
-     */
-    public function hide_edit_menu_item() {
-        remove_submenu_page( 'woocommerce', 'naxoorbu-edit' );
-    }
-
-    /**
-     * Keep "Order Bumps" highlighted while editing a bump.
+     * Keep "All Bumps" highlighted while editing a bump ("Add New" is for a new one).
      *
      * @param string|null $submenu_file Submenu file.
      * @return string|null
      */
     public function highlight_submenu( $submenu_file ) {
         global $plugin_page;
-        return 'naxoorbu-edit' === $plugin_page ? 'naxolabs-order-bump' : $submenu_file;
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only page routing.
+        return 'naxoorbu-edit' === $plugin_page && ! empty( $_GET['edit'] ) ? 'naxolabs-order-bump' : $submenu_file;
     }
 
     /**
@@ -359,6 +358,12 @@ class Naxoorbu_Admin {
         // The bump limit also applies on save, not only on the "Add New" page.
         if ( ! $bump_id ) {
             $this->die_if_bump_limit_reached();
+        } elseif ( ! self::can_edit_bump( $bump_id ) ) {
+            wp_die(
+                wp_kses_post( self::bump_locked_message( $bump_id ) ),
+                esc_html__( 'Order Bump Locked', 'naxolabs-order-bump' ),
+                [ 'back_link' => true ]
+            );
         }
 
         $title    = sanitize_text_field( wp_unslash( $_POST['bump_title'] ?? 'Order Bump' ) );
@@ -503,9 +508,52 @@ class Naxoorbu_Admin {
      * @return bool
      */
     public static function can_create_bump() {
-        $max_bumps     = apply_filters( 'naxoorbu_max_bumps', NAXOORBU_MAX_BUMPS );
+        return self::count_bumps() < apply_filters( 'naxoorbu_max_bumps', NAXOORBU_MAX_BUMPS );
+    }
+
+    /**
+     * Whether an existing bump can be edited. Always, unless an extension says otherwise.
+     *
+     * @since 1.2.0
+     * @param int $bump_id Bump ID.
+     * @return bool
+     */
+    public static function can_edit_bump( $bump_id ) {
+        /**
+         * Filter whether an existing bump can be edited. A bump that can't be edited keeps working.
+         *
+         * @since 1.2.0
+         * @param bool $can_edit Whether it can be edited.
+         * @param int  $bump_id  Bump ID.
+         */
+        return (bool) apply_filters( 'naxoorbu_can_edit_bump', true, (int) $bump_id );
+    }
+
+    /**
+     * Why a bump can't be edited (HTML, as shown on the edit screen).
+     *
+     * @since 1.2.0
+     * @param int $bump_id Bump ID.
+     * @return string
+     */
+    public static function bump_locked_message( $bump_id ) {
+        /**
+         * Filter the message shown on a bump that can't be edited.
+         *
+         * @since 1.2.0
+         * @param string $message HTML.
+         * @param int    $bump_id Bump ID.
+         */
+        return (string) apply_filters( 'naxoorbu_bump_locked_message', __( 'This order bump can\'t be edited.', 'naxolabs-order-bump' ), (int) $bump_id );
+    }
+
+    /**
+     * Bumps counted towards the limit (published and drafts).
+     *
+     * @return int
+     */
+    private static function count_bumps() {
         $current_count = wp_count_posts( 'naxoorbu_order_bump' );
-        $total         = intval( $current_count->publish ?? 0 ) + intval( $current_count->draft ?? 0 );
-        return $total < $max_bumps;
+        return intval( $current_count->publish ?? 0 ) + intval( $current_count->draft ?? 0 );
     }
 }

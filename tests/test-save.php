@@ -249,6 +249,18 @@ class Test_Save extends WP_UnitTestCase {
         $this->assertSame( 'Save to C:\\Docs "now"', $meta['products'][0]['description'] );
     }
 
+    /** Test: a bump an extension locks is left as it is on save (and keeps working). */
+    public function test_locked_bump_not_saved() {
+        $bump_id = wp_insert_post( [ 'post_type' => 'naxoorbu_order_bump', 'post_title' => 'Locked', 'post_status' => 'publish' ] );
+        add_filter( 'naxoorbu_can_edit_bump', '__return_false' );
+
+        $this->simulate_save( [ 'bump_status' => 'draft' ], 'Changed', $bump_id );
+
+        remove_filter( 'naxoorbu_can_edit_bump', '__return_false' );
+        $this->assertSame( 'Locked', get_the_title( $bump_id ) );
+        $this->assertSame( 'publish', get_post_status( $bump_id ) );
+    }
+
     /** Test: product without ID is skipped. */
     public function test_product_without_id_skipped() {
         $meta = $this->simulate_save( [

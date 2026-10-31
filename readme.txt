@@ -48,7 +48,7 @@ Increase your average order value effortlessly by offering relevant products rig
 
 = How It Works =
 
-1. Navigate to **WooCommerce > Order Bumps** in your admin dashboard
+1. Navigate to **Naxo Order Bump** in your admin dashboard
 2. Click **Add New Order Bump** and give it a name
 3. Go to **Products** tab - search and add products with optional discounts
 4. Go to **Design** tab - customize headline, description, badge, colors, and image
@@ -67,7 +67,7 @@ Increase your average order value effortlessly by offering relevant products rig
 1. Upload the `naxolabs-order-bump` folder to `/wp-content/plugins/`
 2. Activate the plugin through the **Plugins** menu in WordPress
 3. Make sure **WooCommerce** is installed and active
-4. Navigate to **WooCommerce > Order Bumps** in the admin sidebar
+4. Navigate to **Naxo Order Bump** in the admin sidebar
 5. Click **Add New Order Bump** to create your first bump
 
 = Minimum Requirements =
@@ -146,13 +146,14 @@ Yes. Commonly used hooks include:
 == Changelog ==
 
 = 1.2.0 =
+* New: The plugin has its own menu, **Naxo Order Bump**, right below WooCommerce (it was under WooCommerce > Order Bumps). Your bumps and settings are unchanged
 * New: Highlight words in the bump headline by wrapping them in `<mark>…</mark>`, in a colour you choose. New bumps start with a highlighted "Yes!"
 * New: Offer a single variation of a variable product (e.g. "T-shirt – Large"). The Products search lists variations; a variable product, or a variation with an "Any…" option, needs the shopper to choose and is not offered
 * New: Works with multi-currency plugins (CURCY, FOX, WooPayments Multi-Currency, Aelia, WPML): the bump discount applies once, in your store currency, and the shopper sees and pays the converted price. Minimum order amounts are compared in the shopper's currency
 * New: Works with WooCommerce Subscriptions: subscription products (also variable ones) show their billing details (e.g. "/ month"), sign-up fees are charged once, and a bump that would make WooCommerce Subscriptions empty the cart is not offered (with "Mixed checkout" on, subscriptions can be offered next to other products and other subscriptions)
 * Improved: The edit screen preview shows the product's name in place of {{product_name}}, as the checkout does
 * Improved: Bumps use your theme's font with a lighter headline, so they match the rest of the checkout
-* Developers: new `naxoorbu_bump_placements` filter, `naxoorbu_admin_after_position` action and `Naxoorbu_Frontend::render_bump_list()`, so extensions can show bumps in more places (e.g. the cart page), a `naxoorbu_bump_toggled` browser event when a bump is added or removed, and `Naxoorbu_Admin::sanitize_settings()` / `can_create_bump()` for saving bumps from elsewhere (e.g. an import)
+* Developers: new `naxoorbu_bump_placements` filter, `naxoorbu_admin_after_position` action and `Naxoorbu_Frontend::render_bump_list()`, so extensions can show bumps in more places (e.g. the cart page), a `naxoorbu_bump_toggled` browser event when a bump is added or removed, `Naxoorbu_Admin::sanitize_settings()` / `can_create_bump()` for saving bumps from elsewhere (e.g. an import), and `naxoorbu_can_edit_bump` / `naxoorbu_bump_locked_message` filters
 * Fixed: The block checkout could show bumps not offered to the shopper for a split second while loading, and count impressions for them
 * Fixed: When the same bump showed twice on a page (e.g. in a theme's desktop and mobile header cart), clicking a headline could tick the other copy
 * Fixed: With Skin 2, editing the headline in the preview could replace the price
@@ -203,7 +204,7 @@ Yes. Commonly used hooks include:
 == Upgrade Notice ==
 
 = 1.2.0 =
-Highlight words in your bump headline, offer single variations of variable products, a working "Replace" option, and support for multi-currency plugins and WooCommerce Subscriptions. Existing bumps keep their text and colours.
+The plugin moves to its own menu, Naxo Order Bump. Highlight words in your bump headline, offer single variations of variable products, a working "Replace" option, and support for multi-currency plugins and WooCommerce Subscriptions. Existing bumps keep their text and colours.
 
 = 1.1.0 =
 Faster checkout, a cleaner admin and several fixes (security, offer checks, revenue totals, saving). Recommended for all users.

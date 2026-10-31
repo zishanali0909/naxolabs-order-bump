@@ -11,6 +11,7 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template file included in class method scope
+$can_edit = ! $edit_id || Naxoorbu_Admin::can_edit_bump( $edit_id );
 ?>
 <div class="wrap naxoorbu-wrap">
     <h1 class="wp-heading-inline" style="display:none;"><?php esc_html_e( 'Edit Bump', 'naxolabs-order-bump' ); ?></h1>
@@ -43,7 +44,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
             <span id="naxoorbu-status-label" style="font-weight:600;font-size:13px;">
                 <?php echo $meta['bump_status'] === 'publish' ? esc_html__( 'Active', 'naxolabs-order-bump' ) : esc_html__( 'Inactive', 'naxolabs-order-bump' ); ?>
             </span>
-            <button form="naxoorbu-edit-form" type="submit" class="naxoorbu-btn naxoorbu-btn-primary">💾 <?php esc_html_e( 'Save', 'naxolabs-order-bump' ); ?></button>
+            <button form="naxoorbu-edit-form" type="submit" class="naxoorbu-btn naxoorbu-btn-primary" <?php disabled( ! $can_edit ); ?>>💾 <?php esc_html_e( 'Save', 'naxolabs-order-bump' ); ?></button>
         </div>
     </div>
 
@@ -56,7 +57,11 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         <div class="naxoorbu-notice naxoorbu-notice-info">⚠️ <?php esc_html_e( 'Saved, but no products added yet. Go to Products tab to add products.', 'naxolabs-order-bump' ); ?></div>
     <?php endif; ?>
 
-    <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" id="naxoorbu-edit-form">
+    <?php if ( ! $can_edit ) : ?>
+        <div class="naxoorbu-notice naxoorbu-notice-info">🔒 <span><?php echo wp_kses_post( Naxoorbu_Admin::bump_locked_message( $edit_id ) ); ?></span></div>
+    <?php endif; ?>
+
+    <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" id="naxoorbu-edit-form"<?php echo $can_edit ? '' : ' inert'; ?>>
         <?php wp_nonce_field( 'naxoorbu_save_bump', 'naxoorbu_nonce' ); ?>
         <input type="hidden" name="action"  value="naxoorbu_save_bump">
         <input type="hidden" name="bump_id" value="<?php echo intval( $edit_id ); ?>">
