@@ -11,10 +11,63 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  */
 class Naxoorbu_Admin {
 
+    /**
+     * The Pro version's page on the plugin's website.
+     */
+    const PRO_URL = 'https://naxolabs.net/products/naxolabs-order-bump-pro';
+
     public function __construct() {
         add_action( 'admin_menu',               [ $this, 'add_menu' ] );
         add_action( 'admin_enqueue_scripts',    [ $this, 'enqueue_assets' ] );
         add_action( 'admin_post_naxoorbu_save_bump', [ $this, 'handle_save' ] );
+        add_filter( 'plugin_action_links_' . plugin_basename( NAXOORBU_PATH . 'order-bump.php' ), [ $this, 'plugin_action_links' ] );
+    }
+
+    /**
+     * Whether Naxolabs Order Bump Pro is active.
+     *
+     * @return bool
+     */
+    public static function pro_active() {
+        /**
+         * Filter whether the Pro version counts as active (it hides the links to Pro).
+         *
+         * @since 1.2.0
+         * @param bool $active Whether Pro is active.
+         */
+        return (bool) apply_filters( 'naxoorbu_pro_active', defined( 'NAXOORBU_PRO_VERSION' ) );
+    }
+
+    /**
+     * "Go Pro" link on the Plugins screen, while Pro isn't active.
+     *
+     * @param string[] $links Action links.
+     * @return string[]
+     */
+    public function plugin_action_links( $links ) {
+        if ( ! self::pro_active() ) {
+            // Inline style: the plugin's stylesheet isn't loaded on the Plugins screen.
+            $links['naxoorbu_go_pro'] = sprintf(
+                '<a href="%1$s" target="_blank" rel="noopener noreferrer" style="color:#D97706;font-weight:600">%2$s</a>',
+                esc_url( self::PRO_URL ),
+                esc_html__( 'Go Pro', 'naxolabs-order-bump' )
+            );
+        }
+        return $links;
+    }
+
+    /**
+     * "Upgrade to Pro" button in the header of the plugin's screens, while Pro isn't active.
+     */
+    public static function render_upgrade_button() {
+        if ( self::pro_active() ) {
+            return;
+        }
+        printf(
+            '<a href="%1$s" class="naxoorbu-btn naxoorbu-btn-pro" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">★</span> %2$s</a>',
+            esc_url( self::PRO_URL ),
+            esc_html__( 'Upgrade to Pro', 'naxolabs-order-bump' )
+        );
     }
 
     /**

@@ -37,6 +37,7 @@ $can_edit = ! $edit_id || Naxoorbu_Admin::can_edit_bump( $edit_id );
             </div>
         </div>
         <div class="naxoorbu-header-actions">
+            <?php Naxoorbu_Admin::render_upgrade_button(); ?>
             <label class="naxoorbu-toggle naxoorbu-toggle-lg">
                 <input type="checkbox" id="naxoorbu-bump-status-top" <?php checked( $meta['bump_status'], 'publish' ); ?>>
                 <span class="naxoorbu-toggle-slider"></span>

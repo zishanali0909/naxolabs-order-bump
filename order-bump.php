@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: Naxolabs Order Bump
- * Plugin URI:  https://github.com/zishanali0909/naxolabs-order-bump
+ * Plugin URI:  https://naxolabs.net/products/naxolabs-order-bump-pro
  * Description: Add order bumps to WooCommerce checkout page. Boost average order value with one-click upsells.
  * Version:     1.2.0
- * Author:      Zishan Ali
- * Author URI:  https://github.com/zishanali0909
+ * Author:      NaxoLabs
+ * Author URI:  https://naxolabs.net
  * Text Domain: naxolabs-order-bump
  * Domain Path: /languages
  * Requires Plugins: woocommerce

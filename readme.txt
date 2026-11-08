@@ -46,6 +46,10 @@ Increase your average order value effortlessly by offering relevant products rig
 * AJAX checkout integration
 * Revenue tracking dashboard
 
+= Pro Version =
+
+[Naxolabs Order Bump Pro](https://naxolabs.net/products/naxolabs-order-bump-pro) is an add-on for growing stores: unlimited bumps and products, A/B testing, analytics, advanced display rules, scheduling, BOGO offers, bumps on the cart page, product pages and mini-cart, and a checkout designer. The free plugin keeps working on its own and is not limited in time.
+
 = How It Works =
 
 1. Navigate to **Naxo Order Bump** in your admin dashboard
@@ -146,6 +150,7 @@ Yes. Commonly used hooks include:
 == Changelog ==
 
 = 1.2.0 =
+* New: "Go Pro" on the Plugins screen and an "Upgrade to Pro" button on the plugin's screens link to the Pro version's page (hidden while Pro is active)
 * New: The plugin has its own menu, **Naxo Order Bump**, right below WooCommerce (it was under WooCommerce > Order Bumps). Your bumps and settings are unchanged
 * New: Highlight words in the bump headline by wrapping them in `<mark>…</mark>`, in a colour you choose. New bumps start with a highlighted "Yes!"
 * New: Offer a single variation of a variable product (e.g. "T-shirt – Large"). The Products search lists variations; a variable product, or a variation with an "Any…" option, needs the shopper to choose and is not offered

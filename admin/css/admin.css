@@ -101,6 +101,9 @@
 .naxoorbu-btn-secondary,.naxoorbu-back-btn,.naxoorbu-action-edit{background:#fff;border-color:var(--border-strong);color:var(--text)}
 .naxoorbu-btn-secondary:hover,.naxoorbu-back-btn:hover,.naxoorbu-action-edit:hover,
 .naxoorbu-btn-secondary:focus,.naxoorbu-back-btn:focus,.naxoorbu-action-edit:focus{background:var(--surface);border-color:#9CA3AF;color:var(--text)}
+.naxoorbu-btn-pro,.naxoorbu-btn-pro:visited{background:linear-gradient(135deg,#F59E0B,#EA580C);border-color:transparent;color:#fff;box-shadow:0 1px 2px rgba(234,88,12,.25)}
+.naxoorbu-btn-pro:hover,.naxoorbu-btn-pro:focus{background:linear-gradient(135deg,#D97706,#C2410C);color:#fff}
+.naxoorbu-btn-pro:focus-visible{box-shadow:0 0 0 3px rgba(234,88,12,.25)}
 .naxoorbu-btn-danger,.naxoorbu-action-delete{background:#fff;border-color:#FECACA;color:var(--err)}
 .naxoorbu-btn-danger:hover,.naxoorbu-action-delete:hover,
 .naxoorbu-btn-danger:focus,.naxoorbu-action-delete:focus{background:#FEF2F2;border-color:#FCA5A5;color:#B91C1C}

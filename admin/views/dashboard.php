@@ -32,6 +32,8 @@ if ( ! defined( 'ABSPATH' ) ) exit;
              */
             do_action( 'naxoorbu_dashboard_header_actions' );
 
+            Naxoorbu_Admin::render_upgrade_button();
+
             $max_bumps = apply_filters( 'naxoorbu_max_bumps', NAXOORBU_MAX_BUMPS );
             $current_count = wp_count_posts( 'naxoorbu_order_bump' );
             $total_bumps = intval( $current_count->publish ?? 0 ) + intval( $current_count->draft ?? 0 );
