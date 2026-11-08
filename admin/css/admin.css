@@ -375,12 +375,12 @@
 .naxoorbu-cat-selected-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 5px;
-    margin-bottom: 6px;
+    gap: 4px;
+    width: 100%; /* Own line below the box, like the chosen products of "Cart Item(s)". */
     min-height: 0;
 }
 .naxoorbu-cat-selected-tags:empty {
-    margin-bottom: 0;
+    display: none;
 }
 .naxoorbu-cat-tag {
     display: inline-flex;

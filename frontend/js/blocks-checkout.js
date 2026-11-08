@@ -272,7 +272,7 @@
                 badgeEl,
                 // Image + Description row
                 (imgEl || product.description) ? el('div', {
-                    style: { display: 'flex', gap: '14px', alignItems: 'flex-start', padding: '12px 16px 10px' }
+                    style: { display: 'flex', gap: '14px', alignItems: 'flex-start', padding: (showBadge ? '30px' : '12px') + ' 16px 10px' }
                 },
                     imgEl ? el('div', { style: { flexShrink: 0 } }, imgEl) : null,
                     product.description

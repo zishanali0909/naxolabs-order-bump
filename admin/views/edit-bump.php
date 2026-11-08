@@ -570,16 +570,6 @@ $can_edit = ! $edit_id || Naxoorbu_Admin::can_edit_bump( $edit_id );
                             <span class="naxoorbu-rule-hint"><?php esc_html_e( 'matches any of', 'naxolabs-order-bump' ); ?></span>
                             <?php $trig_cats = is_array( $meta['trigger_categories'] ) ? $meta['trigger_categories'] : []; ?>
                             <div class="naxoorbu-cat-select-wrap">
-                                <div class="naxoorbu-cat-selected-tags" id="naxoorbu-cat-tags">
-                                    <?php foreach ( $all_categories as $category ) :
-                                        if ( in_array( $category->term_id, $trig_cats ) ) : ?>
-                                            <span class="naxoorbu-cat-tag" data-id="<?php echo intval( $category->term_id ); ?>">
-                                                <?php echo esc_html( $category->name ); ?>
-                                                <button type="button" class="naxoorbu-cat-tag-remove">&times;</button>
-                                            </span>
-                                        <?php endif;
-                                    endforeach; ?>
-                                </div>
                                 <div class="naxoorbu-cat-dropdown-toggle" id="naxoorbu-cat-toggle">
                                     <span class="naxoorbu-cat-placeholder"><?php esc_html_e( 'Select categories...', 'naxolabs-order-bump' ); ?></span>
                                     <span class="naxoorbu-cat-arrow">&#9662;</span>
@@ -599,6 +589,17 @@ $can_edit = ! $edit_id || Naxoorbu_Admin::can_edit_bump( $edit_id );
                                         <?php endforeach; ?>
                                     </div>
                                 </div>
+                            </div>
+                            <?php // Chosen categories below the box, like the chosen products of "Cart Item(s)". ?>
+                            <div class="naxoorbu-cat-selected-tags" id="naxoorbu-cat-tags">
+                                <?php foreach ( $all_categories as $category ) :
+                                    if ( in_array( $category->term_id, $trig_cats ) ) : ?>
+                                        <span class="naxoorbu-cat-tag" data-id="<?php echo intval( $category->term_id ); ?>">
+                                            <?php echo esc_html( $category->name ); ?>
+                                            <button type="button" class="naxoorbu-cat-tag-remove">&times;</button>
+                                        </span>
+                                    <?php endif;
+                                endforeach; ?>
                             </div>
                         </div>
 

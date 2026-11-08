@@ -145,7 +145,8 @@ Yes. Commonly used hooks include:
 2. Edit Bump - Design tab with live preview
 3. Products Tab - Add products with discounts
 4. Rules Tab - Configure display conditions
-5. Checkout - How bumps appear to customers
+5. Checkout - Offers as customers see them, and after one click
+6. Mobile - Offers on a phone; the order total updates with one click
 
 == Changelog ==
 
@@ -158,10 +159,12 @@ Yes. Commonly used hooks include:
 * New: Works with WooCommerce Subscriptions: subscription products (also variable ones) show their billing details (e.g. "/ month"), sign-up fees are charged once, and a bump that would make WooCommerce Subscriptions empty the cart is not offered (with "Mixed checkout" on, subscriptions can be offered next to other products and other subscriptions)
 * Improved: The edit screen preview shows the product's name in place of {{product_name}}, as the checkout does
 * Improved: Bumps use your theme's font with a lighter headline, so they match the rest of the checkout
+* Improved: In the Rules tab, the chosen categories show below the box, like the chosen products, so the rule reads on one line
 * Developers: new `naxoorbu_bump_placements` filter, `naxoorbu_admin_after_position` action and `Naxoorbu_Frontend::render_bump_list()`, so extensions can show bumps in more places (e.g. the cart page), a `naxoorbu_bump_toggled` browser event when a bump is added or removed, `Naxoorbu_Admin::sanitize_settings()` / `can_create_bump()` for saving bumps from elsewhere (e.g. an import), and `naxoorbu_can_edit_bump` / `naxoorbu_bump_locked_message` filters
 * Fixed: The block checkout could show bumps not offered to the shopper for a split second while loading, and count impressions for them
 * Fixed: When the same bump showed twice on a page (e.g. in a theme's desktop and mobile header cart), clicking a headline could tick the other copy
 * Fixed: With Skin 2, editing the headline in the preview could replace the price
+* Fixed: A bump's badge could cover the text: with Skin 2 the start of the description, and on phones with Skin 1 the old price. The bump now leaves room for it
 * Fixed: "Replace Cart Items with Order Bump" now works: ticking the bump swaps out the items that made it show (e.g. to upgrade to a bundle), and unticking it puts them back, with what other plugins stored on them (e.g. add-ons, a gift note)
 * Fixed: Backslashes in a product description were removed when the bump was saved
 

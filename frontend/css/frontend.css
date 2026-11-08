@@ -279,6 +279,11 @@
         gap: 7px !important;
     }
 
+    /* SKIN 1 — Keep the room for the badge on phones too, so it never covers the price */
+    .naxoorbu-skin-skin1.naxoorbu-has-badge .naxoorbu-bump-headline-row {
+        padding-top: 28px !important;
+    }
+
     /* SKIN 1 — Arrow: center aligned, fixed size */
     .naxoorbu-skin-skin1 .naxoorbu-bump-headline-row .naxoorbu-bump-arrow {
         flex-shrink: 0 !important;
@@ -372,6 +377,11 @@
     align-items: flex-start;
     padding: 14px 16px 10px;
     position: relative;
+}
+
+/* Skin2: room for the badge above the body, so it never covers the text */
+.naxoorbu-skin-skin2.naxoorbu-has-badge .naxoorbu-bump-body {
+    padding-top: 30px;
 }
 
 
