@@ -1,0 +1,57 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "meta": {
+    "title": "Naxolabs Order Bump demo store",
+    "description": "WooCommerce with sample products and two order bumps.",
+    "author": "zishanali0909"
+  },
+  "landingPage": "/wp-admin/admin.php?page=naxolabs-order-bump",
+  "preferredVersions": {
+    "php": "8.2",
+    "wp": "latest"
+  },
+  "features": {
+    "networking": true
+  },
+  "login": true,
+  "steps": [
+    {
+      "step": "installPlugin",
+      "pluginData": {
+        "resource": "wordpress.org/plugins",
+        "slug": "woocommerce"
+      },
+      "options": {
+        "activate": true
+      }
+    },
+    {
+      "step": "installPlugin",
+      "pluginData": {
+        "resource": "wordpress.org/plugins",
+        "slug": "naxolabs-order-bump"
+      },
+      "options": {
+        "activate": true
+      }
+    },
+    {
+      "step": "setSiteOptions",
+      "options": {
+        "blogname": "Nova Outfitters",
+        "woocommerce_currency": "USD",
+        "woocommerce_default_country": "US:CA",
+        "woocommerce_onboarding_profile": {
+          "skipped": true
+        },
+        "woocommerce_coming_soon": "no",
+        "woocommerce_store_pages_only": "no",
+        "woocommerce_task_list_hidden": "yes"
+      }
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php\n// Demo store for the WordPress.org Live Preview: products, free shipping, cash on delivery and two bumps.\n// Built into .wordpress-org/blueprints/blueprint.json by make-blueprint.mjs.\nrequire_once '/wordpress/wp-load.php';\n\nWC_Install::create_pages();\nupdate_option( 'woocommerce_cod_settings', array( 'enabled' => 'yes', 'title' => 'Cash on delivery', 'description' => 'Pay with cash upon delivery.', 'enable_for_virtual' => 'yes' ) );\n$zone = new WC_Shipping_Zone( 0 );\nif ( ! $zone->get_shipping_methods() ) {\n\t$zone->add_shipping_method( 'free_shipping' );\n}\n\n$category = function ( $name ) {\n\t$term = term_exists( $name, 'product_cat' ) ?: wp_insert_term( $name, 'product_cat' );\n\treturn (int) ( is_array( $term ) ? $term['term_id'] : $term );\n};\n$product = function ( $name, $price, $sale, $cat, $text ) use ( $category ) {\n\t$p = new WC_Product_Simple();\n\t$p->set_name( $name );\n\t$p->set_status( 'publish' );\n\t$p->set_regular_price( $price );\n\tif ( $sale ) {\n\t\t$p->set_sale_price( $sale );\n\t}\n\t$p->set_short_description( $text );\n\t$p->set_category_ids( array( $category( $cat ) ) );\n\treturn $p->save();\n};\n\n$product( 'Hoodie with Logo', '45', '', 'Hoodies', 'A warm cotton hoodie.' );\n$product( 'Hoodie with Zipper', '45', '', 'Hoodies', 'A zip-up hoodie for every day.' );\n$product( 'T-Shirt with Logo', '18', '', 'T-shirts', 'A soft cotton t-shirt.' );\n$beanie     = $product( 'Beanie', '20', '18', 'Accessories', 'A soft knit beanie.' );\n$cap        = $product( 'Cap', '18', '16', 'Accessories', 'A classic cotton cap.' );\n$sunglasses = $product( 'Sunglasses', '90', '', 'Accessories', 'UV400 lenses in a light frame.' );\n\n$bumps = array(\n\t'Hoodie add-ons'                 => array(\n\t\t'headline'            => '<mark>Yes!</mark> Add {{product_name}} to my order',\n\t\t'badge_text'          => 'Special Offer',\n\t\t'show_badge'          => 1,\n\t\t'show_original_price' => 1,\n\t\t'skin'                => 'skin1',\n\t\t'trigger_type'        => 'category',\n\t\t'trigger_categories'  => array( $category( 'Hoodies' ) ),\n\t\t'products'            => array(\n\t\t\tarray( 'id' => $beanie, 'discount' => 25, 'discount_type' => 'percentage', 'description' => '<p>A soft knit beanie that goes with every hoodie. <strong>Save 25% when you add it now.</strong></p>' ),\n\t\t\tarray( 'id' => $cap, 'discount' => 20, 'discount_type' => 'percentage', 'description' => '<p>Classic cotton cap with an adjustable strap. Only with this order: <strong>20% off</strong>.</p>' ),\n\t\t),\n\t),\n\t'Sunglasses for orders over $40' => array(\n\t\t'headline'             => '<mark>Yes!</mark> Add {{product_name}} for summer',\n\t\t'badge_text'           => 'Limited Deal',\n\t\t'show_badge'           => 1,\n\t\t'show_original_price'  => 1,\n\t\t'skin'                 => 'skin2',\n\t\t'trigger_type'         => 'minimum_order',\n\t\t'minimum_order_amount' => 40,\n\t\t'products'             => array(\n\t\t\tarray( 'id' => $sunglasses, 'discount' => 20, 'discount_type' => 'flat', 'description' => '<p>UV400 lenses in a lightweight frame. <strong>$20 off</strong>, today only.</p>' ),\n\t\t),\n\t),\n);\nforeach ( $bumps as $title => $settings ) {\n\t$id = wp_insert_post( array( 'post_type' => 'naxoorbu_order_bump', 'post_title' => $title, 'post_status' => 'publish' ) );\n\tupdate_post_meta( $id, '_naxoorbu_settings', wp_slash( Naxoorbu_Admin::sanitize_settings( $settings, $id ) ) );\n}\n\n"
+    }
+  ]
+}
